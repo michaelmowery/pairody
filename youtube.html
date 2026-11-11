@@ -263,7 +263,7 @@ function tap(i){
 // visitors out but is not real security. Only a hash of the password is stored here.
 // To change the password, set BETA_HASH to the SHA-256 hex of "pairody:" + new password,
 // e.g.  printf 'pairody:NEWPASSWORD' | shasum -a 256
-const BETA_HASH="d2a7e05bdb35bf15a555f9a0c4a1b63bf20d1c2b097e9a34108005b61272c501";
+const BETA_HASH="a7be07bbba9b9461ebf8de3302ebb0b801c841ec39c07efcaf887aa471e7f6cf";
 async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 function unlock(){document.getElementById("gate").hidden=true;document.getElementById("game").hidden=false;loadYT()}
 (function(){
