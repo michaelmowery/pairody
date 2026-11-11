@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pairody: your music</title>
+<meta name="description" content="Play Pairody with your own YouTube playlist: find the two clips from the same song.">
+<meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Pairody">
+<meta property="og:description" content="Memory match, played by ear.">
+<meta property="og:image" content="https://pairody.app/assets/og-image.png">
+<meta property="og:url" content="https://pairody.app/youtube.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Work+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/pairody.css">
+<style>
+label.lbl{font-family:var(--display);font-weight:600;font-size:.9rem;color:var(--muted)}
+textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem}
+.player{position:relative;width:100%;height:max(200px,min(56.25vw,340px));min-width:200px;border-radius:12px;overflow:hidden;background:#000}
+.player > *{position:absolute;inset:0;width:100%;height:100%}
+.pad img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:pop .35s ease-out}
+.pad .cap{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;font-size:.62rem;line-height:1.15;text-align:left;font-family:var(--body);
+  background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.pad img{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a href="./" aria-label="Pairody home">
+      <img class="logo logo-light" src="assets/logo-light.svg" alt="Pairody" width="789" height="216">
+      <img class="logo logo-dark" src="assets/logo-dark.svg" alt="Pairody" width="789" height="216">
+    </a>
+    <nav class="nav" aria-label="Game mode">
+      <a href="./">Sounds</a>
+      <a href="youtube.html" aria-current="page">Your music</a>
+    </nav>
+  </header>
+  <p class="tagline">Play with your own music. Each pad hides a 4-second clip; find the two clips from the same song.</p>
+
+  <div class="chassis" id="setup">
+    <label class="lbl" for="src">YouTube or YouTube Music playlist link, or 8+ song links</label>
+    <textarea id="src" placeholder="https://music.youtube.com/playlist?list=...&#10;or one song link per line"></textarea>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="hard"> Hard mode: pair clips come from different parts of the song</label>
+      <button class="btn primary" id="go">Deal board</button>
+    </div>
+    <p class="status" id="setupStatus"></p>
+  </div>
+
+  <div class="chassis">
+    <div class="player"><div id="yt"></div></div>
+    <div class="row" id="gamebar" hidden>
+      <div class="readout" aria-live="polite">
+        <div><span>Moves</span><b id="moves">0</b></div>
+        <div><span>Pairs</span><b id="pairs">0/8</b></div>
+        <div><span>Time</span><b id="time">0:00</b></div>
+      </div>
+      <button class="btn" id="again">New board</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="status" id="status">Paste songs above, then deal a board.</p>
+  </div>
+
+  <div class="notes">
+    <h2>Tips</h2>
+    <ul>
+      <li>Playlists must be public or unlisted. Liked Music and private playlists won't load, so copy songs into an unlisted playlist.</li>
+      <li>Some official music videos block playback outside YouTube. Pairody swaps those out when it has spare songs.</li>
+      <li>On iPhone, if the first pad is silent, tap it again.</li>
+      <li>Videos play through YouTube's own player and stay on screen while they play.</li>
+    </ul>
+  </div>
+  <footer>© 2026 Mount M Technologies, LLC · Not affiliated with YouTube.</footer>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const CLIP=4, PAIRS=8;
+let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
+let clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
+
+try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; }catch(e){}
+
+// Load the YouTube IFrame API
+const tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";document.head.appendChild(tag);
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("yt",{width:"100%",height:"100%",
+    playerVars:{playsinline:1,rel:0,modestbranding:1,controls:1},
+    events:{onReady:()=>{ready=true},onStateChange:onState,onError:onErr}});
+}
+window.onYouTubeIframeAPIReady=onYouTubeIframeAPIReady;
+
+function parse(text){
+  const ids=[],lists=[];
+  text.split(/[\s,]+/).filter(Boolean).forEach(s=>{
+    let u; try{u=new URL(s.startsWith("http")?s:"https://"+s)}catch(e){ if(/^[\w-]{11}$/.test(s))ids.push(s); return }
+    const l=u.searchParams.get("list"), v=u.searchParams.get("v");
+    if(v&&/^[\w-]{11}$/.test(v))ids.push(v);
+    else if(/youtu\.be$/.test(u.hostname)){const id=u.pathname.slice(1,12);if(/^[\w-]{11}$/.test(id))ids.push(id)}
+    else{const m=u.pathname.match(/\/(shorts|embed|live)\/([\w-]{11})/);if(m)ids.push(m[2])}
+    if(l&&!v)lists.push(l);
+  });
+  return {ids:[...new Set(ids)],lists:[...new Set(lists)]};
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+// Read a playlist's video ids through the player itself (no API key needed)
+async function readPlaylist(list){
+  player.cuePlaylist({listType:"playlist",list});
+  for(let i=0;i<40;i++){await sleep(250);const p=player.getPlaylist&&player.getPlaylist();if(p&&p.length)return p}
+  return [];
+}
+
+$("go").onclick=async()=>{
+  const text=$("src").value.trim(), st=$("setupStatus");
+  try{localStorage.setItem("pairody-src",text);localStorage.setItem("pairody-hard",$("hard").checked?"1":"0")}catch(e){}
+  if(!ready){st.textContent="YouTube player is still loading. Try again in a second.";return}
+  const {ids,lists}=parse(text);
+  if(!ids.length&&!lists.length){st.textContent="I couldn't find any YouTube links in that.";return}
+  $("go").disabled=true;st.className="status";st.textContent="Loading songs…";
+  let all=[...ids];
+  for(const l of lists){all.push(...await readPlaylist(l))}
+  player.stopVideo();
+  all=[...new Set(all)].filter(id=>!bad.has(id));
+  $("go").disabled=false;
+  if(all.length<PAIRS){st.className="status err";
+    st.textContent=lists.length&&!all.length?"That playlist didn't load. It may be private, or Liked Music. Try an unlisted playlist.":
+      "Found "+all.length+" song"+(all.length===1?"":"s")+"; need at least "+PAIRS+".";return}
+  st.textContent="Loaded "+all.length+" songs.";
+  pool=all;deal();
+};
+$("again").onclick=()=>pool.length&&deal();
+
+function deal(){
+  clearInterval(timer);timer=null;stopClip();open=[];lock=false;moves=0;pairs=0;
+  const hard=$("hard").checked;
+  songs=shuffle([...pool]).slice(0,PAIRS).map(id=>newSong(id,hard));
+  cards=shuffle([...Array(PAIRS).keys()].flatMap(i=>[{s:i,c:0},{s:i,c:1}]));
+  $("moves").textContent=0;$("pairs").textContent="0/"+PAIRS;$("time").textContent="0:00";
+  $("gamebar").hidden=false;setStatus("Tap a pad to hear its clip.");
+  const g=$("grid");g.innerHTML="";
+  cards.forEach((card,i)=>{
+    const b=document.createElement("button");b.className="pad";b.id="pad"+i;
+    b.setAttribute("aria-label","Pad "+(i+1)+", hidden clip");
+    b.innerHTML='<span class="dot"></span>';b.onclick=()=>tap(i);g.appendChild(b);
+  });
+}
+function newSong(id,hard){
+  const a=.15+Math.random()*.55;
+  let b=a; if(hard){do{b=.12+Math.random()*.7}while(Math.abs(b-a)<.2)}
+  return {id,frac:[a,b]};
+}
+function setStatus(t,cls=""){const s=$("status");s.textContent=t;s.className="status "+cls}
+
+// Play a clip: start muted at 0 to learn duration, then seek and unmute
+function playPad(i){
+  stopClip(true);
+  const card=cards[i],song=songs[card.s];
+  const b=$("pad"+i);b.classList.add("playing");playingPad=i;
+  const d=meta[song.id]&&meta[song.id].dur;
+  if(d){pending=null;player.unMute();player.loadVideoById({videoId:song.id,startSeconds:Math.floor(d*song.frac[card.c])});armWhenPlaying(i)}
+  else{pending={i,song,card};player.mute();player.loadVideoById({videoId:song.id,startSeconds:0})}
+}
+let armFor=null;
+function armWhenPlaying(i){armFor=i}
+function onState(e){
+  if(e.data!==YT.PlayerState.PLAYING)return;
+  const vd=player.getVideoData?player.getVideoData():null;
+  if(pending){
+    const {i,song,card}=pending, dur=player.getDuration();
+    if(dur>0){
+      meta[song.id]=Object.assign(meta[song.id]||{},{dur,title:vd&&vd.title||(meta[song.id]||{}).title});
+      pending=null;player.seekTo(Math.floor(dur*song.frac[card.c]),true);player.unMute();
+      clipTimer=setTimeout(()=>stopClip(),CLIP*1000+600);
+    }
+    return;
+  }
+  if(vd&&vd.video_id&&vd.title){meta[vd.video_id]=Object.assign(meta[vd.video_id]||{},{title:vd.title})}
+  if(armFor!==null&&!clipTimer){const i=armFor;armFor=null;clipTimer=setTimeout(()=>stopClip(),CLIP*1000)}
+}
+function stopClip(keepPlaying){
+  clearTimeout(clipTimer);clipTimer=null;armFor=null;
+  if(playingPad!==null){const b=$("pad"+playingPad);b&&b.classList.remove("playing");playingPad=null}
+  if(!keepPlaying&&player&&player.pauseVideo)player.pauseVideo();
+}
+function onErr(e){
+  const vid=player.getVideoData&&player.getVideoData().video_id;
+  const target=pending?pending.song:(playingPad!==null?songs[cards[playingPad].s]:null);
+  const id=target?target.id:vid; pending=null; stopClip(true);
+  if(!id)return; bad.add(id);
+  const spare=pool.filter(p=>!bad.has(p)&&!songs.some(s=>s.id===p));
+  const si=songs.findIndex(s=>s.id===id);
+  if(si>=0&&spare.length){songs[si]=newSong(spare[0],$("hard").checked);setStatus("That song can't play outside YouTube, so I swapped in another. Tap again.","err")}
+  else setStatus("That song can't play outside YouTube. Add more songs and deal a new board.","err");
+}
+
+function tap(i){
+  const b=$("pad"+i);
+  if(lock||b.classList.contains("matched"))return;
+  if(open.length===1&&open[0]===i){playPad(i);return}
+  if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500)}
+  playPad(i);b.classList.add("open");open.push(i);
+  if(open.length<2){setStatus("Now find the other clip from that song.");return}
+  moves++;$("moves").textContent=moves;lock=true;
+  const [a,c]=open;
+  setTimeout(()=>{
+    const pa=$("pad"+a),pc=$("pad"+c);
+    if(cards[a].s===cards[c].s){
+      const song=songs[cards[a].s],title=(meta[song.id]&&meta[song.id].title)||"Matched";
+      [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");
+        p.innerHTML="";const img=new Image();img.alt="";img.src="https://i.ytimg.com/vi/"+song.id+"/mqdefault.jpg";p.appendChild(img);
+        const cap=document.createElement("span");cap.className="cap";cap.textContent=title;p.appendChild(cap);
+        p.setAttribute("aria-label",title+", matched")});
+      pairs++;$("pairs").textContent=pairs+"/"+PAIRS;setStatus("Match: "+title+".");
+      if(pairs===PAIRS){clearInterval(timer);setStatus("Board cleared in "+moves+" moves, "+$("time").textContent+". Perfect is "+PAIRS+".","win")}
+    }else{
+      [pa,pc].forEach(p=>p.classList.add("miss"));setStatus("Different songs. Remember where they were.");
+      setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
+    }
+    open=[];lock=false;
+  },CLIP*1000+300);
+}
+</script>
+</body>
+</html>

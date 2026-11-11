@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pairody: memory match, played by ear</title>
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animals, drums, notes, chords and rhythms.">
+<meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Pairody">
+<meta property="og:description" content="Memory match, played by ear.">
+<meta property="og:image" content="https://pairody.app/assets/og-image.png">
+<meta property="og:url" content="https://pairody.app/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Work+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/pairody.css">
+<style>
+.pad .lbl{font-size:.72rem;padding:4px;text-align:center;line-height:1.2;display:grid;gap:4px;justify-items:center}
+.pad .art{font-size:clamp(1.5rem,7vw,2.4rem);line-height:1;font-weight:600;color:var(--fg)}
+.pad .art.txt{font-size:clamp(1rem,4.5vw,1.5rem);color:var(--ok)}
+.pad.matched .lbl{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.rings i{position:absolute;width:30%;aspect-ratio:1;border:2px solid var(--led);border-radius:50%;opacity:0}
+.pad.playing .rings i{animation:ring .9s ease-out infinite}
+.pad.playing .rings i:nth-child(2){animation-delay:.3s}
+@keyframes ring{from{transform:scale(.6);opacity:.8}to{transform:scale(2.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pad.playing .rings i{animation:none;opacity:.6}.pad.matched .lbl{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a href="./" aria-label="Pairody home">
+      <img class="logo logo-light" src="assets/logo-light.svg" alt="Pairody" width="789" height="216">
+      <img class="logo logo-dark" src="assets/logo-dark.svg" alt="Pairody" width="789" height="216">
+    </a>
+    <nav class="nav" aria-label="Game mode">
+      <a href="./" aria-current="page">Sounds</a>
+      <a href="youtube.html">Your music</a>
+    </nav>
+  </header>
+  <p class="tagline">Memory match, played by ear. Every pad hides a sound. Tap two; if they sound the same, they lock in. Headphones help.</p>
+
+  <div class="chassis">
+    <div class="strip">
+      <div class="decks" role="group" aria-label="Sound deck">
+        <button data-deck="animals" aria-pressed="true">Animals</button>
+        <button data-deck="drums" aria-pressed="false">Drums</button>
+        <button data-deck="notes" aria-pressed="false">Notes</button>
+        <button data-deck="chords" aria-pressed="false">Chords</button>
+        <button data-deck="rhythm" aria-pressed="false">Rhythms</button>
+      </div>
+      <button class="btn" id="reset">New board</button>
+    </div>
+    <div class="readout" aria-live="polite">
+      <div><span>Moves</span><b id="moves">0</b></div>
+      <div><span>Pairs</span><b id="pairs">0/8</b></div>
+      <div><span>Time</span><b id="time">0:00</b></div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="status" id="status">Tap any pad to hear it.</p>
+  </div>
+
+  <div class="notes">
+    <h2>How to play</h2>
+    <p>16 pads hold 8 pairs of sounds. Flip one, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes 8 moves.</p>
+    <p>Decks get harder left to right: chords and rhythms are real ear training. Want your own songs? Try <a href="youtube.html">Your music</a> with a YouTube playlist.</p>
+  </div>
+  <footer>© 2026 Mount M Technologies, LLC</footer>
+</div>
+
+<script>
+let ctx, master;
+function audio(){
+  if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=.55;master.connect(ctx.destination)}
+  if(ctx.state==="suspended")ctx.resume();
+  return ctx;
+}
+function tone(freq,t,dur,type="sine",vol=.35){
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+}
+function sweep(f1,f2,t,dur,type="sine",vol=.6){
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+}
+function noise(t,dur,hp=1000,vol=.4,bp){
+  const len=Math.floor(ctx.sampleRate*dur),b=ctx.createBuffer(1,len,ctx.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  const s=ctx.createBufferSource();s.buffer=b;
+  const f=ctx.createBiquadFilter();f.type=bp?"bandpass":"highpass";f.frequency.value=bp||hp;
+  const g=ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  s.connect(f);f.connect(g);g.connect(master);s.start(t);
+}
+function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}){
+  const o=ctx.createOscillator(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(f[0][1],t);
+  f.slice(1).forEach(([d,hz])=>o.frequency.linearRampToValueAtTime(hz,t+d));
+  fl.type=ft;fl.frequency.value=fq;fl.Q.value=q;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+atk);
+  g.gain.setValueAtTime(vol,t+Math.max(atk,dur*.7));g.gain.linearRampToValueAtTime(0,t+dur);
+  o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+}
+const C4=261.63, st=n=>C4*Math.pow(2,n/12);
+const chord=(ints)=>t=>ints.forEach(n=>tone(st(n),t,1.1,"triangle",.16));
+const pattern=(hits)=>t=>hits.forEach(h=>tone(660,t+h,.09,"square",.12));
+const dots=hits=>{const s=Array(8).fill("·");hits.forEach(h=>s[Math.min(7,Math.round(h/.7*7))]="●");return s.join("")};
+const rh=(n,h)=>[n,pattern(h),dots(h),1];
+const ART={Cat:"🐱",Dog:"🐶",Cow:"🐮",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Cricket:"🦗",
+  Kick:"🦶",Snare:"🥁","Closed hat":"ts","Open hat":"tsss",Clap:"👏","Low tom":"🪘",Cowbell:"🔔",Zap:"⚡"};
+const TXT=new Set(["ts","tsss"]);
+
+const DECKS={
+  animals:[
+    ["Cat",t=>voice(t,{f:[[0,480],[.18,820],[.65,430]],dur:.7,ft:"bandpass",fq:1300,q:2.5,vol:.7,atk:.08})],
+    ["Dog",t=>[0,.28].forEach(d=>{voice(t+d,{f:[[0,320],[.04,560],[.16,260]],dur:.17,ft:"bandpass",fq:900,q:1.2,vol:.8,atk:.005});noise(t+d,.1,0,.25,800)})],
+    ["Cow",t=>voice(t,{f:[[0,105],[.35,135],[1.2,90]],dur:1.25,fq:520,q:5,vol:.75,atk:.15})],
+    ["Songbird",t=>[0,.09,.18,.32,.4].forEach((d,i)=>voice(t+d,{type:"sine",f:[[0,2800+i*150],[.05,4400]],dur:.06,ft:"highpass",fq:1000,vol:.25,atk:.005}))],
+    ["Owl",t=>[[0,.4],[.55,.18],[.78,.35]].forEach(([d,l])=>voice(t+d,{type:"sine",f:[[0,390],[l,340]],dur:l,ft:"lowpass",fq:900,vol:.45,atk:.06}))],
+    ["Duck",t=>[0,.2,.4].forEach((d,i)=>voice(t+d,{type:"square",f:[[0,250-i*15],[.13,190]],dur:.14,ft:"bandpass",fq:1100,q:5,vol:.6,atk:.005}))],
+    ["Frog",t=>[0,.32].forEach(g=>{for(let p=0;p<5;p++)voice(t+g+p*.028,{f:[[0,170],[.02,140]],dur:.022,fq:700,q:3,vol:.6,atk:.003})})],
+    ["Cricket",t=>[0,.25,.5].forEach(g=>{for(let p=0;p<4;p++)voice(t+g+p*.03,{type:"sine",f:[[0,4300]],dur:.018,ft:"highpass",fq:2000,vol:.18,atk:.002})})]
+  ],
+  drums:[
+    ["Kick",t=>sweep(150,40,t,.45)],
+    ["Snare",t=>{noise(t,.2,1500,.45);tone(190,t,.12,"triangle",.3)}],
+    ["Closed hat",t=>noise(t,.05,7000,.35)],
+    ["Open hat",t=>noise(t,.4,7000,.25)],
+    ["Clap",t=>[0,.012,.024,.04].forEach(d=>noise(t+d,.12,0,.3,1200))],
+    ["Low tom",t=>sweep(140,90,t,.4,"sine",.55)],
+    ["Cowbell",t=>{tone(540,t,.3,"square",.08);tone(800,t,.3,"square",.08)}],
+    ["Zap",t=>sweep(1800,120,t,.25,"sawtooth",.15)]
+  ],
+  notes:[0,2,4,5,7,9,11,12].map((n,i)=>[["C","D","E","F","G","A","B","High C"][i],t=>tone(st(n),t,.8,"triangle",.32),"♪"+["C","D","E","F","G","A","B","C′"][i],1]),
+  chords:[
+    ["Major",chord([0,4,7]),"C",1],["Minor",chord([0,3,7]),"Cm",1],["Diminished",chord([0,3,6]),"C°",1],["Augmented",chord([0,4,8]),"C+",1],
+    ["Sus2",chord([0,2,7]),"Csus2",1],["Sus4",chord([0,5,7]),"Csus4",1],["Major 7",chord([0,4,7,11]),"Cmaj7",1],["Dominant 7",chord([0,4,7,10]),"C7",1]
+  ],
+  rhythm:[
+    rh("Four even",[0,.2,.4,.6]),rh("Gallop",[0,.1,.2,.4,.5,.6]),rh("Swing",[0,.27,.4,.67]),
+    rh("Triplet",[0,.13,.27,.4,.53,.67]),rh("Long-short",[0,.45,.6]),rh("Short-long",[0,.15,.6]),
+    rh("Offbeat",[.1,.3,.5,.7]),rh("Stutter",[0,.05,.1,.5])
+  ]
+};
+
+let deck="animals",cards=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null;
+const $=id=>document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+
+function build(){
+  clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;
+  $("moves").textContent=0;$("pairs").textContent="0/8";$("time").textContent="0:00";
+  $("status").textContent="Tap any pad to hear it.";$("status").className="status";
+  cards=shuffle([...Array(8).keys(),...Array(8).keys()]);
+  const g=$("grid");g.innerHTML="";
+  cards.forEach((id,i)=>{
+    const b=document.createElement("button");b.className="pad";b.id="pad"+i;
+    b.setAttribute("aria-label","Pad "+(i+1)+", hidden sound");
+    b.innerHTML='<span class="dot"></span><span class="rings"><i></i><i></i></span><span class="lbl"></span>';
+    b.onclick=()=>tap(i,b);g.appendChild(b);
+  });
+}
+function playPad(i,b){
+  audio();DECKS[deck][cards[i]][1](ctx.currentTime+.02);
+  b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),900);
+}
+function tap(i,b){
+  if(lock||b.classList.contains("matched"))return;
+  if(open.length===1&&open[0]===i){playPad(i,b);return}
+  if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500)}
+  playPad(i,b);b.classList.add("open");open.push(i);
+  if(open.length<2){$("status").textContent="Now find its twin.";return}
+  moves++;$("moves").textContent=moves;lock=true;
+  const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
+  setTimeout(()=>{
+    if(cards[a]===cards[c]){
+      const entry=DECKS[deck][cards[a]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3]||TXT.has(art);
+      [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
+        if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
+        const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
+      pairs++;$("pairs").textContent=pairs+"/8";
+      $("status").textContent="Match: "+name+".";
+      if(pairs===8){clearInterval(timer);$("status").textContent="Board cleared in "+moves+" moves, "+$("time").textContent+". Perfect is 8.";$("status").className="status win"}
+    }else{
+      [pa,pc].forEach(p=>p.classList.add("miss"));
+      $("status").textContent="Different sounds. Remember where they were.";
+      setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
+    }
+    open=[];lock=false;
+  },950);
+}
+document.querySelectorAll(".decks button").forEach(btn=>btn.onclick=()=>{
+  deck=btn.dataset.deck;
+  document.querySelectorAll(".decks button").forEach(x=>x.setAttribute("aria-pressed",x===btn));
+  build();
+});
+$("reset").onclick=build;
+build();
+</script>
+</body>
+</html>
