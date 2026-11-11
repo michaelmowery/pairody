@@ -40,9 +40,20 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
     </a>
     <nav class="nav" aria-label="Game mode">
       <a href="./">Sounds</a>
-      <a href="youtube.html" aria-current="page">Your music</a>
+      <a href="youtube.html" aria-current="page">Your music<span class="beta">Beta</span></a>
     </nav>
   </header>
+  <div class="chassis gate" id="gate">
+    <h2>Your music is in beta</h2>
+    <p>This mode is open to beta testers for now. Enter the beta password to play.</p>
+    <form id="gateForm">
+      <input type="password" id="pw" autocomplete="current-password" aria-label="Beta password" placeholder="Beta password" required>
+      <button class="btn primary" type="submit">Unlock</button>
+    </form>
+    <p class="status" id="gateStatus" aria-live="polite"></p>
+  </div>
+
+  <div id="game" hidden>
   <p class="tagline">Play with your own music. Each pad hides a 4-second clip; find the two clips from the same song.</p>
 
   <div class="chassis" id="setup">
@@ -80,6 +91,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
       <li>Videos play through YouTube's own player and stay on screen while they play.</li>
     </ul>
   </div>
+  </div>
   <footer>© 2026 Mount M Technologies, LLC · Not affiliated with YouTube.</footer>
 </div>
 <script>
@@ -102,8 +114,9 @@ function showNP(i){
   if(easy()&&m.title)setStatus("Now playing: "+m.title+(m.author?" · "+m.author:"")+".");
 }
 
-// Load the YouTube IFrame API
-const tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";document.head.appendChild(tag);
+// Load the YouTube IFrame API (only once the beta gate is unlocked)
+let ytLoaded=false;
+function loadYT(){if(ytLoaded)return;ytLoaded=true;const tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";document.head.appendChild(tag)}
 function onYouTubeIframeAPIReady(){
   player=new YT.Player("yt",{width:"100%",height:"100%",
     playerVars:{playsinline:1,rel:0,modestbranding:1,controls:1},
@@ -244,6 +257,25 @@ function tap(i){
     open=[];lock=false;
   },CLIP*1000+300);
 }
+</script>
+<script>
+// Beta gate. The site is static, so this check runs in the browser: it keeps casual
+// visitors out but is not real security. Only a hash of the password is stored here.
+// To change the password, set BETA_HASH to the SHA-256 hex of "pairody:" + new password,
+// e.g.  printf 'pairody:NEWPASSWORD' | shasum -a 256
+const BETA_HASH="d2a7e05bdb35bf15a555f9a0c4a1b63bf20d1c2b097e9a34108005b61272c501";
+async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function unlock(){document.getElementById("gate").hidden=true;document.getElementById("game").hidden=false;loadYT()}
+(function(){
+  let saved=null;try{saved=localStorage.getItem("pairody-beta")}catch(e){}
+  if(saved===BETA_HASH){unlock();return}
+  document.getElementById("gateForm").onsubmit=async e=>{
+    e.preventDefault();
+    const h=await sha256("pairody:"+document.getElementById("pw").value);
+    if(h===BETA_HASH){try{localStorage.setItem("pairody-beta",h)}catch(e){}unlock()}
+    else{const s=document.getElementById("gateStatus");s.className="status err";s.textContent="That's not the beta password.";document.getElementById("pw").select()}
+  };
+})();
 </script>
 </body>
 </html>
