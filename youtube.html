@@ -18,6 +18,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Work+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/pairody.css">
+<script src="assets/best.js"></script>
 <style>
 label.lbl{font-family:var(--display);font-weight:600;font-size:.9rem;color:var(--muted)}
 textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px}
@@ -74,6 +75,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
         <div><span>Moves</span><b id="moves">0</b></div>
         <div><span>Pairs</span><b id="pairs">0/8</b></div>
         <div><span>Time</span><b id="time">0:00</b></div>
+        <div class="best" id="bestBox" title="Your best with these songs: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
       </div>
       <button class="btn" id="again">New board</button>
     </div>
@@ -89,6 +91,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
       <li>Easy mode shows each song's title and artist on the pad while its clip plays, like the now-playing card in YouTube Music.</li>
       <li>On iPhone, if the first pad is silent, tap it again.</li>
       <li>Videos play through YouTube's own player and stay on screen while they play.</li>
+      <li>Your best score is saved on this device for each playlist (or set of song links), with Hard and Easy mode boards kept separately.</li>
     </ul>
   </div>
   </div>
@@ -99,10 +102,13 @@ const $=id=>document.getElementById(id);
 const CLIP=4, PAIRS=8;
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
 let clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
+let srcKey="", boardKey="";
 
 try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("easy").checked=localStorage.getItem("pairody-easy")==="1"; }catch(e){}
 function easy(){return $("easy").checked}
-function applyEasy(){document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
+function applyEasy(){
+  if(easy()&&boardKey&&!boardKey.includes(":easy")&&pairs<PAIRS){boardKey+=":easy";showBest()}
+  document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
 $("easy").onchange=applyEasy;applyEasy();
 // Fill a pad's now-playing label from what we know about the song
 function showNP(i){
@@ -163,13 +169,22 @@ $("go").onclick=async()=>{
     st.textContent=lists.length&&!all.length?"That playlist didn't load. It may be private, or Liked Music. Try an unlisted playlist.":
       "Found "+all.length+" song"+(all.length===1?"":"s")+"; need at least "+PAIRS+".";return}
   st.textContent="Loaded "+all.length+" songs.";
+  // Best scores are kept per playlist; loose song links are keyed by the set of songs
+  srcKey=lists.length===1&&!ids.length?"pl:"+lists[0]:"set:"+Best.hash([...lists,...ids].sort());
   pool=all;deal();
 };
 $("again").onclick=()=>pool.length&&deal();
 
+function modeKey(){return "yt:"+srcKey+($("hard").checked?":hard":"")+(easy()?":easy":"")}
+function showBest(){
+  const b=Best.get(boardKey),h=boardKey.includes(":hard"),e=boardKey.includes(":easy");
+  $("bestLbl").textContent=(h&&e?"Hard+easy":h?"Hard":e?"Easy":"")+(h||e?" best":"Best");
+  $("best").textContent=Best.fmt(b);
+}
 function deal(){
   clearInterval(timer);timer=null;stopClip();open=[];lock=false;moves=0;pairs=0;
   const hard=$("hard").checked;
+  boardKey=modeKey();$("bestBox").classList.remove("new");showBest();
   songs=shuffle([...pool]).slice(0,PAIRS).map(id=>newSong(id,hard));
   cards=shuffle([...Array(PAIRS).keys()].flatMap(i=>[{s:i,c:0},{s:i,c:1}]));
   $("moves").textContent=0;$("pairs").textContent="0/"+PAIRS;$("time").textContent="0:00";
@@ -249,7 +264,17 @@ function tap(i){
         const cap=document.createElement("span");cap.className="cap";cap.textContent=title;p.appendChild(cap);
         p.setAttribute("aria-label",title+", matched")});
       pairs++;$("pairs").textContent=pairs+"/"+PAIRS;setStatus("Match: "+title+".");
-      if(pairs===PAIRS){clearInterval(timer);setStatus("Board cleared in "+moves+" moves, "+$("time").textContent+". Perfect is "+PAIRS+".","win")}
+      if(pairs===PAIRS){
+        clearInterval(timer);
+        const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(boardKey,moves,secs);
+        $("time").textContent=fmt(secs);
+        let msg="Board cleared in "+moves+" moves, "+fmt(secs)+". ";
+        if(isNew&&prev)msg="New best for these songs! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
+        else if(isNew)msg="First board with these songs: "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
+        msg+=moves===PAIRS?"A perfect board!":"Perfect is "+PAIRS+".";
+        setStatus(msg,"win");showBest();
+        if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
+      }
     }else{
       [pa,pc].forEach(p=>p.classList.add("miss"));setStatus("Different songs. Remember where they were.");
       setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
