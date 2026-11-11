@@ -88,3 +88,10 @@ footer{color:var(--muted);font-size:.8rem;text-align:center}
 .gate p{margin:0;color:var(--muted)}
 .gate form{display:flex;flex-wrap:wrap;gap:10px}
 .gate input[type=password]{flex:1 1 180px;min-width:0;font:15px var(--body);color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:999px;padding:8px 14px}
+/* Best score per deck */
+.readout .best b{color:var(--ok)}
+.readout .best.new b{animation:bestpop .9s ease-out 2}
+@keyframes bestpop{0%,100%{transform:scale(1)}30%{transform:scale(1.25);color:var(--led)}}
+.decks button small{font-weight:500;font-size:.72rem;color:var(--ok);margin-left:5px;font-variant-numeric:tabular-nums}
+.decks button small:empty{display:none}
+@media (prefers-reduced-motion:reduce){.readout .best.new b{animation:none;color:var(--led)}}

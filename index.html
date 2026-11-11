@@ -18,6 +18,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Work+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/pairody.css">
+<script src="assets/best.js"></script>
 <style>
 .pad .lbl{font-size:.72rem;padding:4px;text-align:center;line-height:1.2;display:grid;gap:4px;justify-items:center}
 .pad .art{font-size:clamp(1.5rem,7vw,2.4rem);line-height:1;font-weight:600;color:var(--fg)}
@@ -62,6 +63,7 @@
       <div><span>Moves</span><b id="moves">0</b></div>
       <div><span>Pairs</span><b id="pairs">0/8</b></div>
       <div><span>Time</span><b id="time">0:00</b></div>
+      <div class="best" id="bestBox" title="Your best on this deck: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
     <div class="grid" id="grid"></div>
     <p class="status" id="status">Tap any pad to hear it.</p>
@@ -70,6 +72,7 @@
   <div class="notes">
     <h2>How to play</h2>
     <p>16 pads hold 8 pairs of sounds. Flip one, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes 8 moves.</p>
+    <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Easy mode keeps its own bests, so a board where you used it doesn't count against your regular ones.</p>
     <p>New to it, or playing with kids? Turn on Easy mode and each pad shows the name of its sound while it plays, like the now-playing card in a music app.</p>
     <p>Decks get harder left to right: chords and rhythms are real ear training. Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
@@ -154,13 +157,25 @@ const DECKS={
   ]
 };
 
-let deck="animals",cards=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null;
+let deck="animals",cards=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
 
+// Best scores: one per deck, with Easy mode boards kept separately
+const bestKey=d=>d+(easyUsed?":easy":"");
+function showBest(){
+  $("bestLbl").textContent=easyUsed?"Easy best":"Best";
+  $("best").textContent=Best.fmt(Best.get(bestKey(deck)));
+  document.querySelectorAll(".decks button").forEach(btn=>{
+    let sm=btn.querySelector("small");if(!sm){sm=document.createElement("small");btn.appendChild(sm)}
+    const b=Best.get(bestKey(btn.dataset.deck));sm.textContent=b?b.moves:"";
+    sm.setAttribute("aria-label",b?"best "+b.moves+" moves":"");
+  });
+}
 function build(){
-  clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;
+  clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();
+  $("bestBox").classList.remove("new");showBest();
   $("moves").textContent=0;$("pairs").textContent="0/8";$("time").textContent="0:00";
   $("status").textContent="Tap any pad to hear it.";$("status").className="status";
   cards=shuffle([...Array(8).keys(),...Array(8).keys()]);
@@ -197,7 +212,17 @@ function tap(i,b){
         const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
       pairs++;$("pairs").textContent=pairs+"/8";
       $("status").textContent="Match: "+name+".";
-      if(pairs===8){clearInterval(timer);$("status").textContent="Board cleared in "+moves+" moves, "+$("time").textContent+". Perfect is 8.";$("status").className="status win"}
+      if(pairs===8){
+        clearInterval(timer);
+        const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
+        $("time").textContent=fmt(secs);
+        let msg="Board cleared in "+moves+" moves, "+fmt(secs)+". ";
+        if(isNew&&prev)msg="New best for "+DECKNAME[deck]+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
+        else if(isNew)msg="First board on "+DECKNAME[deck]+(easyUsed?" in Easy mode":"")+": "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
+        msg+=moves===8?"A perfect board!":"Perfect is 8.";
+        $("status").textContent=msg;$("status").className="status win";
+        showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
+      }
     }else{
       [pa,pc].forEach(p=>p.classList.add("miss"));
       $("status").textContent="Different sounds. Remember where they were.";
@@ -212,7 +237,11 @@ document.querySelectorAll(".decks button").forEach(btn=>btn.onclick=()=>{
   build();
 });
 function easy(){return $("easy").checked}
-function applyEasy(){document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
+function applyEasy(){
+  // Turning Easy mode on mid-board makes this board count as an Easy one
+  if(easy()&&!easyUsed&&$("bestBox")){easyUsed=true;showBest()}
+  else if(!easy()&&easyUsed&&((!timer&&open.length===0)||pairs===8)){easyUsed=false;showBest()}
+  document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
 try{$("easy").checked=localStorage.getItem("pairody-easy")==="1"}catch(e){}
 $("easy").onchange=applyEasy;applyEasy();
 $("reset").onclick=build;
