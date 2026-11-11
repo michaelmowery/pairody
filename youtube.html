@@ -50,6 +50,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
     <textarea id="src" placeholder="https://music.youtube.com/playlist?list=...&#10;or one song link per line"></textarea>
     <div class="row">
       <label class="check"><input type="checkbox" id="hard"> Hard mode: pair clips come from different parts of the song</label>
+      <label class="toggle"><input type="checkbox" id="easy"><span>Easy mode: show the song title while a clip plays</span></label>
       <button class="btn primary" id="go">Deal board</button>
     </div>
     <p class="status" id="setupStatus"></p>
@@ -74,6 +75,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
     <ul>
       <li>Playlists must be public or unlisted. Liked Music and private playlists won't load, so copy songs into an unlisted playlist.</li>
       <li>Some official music videos block playback outside YouTube. Pairody swaps those out when it has spare songs.</li>
+      <li>Easy mode shows each song's title and artist on the pad while its clip plays, like the now-playing card in YouTube Music.</li>
       <li>On iPhone, if the first pad is silent, tap it again.</li>
       <li>Videos play through YouTube's own player and stay on screen while they play.</li>
     </ul>
@@ -86,7 +88,19 @@ const CLIP=4, PAIRS=8;
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
 let clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
 
-try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; }catch(e){}
+try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("easy").checked=localStorage.getItem("pairody-easy")==="1"; }catch(e){}
+function easy(){return $("easy").checked}
+function applyEasy(){document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
+$("easy").onchange=applyEasy;applyEasy();
+// Fill a pad's now-playing label from what we know about the song
+function showNP(i){
+  if(i===null||i===undefined||!cards[i])return;
+  const b=$("pad"+i),np=b&&b.querySelector(".np");if(!np)return;
+  const m=meta[songs[cards[i].s].id]||{};
+  np.querySelector("b").textContent=m.title||"Loading…";
+  np.querySelector("small").textContent=m.author||"";
+  if(easy()&&m.title)setStatus("Now playing: "+m.title+(m.author?" · "+m.author:"")+".");
+}
 
 // Load the YouTube IFrame API
 const tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";document.head.appendChild(tag);
@@ -151,7 +165,7 @@ function deal(){
   cards.forEach((card,i)=>{
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
     b.setAttribute("aria-label","Pad "+(i+1)+", hidden clip");
-    b.innerHTML='<span class="dot"></span>';b.onclick=()=>tap(i);g.appendChild(b);
+    b.innerHTML='<span class="dot"></span><span class="np" aria-hidden="true"><b></b><small></small></span>';b.onclick=()=>tap(i);g.appendChild(b);
   });
 }
 function newSong(id,hard){
@@ -165,7 +179,7 @@ function setStatus(t,cls=""){const s=$("status");s.textContent=t;s.className="st
 function playPad(i){
   stopClip(true);
   const card=cards[i],song=songs[card.s];
-  const b=$("pad"+i);b.classList.add("playing");playingPad=i;
+  const b=$("pad"+i);b.classList.add("playing");playingPad=i;showNP(i);
   const d=meta[song.id]&&meta[song.id].dur;
   if(d){pending=null;player.unMute();player.loadVideoById({videoId:song.id,startSeconds:Math.floor(d*song.frac[card.c])});armWhenPlaying(i)}
   else{pending={i,song,card};player.mute();player.loadVideoById({videoId:song.id,startSeconds:0})}
@@ -178,13 +192,14 @@ function onState(e){
   if(pending){
     const {i,song,card}=pending, dur=player.getDuration();
     if(dur>0){
-      meta[song.id]=Object.assign(meta[song.id]||{},{dur,title:vd&&vd.title||(meta[song.id]||{}).title});
+      meta[song.id]=Object.assign(meta[song.id]||{},{dur},vd&&vd.title?{title:vd.title,author:vd.author||""}:{});
+      showNP(i);
       pending=null;player.seekTo(Math.floor(dur*song.frac[card.c]),true);player.unMute();
       clipTimer=setTimeout(()=>stopClip(),CLIP*1000+600);
     }
     return;
   }
-  if(vd&&vd.video_id&&vd.title){meta[vd.video_id]=Object.assign(meta[vd.video_id]||{},{title:vd.title})}
+  if(vd&&vd.video_id&&vd.title){meta[vd.video_id]=Object.assign(meta[vd.video_id]||{},{title:vd.title,author:vd.author||""});showNP(playingPad)}
   if(armFor!==null&&!clipTimer){const i=armFor;armFor=null;clipTimer=setTimeout(()=>stopClip(),CLIP*1000)}
 }
 function stopClip(keepPlaying){
@@ -209,7 +224,7 @@ function tap(i){
   if(open.length===1&&open[0]===i){playPad(i);return}
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500)}
   playPad(i);b.classList.add("open");open.push(i);
-  if(open.length<2){setStatus("Now find the other clip from that song.");return}
+  if(open.length<2){if(!easy())setStatus("Now find the other clip from that song.");return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open;
   setTimeout(()=>{
