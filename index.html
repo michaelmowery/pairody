@@ -84,6 +84,7 @@ let ctx, master;
 function audio(){
   if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=.55;master.connect(ctx.destination)}
   if(ctx.state==="suspended")ctx.resume();
+  for(const name in CLIPS)decodeClip(name);
   return ctx;
 }
 function tone(freq,t,dur,type="sine",vol=.35){
@@ -120,20 +121,59 @@ const chord=(ints)=>t=>ints.forEach(n=>tone(st(n),t,1.1,"triangle",.16));
 const pattern=(hits)=>t=>hits.forEach(h=>tone(660,t+h,.09,"square",.12));
 const dots=hits=>{const s=Array(8).fill("·");hits.forEach(h=>s[Math.min(7,Math.round(h/.7*7))]="●");return s.join("")};
 const rh=(n,h)=>[n,pattern(h),dots(h),1];
-const ART={Cat:"🐱",Dog:"🐶",Cow:"🐮",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Cricket:"🦗",
+const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",
   Kick:"🦶",Snare:"🥁","Closed hat":"ts","Open hat":"tsss",Clap:"👏","Low tom":"🪘",Cowbell:"🔔",Zap:"⚡"};
 const TXT=new Set(["ts","tsss"]);
 
+// Real recordings for some sounds (public domain / CC0, see sounds/CREDITS.md).
+// Each clip is fetched once and decoded on first use; if it is missing or fails
+// to load, the pad plays the synth version below instead.
+const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster"};
+const clipData={},clipBuf={};
+function loadClips(){
+  for(const [name,file] of Object.entries(CLIPS)){
+    if(clipData[name])continue;
+    clipData[name]=fetch("sounds/animals/"+file+".mp3").then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).catch(()=>null);
+  }
+}
+const clipReady={};
+function decodeClip(name){
+  if(clipReady[name]||!clipData[name])return;
+  clipReady[name]=clipData[name]
+    .then(ab=>ab&&new Promise((ok,bad)=>ctx.decodeAudioData(ab,ok,bad)))
+    .then(b=>{if(clipBuf[name]!==false)clipBuf[name]=b||false},()=>{clipBuf[name]=false});
+}
+function withClip(name,synth){
+  const play=t=>{
+    const b=clipBuf[name];
+    if(!b){synth(t);return}
+    const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;
+    s.buffer=b;s.connect(g);g.connect(master);s.start(t);
+  };
+  // If the clip is still loading on the very first tap, wait for it (briefly)
+  // so a pad never plays the synth once and the recording the next time.
+  return t=>{
+    if(clipBuf[name]!==undefined||!clipReady[name]){play(t);return}
+    let done=false;
+    const go=()=>{if(!done){done=true;play(ctx.currentTime+.01)}};
+    setTimeout(()=>{if(!done)clipBuf[name]=false;go()},2500);
+    clipReady[name].then(go);
+  };
+}
+// Start decoding as soon as the player touches the page, before the first pad
+addEventListener("pointerdown",()=>audio(),{once:true});
+loadClips();
+
 const DECKS={
   animals:[
-    ["Cat",t=>voice(t,{f:[[0,480],[.18,820],[.65,430]],dur:.7,ft:"bandpass",fq:1300,q:2.5,vol:.7,atk:.08})],
-    ["Dog",t=>[0,.28].forEach(d=>{voice(t+d,{f:[[0,320],[.04,560],[.16,260]],dur:.17,ft:"bandpass",fq:900,q:1.2,vol:.8,atk:.005});noise(t+d,.1,0,.25,800)})],
-    ["Cow",t=>voice(t,{f:[[0,105],[.35,135],[1.2,90]],dur:1.25,fq:520,q:5,vol:.75,atk:.15})],
-    ["Songbird",t=>[0,.09,.18,.32,.4].forEach((d,i)=>voice(t+d,{type:"sine",f:[[0,2800+i*150],[.05,4400]],dur:.06,ft:"highpass",fq:1000,vol:.25,atk:.005}))],
-    ["Owl",t=>[[0,.4],[.55,.18],[.78,.35]].forEach(([d,l])=>voice(t+d,{type:"sine",f:[[0,390],[l,340]],dur:l,ft:"lowpass",fq:900,vol:.45,atk:.06}))],
-    ["Duck",t=>[0,.2,.4].forEach((d,i)=>voice(t+d,{type:"square",f:[[0,250-i*15],[.13,190]],dur:.14,ft:"bandpass",fq:1100,q:5,vol:.6,atk:.005}))],
-    ["Frog",t=>[0,.32].forEach(g=>{for(let p=0;p<5;p++)voice(t+g+p*.028,{f:[[0,170],[.02,140]],dur:.022,fq:700,q:3,vol:.6,atk:.003})})],
-    ["Cricket",t=>[0,.25,.5].forEach(g=>{for(let p=0;p<4;p++)voice(t+g+p*.03,{type:"sine",f:[[0,4300]],dur:.018,ft:"highpass",fq:2000,vol:.18,atk:.002})})]
+    ["Cat",withClip("Cat",t=>voice(t,{f:[[0,480],[.18,820],[.65,430]],dur:.7,ft:"bandpass",fq:1300,q:2.5,vol:.7,atk:.08}))],
+    ["Dog",withClip("Dog",t=>[0,.28].forEach(d=>{voice(t+d,{f:[[0,320],[.04,560],[.16,260]],dur:.17,ft:"bandpass",fq:900,q:1.2,vol:.8,atk:.005});noise(t+d,.1,0,.25,800)}))],
+    ["Sheep",withClip("Sheep",t=>voice(t,{f:[[0,330],[.15,370],[.9,320]],dur:1,ft:"bandpass",fq:900,q:2,vol:.7,atk:.06}))],
+    ["Songbird",withClip("Songbird",t=>[0,.09,.18,.32,.4].forEach((d,i)=>voice(t+d,{type:"sine",f:[[0,2800+i*150],[.05,4400]],dur:.06,ft:"highpass",fq:1000,vol:.25,atk:.005})))],
+    ["Owl",withClip("Owl",t=>[[0,.4],[.55,.18],[.78,.35]].forEach(([d,l])=>voice(t+d,{type:"sine",f:[[0,390],[l,340]],dur:l,ft:"lowpass",fq:900,vol:.45,atk:.06})))],
+    ["Duck",withClip("Duck",t=>[0,.2,.4].forEach((d,i)=>voice(t+d,{type:"square",f:[[0,250-i*15],[.13,190]],dur:.14,ft:"bandpass",fq:1100,q:5,vol:.6,atk:.005})))],
+    ["Frog",withClip("Frog",t=>[0,.32].forEach(g=>{for(let p=0;p<5;p++)voice(t+g+p*.028,{f:[[0,170],[.02,140]],dur:.022,fq:700,q:3,vol:.6,atk:.003})}))],
+    ["Rooster",withClip("Rooster",t=>{voice(t,{f:[[0,420],[.12,620],[.3,600]],dur:.32,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.02});voice(t+.36,{f:[[0,640],[.2,760],[.9,820],[1.2,560]],dur:1.25,ft:"bandpass",fq:1500,q:1.5,vol:.65,atk:.04})})]
   ],
   drums:[
     ["Kick",t=>sweep(150,40,t,.45)],
