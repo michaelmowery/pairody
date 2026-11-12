@@ -3,7 +3,8 @@
 //  - registers the service worker (bypassing the HTTP cache for sw.js itself),
 //  - re-checks for a new version when the app comes back to the foreground,
 //  - shows a small "New version ready" pill once a new version has taken over,
-//  - powers "Check for updates" in the info panel (PairodyUpdate.check).
+//  - powers "Check for updates" in the info panel (PairodyUpdate.check),
+//  - says "Updated to version 0.N" once, the first time a new version opens.
 // The page never reloads on its own: that would wipe a board in progress.
 // Ported from Noodlit's update.js so both apps behave the same way.
 (function(){
@@ -103,6 +104,30 @@
       setTimeout(() => pill.remove(), 200);
     });
     document.body.appendChild(pill);
+  }
+
+  // After an update, say so once: "Updated to version 0.N" (Noodlit's "New version released" note).
+  // The first visit just remembers the version quietly.
+  if (stamped) {
+    let seen = null;
+    try { seen = localStorage.getItem('pairody-version'); localStorage.setItem('pairody-version', version); } catch (e) {}
+    if (seen && seen !== version) {
+      const showNote = () => setTimeout(() => {
+        if (document.getElementById('update-pill')) return;
+        const note = document.createElement('div');
+        note.id = 'update-note';
+        note.className = 'update-pill';
+        note.setAttribute('role', 'status');
+        note.innerHTML = '<span class="update-pill-go">Updated to version <b></b></span>' +
+          '<button type="button" class="update-pill-x" aria-label="Close">×</button>';
+        note.querySelector('b').textContent = version;
+        const close = () => { note.classList.add('leaving'); setTimeout(() => note.remove(), 200); };
+        note.querySelector('.update-pill-x').addEventListener('click', close);
+        setTimeout(close, 6000);
+        document.body.appendChild(note);
+      }, 700);
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showNote); else showNote();
+    }
   }
 
   window.PairodyUpdate = { version, supported, check, reload, isReady: () => ready };

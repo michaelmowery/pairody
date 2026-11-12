@@ -1,34 +1,10 @@
 // Offline copy of Pairody, and the source of "Check for updates".
 // VERSION is stamped by the deploy workflow (.github/workflows/pages.yml) on every deploy, so each
 // deploy changes this file, the browser installs a fresh cache, and players see "New version ready".
-// Don't edit the VERSION line by hand; PRs never bump versions. New files must be added to SHELL.
+// Don't edit the VERSION or SHELL lines by hand; PRs never bump versions. The same deploy step fills
+// SHELL (the files saved for offline play) with every site file, so new files need no listing anywhere.
 const VERSION = 'pairody-__BUILD__';
-const SHELL = [
-  './',
-  './index.html',
-  './youtube.html',
-  './manifest.webmanifest',
-  './favicon.ico',
-  './apple-touch-icon.png',
-  './assets/pairody.css',
-  './assets/best.js',
-  './assets/info.js',
-  './assets/update.js',
-  './assets/analytics.js',
-  './assets/logo-light.svg',
-  './assets/logo-dark.svg',
-  './assets/mark.svg',
-  './assets/icon-192.png',
-  './assets/icon-512.png',
-  './sounds/animals/cat.mp3',
-  './sounds/animals/dog.mp3',
-  './sounds/animals/duck.mp3',
-  './sounds/animals/frog.mp3',
-  './sounds/animals/owl.mp3',
-  './sounds/animals/rooster.mp3',
-  './sounds/animals/sheep.mp3',
-  './sounds/animals/songbird.mp3',
-];
+const SHELL = ['./', './index.html'];
 
 self.addEventListener('install', (e) => {
   // cache: 'reload' skips the browser's HTTP cache, so a new version never ships stale files.
