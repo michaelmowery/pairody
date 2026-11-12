@@ -152,7 +152,8 @@ dialog.welcome .welcome-update{margin:0 0 8px;color:var(--fg);font-weight:600}
 dialog.welcome .welcome-optout{margin:-6px 0 16px;font-size:.82rem}
 .welcome-i{font:italic 600 1em Georgia,"Times New Roman",serif;color:var(--fg)}
 .welcome-prefs{font:inherit;color:var(--led);background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
-.welcome-actions{margin:0}
+.welcome-actions{margin:0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.welcome-demo{padding:9px 18px;font-size:1rem}
 .welcome-ok{min-width:132px;padding:9px 22px;font-size:1rem}
 .info-prefs{border-radius:12px;padding:4px 6px;margin:0 -6px;transition:background .3s}
 .info-prefs.flash{background:var(--led-soft)}
