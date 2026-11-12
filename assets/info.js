@@ -26,17 +26,17 @@
 <p>Found a bug, or have an idea for a deck? We'd love to hear it.</p>
 <div class="info-feedback"><a class="btn info-feedback-btn" href="mailto:mountmtech@gmail.com?subject=Pairody%20feedback">Send feedback</a>
 <span class="info-email">mountmtech@gmail.com</span></div>
+<h3>Preferences</h3>
+<div class="info-prefs" id="infoPrefs">
+  <label class="toggle"><input type="checkbox" name="updateNote" checked><span>Note after updates: show the preview note when a new version arrives</span></label>
+  <p class="info-prefs-note">Saved on this device.</p>
+</div>
 <h3>Updates</h3>
 <div class="info-update">
   <button type="button" class="btn info-update-btn">Check for updates</button>
   <span class="info-version"></span>
 </div>
 <p class="info-update-status" role="status"></p>
-<h3>Preferences</h3>
-<div class="info-prefs" id="infoPrefs">
-  <label class="toggle"><input type="checkbox" name="updateNote" checked><span>Note after updates: show the preview note when a new version arrives</span></label>
-  <p class="info-prefs-note">Saved on this device.</p>
-</div>
 <p class="info-foot">Pairody preview · © 2026 Mount M Technologies, LLC</p>`;
   function init(){
     const top=document.querySelector(".top");if(!top)return;
