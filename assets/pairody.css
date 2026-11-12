@@ -95,3 +95,30 @@ footer{color:var(--muted);font-size:.8rem;text-align:center}
 .decks button small{font-weight:500;font-size:.72rem;color:var(--ok);margin-left:5px;font-variant-numeric:tabular-nums}
 .decks button small:empty{display:none}
 @media (prefers-reduced-motion:reduce){.readout .best.new b{animation:none;color:var(--led)}}
+/* "i" button and the preview info panel */
+.top-right{display:flex;align-items:center;gap:8px}
+.info-btn{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted);
+  font:italic 600 1rem/1 Georgia,"Times New Roman",serif;cursor:pointer;display:grid;place-items:center;padding:0}
+.info-btn:hover{color:var(--fg);border-color:var(--led)}
+dialog.info{max-width:min(460px,calc(100vw - 32px));width:100%;max-height:calc(100dvh - 48px);overflow:auto;
+  background:var(--chassis);color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:20px 20px 16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);font-size:.92rem;position:fixed}
+dialog.info::backdrop{background:rgba(20,22,43,.55)}
+dialog.info[open]{animation:infoin .18s ease-out}
+@keyframes infoin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+dialog.info h2{font-family:var(--display);font-weight:600;font-size:1.2rem;margin:4px 0 6px;padding-right:28px}
+dialog.info h3{font-family:var(--display);font-weight:600;font-size:.95rem;margin:14px 0 4px}
+dialog.info p{margin:0 0 6px;color:var(--muted)}
+dialog.info ul{margin:0;padding-left:18px;color:var(--muted)}
+dialog.info li{margin:0 0 4px}
+dialog.info li b{color:var(--fg);font-weight:600}
+.info-tag{display:inline-block;margin:0!important;padding:2px 9px;border-radius:999px;background:var(--led);color:#14162B!important;
+  font-family:var(--display);font-weight:600;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}
+.info-x{position:absolute;top:10px;right:10px;margin:0}
+.info-x button{width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:1.4rem;line-height:1;cursor:pointer}
+.info-x button:hover{color:var(--fg);background:var(--line)}
+.info-foot{margin-top:14px!important;font-size:.78rem;text-align:center}
+@media (prefers-reduced-motion:reduce){dialog.info[open]{animation:none}}
+@media (max-width:440px){.top-right{gap:6px}.nav a{padding:5px 9px;font-size:.8rem}.info-btn{width:28px;height:28px}}
+@media (max-width:400px){.logo{height:30px}.nav{gap:4px}.nav a{padding:4px 8px;font-size:.76rem}.beta{margin-left:3px;padding:1px 5px}}
+.top{flex-wrap:wrap}
