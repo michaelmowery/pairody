@@ -24,7 +24,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
 | page view (`/`, `/youtube.html`) | each page load |
 | `launch/installed-app`, `launch/browser` | each page load, by how Pairody was opened |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
-| `deck/<id>` | a deck button tapped (animals, drums, notes, chords, rhythm) |
+| `deck/<id>` | a deck button tapped (animals, drums, notes, chords, rhythm, quotes) |
 | `play/<id>[/easy]` | first pad tapped on a new board |
 | `win/<id>[/easy]` | board cleared |
 | `perfect/<id>` | board cleared in 8 moves |
