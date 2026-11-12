@@ -29,6 +29,7 @@
 .pad .art.txt{font-size:clamp(1rem,4.5vw,1.5rem);color:var(--ok)}
 .deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
 .deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
+.row-btns{display:flex;gap:6px}
 .pad.matched .lbl{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
@@ -60,7 +61,7 @@
         <button data-deck="quotes" aria-pressed="false">Quotes</button>
         <button data-deck="notes" aria-pressed="false">Notes</button>
       </div>
-      <button class="btn" id="reset">New board</button>
+      <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of Animals by itself">Demo</button><button class="btn" id="reset">New board</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
     <label class="toggle"><input type="checkbox" id="easy"><span>Easy mode: show each sound's name while it plays</span></label>
@@ -80,6 +81,7 @@
     <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Easy mode keeps its own bests, so a board where you used it doesn't count against your regular ones.</p>
     <p>New to it, or playing with kids? Turn on Easy mode and each pad shows the name of its sound while it plays, like the now-playing card in a music app.</p>
     <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
+    <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of Animals by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
     <p> Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
   <footer>© 2026 Mount M Technologies, LLC</footer>
@@ -223,7 +225,7 @@ const DECKS={
 };
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
-let deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false;
+let deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
@@ -240,6 +242,7 @@ function showBest(){
   });
 }
 function build(){
+  if(demo)stopDemo(true);
   clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
@@ -255,7 +258,7 @@ function build(){
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
     b.setAttribute("aria-label","Pad "+(i+1)+", hidden sound");
     b.innerHTML='<span class="dot"></span><span class="rings"><i></i><i></i></span><span class="lbl"></span><span class="np" aria-hidden="true"><b></b><small></small></span>';
-    b.onclick=()=>tap(i,b);g.appendChild(b);
+    b.onclick=()=>{if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";return}tap(i,b)};g.appendChild(b);
   });
 }
 const DECKNAME={animals:"Animals",quotes:"Quotes",notes:"Notes"};
@@ -270,16 +273,16 @@ function playPad(i,b){
   audio();entry[1](ctx.currentTime+.02,half[i]);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=entry[0];np.querySelector("small").textContent=DECKNAME[deck]}
-  if(easy())$("status").textContent="Now playing: "+entry[0]+".";
+  if(easy()||demo)$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+entry[0]+".";
   b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),900);
 }
 function tap(i,b){
   if(lock||b.classList.contains("matched"))return;
   if(open.length===1&&open[0]===i){playPad(i,b);return}
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500);
-    track("play/"+deck+(easy()?"/easy":""),"Board started: "+DECKNAME[deck]+(easy()?" (Easy)":""))}
+    if(!demo)track("play/"+deck+(easy()?"/easy":""),"Board started: "+DECKNAME[deck]+(easy()?" (Easy)":""))}
   playPad(i,b);b.classList.add("open");open.push(i);
-  if(open.length<2){if(!easy())$("status").textContent="Now find its twin.";return}
+  if(open.length<2){if(!easy()&&!demo)$("status").textContent="Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
   setTimeout(()=>{
@@ -289,8 +292,15 @@ function tap(i,b){
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
         const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
       pairs++;$("pairs").textContent=pairs+"/8";
-      $("status").textContent="Match: "+(entry[4]||name)+".";
-      if(pairs===8){
+      $("status").textContent=(demo?"Demo: ":"")+"Match: "+(entry[4]||name)+".";
+      if(pairs===8&&demo){
+        // Demo boards never count toward best scores
+        clearInterval(timer);
+        const secs=Math.floor((Date.now()-start)/1000);$("time").textContent=fmt(secs);
+        track("demo/done","Demo finished");
+        $("status").textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New board to play.";
+        $("status").className="status win";endDemo();
+      }else if(pairs===8){
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
         $("time").textContent=fmt(secs);
@@ -305,7 +315,7 @@ function tap(i,b){
       }
     }else{
       [pa,pc].forEach(p=>p.classList.add("miss"));
-      $("status").textContent="Different sounds. Remember where they were.";
+      $("status").textContent=demo?"Demo: different sounds. It remembers where they were.":"Different sounds. Remember where they were.";
       setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
     }
     open=[];lock=false;
@@ -325,6 +335,55 @@ function applyEasy(){
 try{$("easy").checked=localStorage.getItem("pairody-easy")==="1"}catch(e){}
 $("easy").onchange=()=>{applyEasy();track(easy()?"easy/on":"easy/off",easy()?"Easy mode on":"Easy mode off")};applyEasy();
 $("reset").onclick=build;
+
+// Demo: plays an Animals board by itself. It flips unknown pads, remembers what
+// each one sounded like, and flips a pair as soon as it knows where both are.
+// It slips once now and then, like a person would. Not saved as a best score.
+const DEMO_GAP=1150,DEMO_NEXT=1650; // ms between the two flips, and after a move
+function demoWait(ms,fn){const run=demo;setTimeout(()=>{if(demo&&demo===run)fn()},ms)}
+function demoFlip(i){tap(i,$("pad"+i));demo.seen[i]=cards[i]}
+function demoMove(){
+  const d=demo,left=i=>!$("pad"+i).classList.contains("matched");
+  const known=Object.keys(d.seen).map(Number).filter(left);
+  const unseen=cards.map((_,i)=>i).filter(i=>left(i)&&!(i in d.seen));
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  // 1. A pair it already knows about: flip both
+  for(const a of known){const b=known.find(x=>x!==a&&d.seen[x]===d.seen[a]);if(b!==undefined)return[a,b]}
+  // 2. Otherwise flip something new, then its twin if it has heard it before
+  const a=unseen.length?pick(unseen):pick(known);
+  return[a,()=>{
+    const twin=known.find(x=>x!==a&&d.seen[x]===cards[a]);
+    if(twin!==undefined){
+      // An occasional honest slip: picks the wrong remembered pad
+      if(!d.slipped&&moves>=3&&Math.random()<.5){d.slipped=true;const wrong=known.filter(x=>x!==a&&x!==twin);if(wrong.length)return pick(wrong)}
+      return twin}
+    const rest=unseen.filter(x=>x!==a);return rest.length?pick(rest):known.find(x=>x!==a);
+  }];
+}
+function demoStep(){
+  if(pairs===8)return;
+  const [a,b]=demoMove();
+  demoFlip(a);
+  demoWait(DEMO_GAP,()=>{demoFlip(typeof b==="function"?b():b);demoWait(DEMO_NEXT,demoStep)});
+}
+function setDemoUi(on){
+  const btn=$("demo");btn.textContent=on?"Stop demo":"Demo";btn.classList.toggle("primary",on);btn.setAttribute("aria-pressed",on);
+  document.body.classList.toggle("demo",on);
+}
+function endDemo(){demo=null;setDemoUi(false)}
+function stopDemo(silent){
+  if(!demo)return;track("demo/stop","Demo stopped early");endDemo();
+  if(!silent)build();
+}
+function startDemo(){
+  if(deck!=="animals"){deck="animals";document.querySelectorAll(".decks button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.deck==="animals"))}
+  build();audio();
+  demo={seen:{},slipped:false};setDemoUi(true);
+  track("demo/start","Demo started");
+  $("status").textContent="Demo: watch and listen. Tap Stop demo any time.";
+  demoWait(700,demoStep);
+}
+$("demo").onclick=()=>demo?stopDemo():startDemo();
 build();
 </script>
 </body>

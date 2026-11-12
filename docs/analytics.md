@@ -29,6 +29,9 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
 | `win/<id>[/easy]` | board cleared |
 | `perfect/<id>` | board cleared in 8 moves |
 | `easy/on`, `easy/off` | Easy mode switched |
+| `demo/start` | Demo button tapped (auto-plays an Animals board) |
+| `demo/done` | Demo finished the board |
+| `demo/stop` | Demo stopped early (Stop demo, New board or a deck button) |
 | `yt/beta-unlocked` | Your music beta password entered |
 | `yt/load/playlist`, `yt/load/links` | Your music songs loaded (the playlist itself is not sent) |
 | `yt/win[/hard]` | Your music board cleared |
