@@ -19,6 +19,12 @@
   <li>No ads, no accounts, no analytics. Your scores stay on this device. Your music plays through YouTube's own player.</li>
   <li>Animal sounds are public domain or CC0 recordings (<a href="https://github.com/michaelmowery/pairody/blob/main/sounds/CREDITS.md" target="_blank" rel="noopener">credits</a>).</li>
 </ul>
+<h3>Updates</h3>
+<div class="info-update">
+  <button type="button" class="btn info-update-btn">Check for updates</button>
+  <span class="info-version"></span>
+</div>
+<p class="info-update-status" role="status"></p>
 <p class="info-foot">Pairody preview · © 2026 Mount M Technologies, LLC</p>`;
   function init(){
     const top=document.querySelector(".top");if(!top)return;
@@ -35,6 +41,35 @@
     btn.onclick=()=>{if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","")};
     // Tap outside the panel to close it
     dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+    setupUpdates(dlg);btn.addEventListener("click",()=>resetUpdateUi(dlg));
+  }
+  // "Check for updates": asks the service worker (assets/update.js) for a newer version,
+  // installs it, then reloads. Same flow as Noodlit's About panel.
+  const U=()=>window.PairodyUpdate||{version:"dev",supported:false,check:async()=>"unsupported",reload:()=>location.reload(),isReady:()=>false};
+  function setUpdateUi(dlg,label,status,busy){
+    const b=dlg.querySelector(".info-update-btn");
+    b.textContent=label;b.disabled=!!busy;b.classList.toggle("busy",!!busy);
+    dlg.querySelector(".info-update-status").textContent=status||"";
+  }
+  function resetUpdateUi(dlg){
+    dlg.querySelector(".info-version").textContent="Version "+U().version;
+    if(U().isReady())setUpdateUi(dlg,"Refresh to update","A new version is ready.");
+    else setUpdateUi(dlg,"Check for updates","");
+  }
+  function setupUpdates(dlg){
+    resetUpdateUi(dlg);
+    dlg.querySelector(".info-update-btn").addEventListener("click",async()=>{
+      const u=U(),v=u.version;
+      if(u.isReady()){setUpdateUi(dlg,"Updating…","",true);u.reload();return}
+      if(!u.supported){setUpdateUi(dlg,"Check for updates","You're on version "+v+". Updates arrive when you reload.");return}
+      setUpdateUi(dlg,"Checking…","",true);
+      // A short minimum so "Checking…" doesn't just flicker
+      const [r]=await Promise.all([u.check(),new Promise(ok=>setTimeout(ok,700))]);
+      if(r==="ready"){setUpdateUi(dlg,"Updating…","Found a new version. Reloading…",true);setTimeout(u.reload,500)}
+      else if(r==="current")setUpdateUi(dlg,"Check for updates","You're up to date ("+v+").");
+      else if(r==="offline")setUpdateUi(dlg,"Try again","Couldn't reach pairody.app. Are you offline?");
+      else setUpdateUi(dlg,"Check for updates","You're on version "+v+". Updates arrive when you reload.");
+    });
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();

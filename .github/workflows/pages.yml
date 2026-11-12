@@ -1,0 +1,39 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # Stamp the version at deploy time so PRs never touch version numbers (no merge conflicts).
+      # 0.<deploy number> shows in the info panel; the service-worker cache name also carries the
+      # commit, so every deploy installs a fresh cache and the "New version ready" pill fires.
+      # The whole line is rewritten, so a stray hand-edited number can't break it.
+      - name: Stamp version
+        run: |
+          APP_VERSION="0.${{ github.run_number }}"
+          BUILD="v${{ github.run_number }}-${GITHUB_SHA::7}"
+          sed -i -E "s|^const VERSION = '[^']*';|const VERSION = 'pairody-${BUILD}';|" sw.js
+          sed -i -E "s|^  const STAMP = '[^']*';|  const STAMP = '${APP_VERSION}';|" assets/update.js
+          grep -q "^const VERSION = 'pairody-${BUILD}';" sw.js
+          grep -q "^  const STAMP = '${APP_VERSION}';" assets/update.js
+          echo "Deploying Pairody ${APP_VERSION} (cache pairody-${BUILD})" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
