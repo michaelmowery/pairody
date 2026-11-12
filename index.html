@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pairody: memory match, played by ear</title>
-<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animals, drums, notes, chords and rhythms.">
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animals, drums, notes, chords, rhythms and famous quotes.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Pairody">
@@ -58,6 +58,7 @@
         <button data-deck="notes" aria-pressed="false">Notes</button>
         <button data-deck="chords" aria-pressed="false">Chords</button>
         <button data-deck="rhythm" aria-pressed="false">Rhythms</button>
+        <button data-deck="quotes" aria-pressed="false">Quotes</button>
       </div>
       <button class="btn" id="reset">New board</button>
     </div>
@@ -77,7 +78,8 @@
     <p>16 pads hold 8 pairs of sounds. Flip one, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes 8 moves.</p>
     <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Easy mode keeps its own bests, so a board where you used it doesn't count against your regular ones.</p>
     <p>New to it, or playing with kids? Turn on Easy mode and each pad shows the name of its sound while it plays, like the now-playing card in a music app.</p>
-    <p>Decks get harder left to right: chords and rhythms are real ear training. Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
+    <p>Decks get harder left to right: chords and rhythms are real ear training. Quotes works a little differently: one pad reads the start of a famous quote and its twin reads the ending, so you match each opening to the way it finishes. Every board picks 8 quotes from a bigger set.</p>
+    <p> Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
   <footer>© 2026 Mount M Technologies, LLC</footer>
 </div>
@@ -167,6 +169,55 @@ function withClip(name,synth){
 addEventListener("pointerdown",()=>audio(),{once:true});
 loadClips();
 
+// Quotes deck: one pad of each pair speaks the start of a famous quote, its twin
+// speaks the ending. Spoken by the browser's own voice (Web Speech API), so there
+// are no audio files. Only short, public-domain quotes from historical figures.
+// [speaker, opening, ending]
+const QUOTES=[
+  ["Franklin D. Roosevelt","The only thing we have to fear","is fear itself."],
+  ["John F. Kennedy","Ask not what your country can do for you,","ask what you can do for your country."],
+  ["William Shakespeare","To be, or not to be,","that is the question."],
+  ["René Descartes","I think,","therefore I am."],
+  ["Abraham Lincoln","A house divided against itself","cannot stand."],
+  ["Benjamin Franklin","An ounce of prevention","is worth a pound of cure."],
+  ["Patrick Henry","Give me liberty,","or give me death!"],
+  ["Julius Caesar","I came, I saw,","I conquered."],
+  ["William Shakespeare","A rose by any other name","would smell as sweet."],
+  ["Alexander Pope","To err is human;","to forgive, divine."],
+  ["Edward Bulwer-Lytton","The pen is mightier","than the sword."],
+  ["Neil Armstrong","That's one small step for man,","one giant leap for mankind."],
+  ["Thomas Jefferson","We hold these truths to be self-evident,","that all men are created equal."],
+  ["Socrates","The unexamined life","is not worth living."],
+  ["Lao Tzu","A journey of a thousand miles","begins with a single step."],
+  ["Benjamin Franklin","Early to bed and early to rise","makes a man healthy, wealthy, and wise."],
+  ["Theodore Roosevelt","Speak softly","and carry a big stick."],
+  ["William Shakespeare","All the world's a stage,","and all the men and women merely players."],
+  ["Nathan Hale","I only regret that I have but one life","to lose for my country."],
+  ["John Donne","No man is an island,","entire of itself."],
+  ["Archimedes","Give me a place to stand,","and I will move the Earth."],
+  ["Heraclitus","No man ever steps","in the same river twice."],
+  ["Mark Twain","The reports of my death","are greatly exaggerated."],
+  ["Ralph Waldo Emerson","The only way to have a friend","is to be one."]
+];
+const canSpeak="speechSynthesis" in window&&"SpeechSynthesisUtterance" in window;
+let enVoice=null;
+function pickVoice(){
+  if(!canSpeak)return;
+  const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  enVoice=vs.find(v=>v.default)||vs.find(v=>/en[-_]US/i.test(v.lang))||vs[0]||null;
+}
+if(canSpeak){pickVoice();speechSynthesis.addEventListener&&speechSynthesis.addEventListener("voiceschanged",pickVoice)}
+function say(text){
+  if(!canSpeak){$("status").textContent="“"+text+"” (this browser can't read aloud, so here it is in text)";return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  if(enVoice)u.voice=enVoice;u.lang=enVoice?enVoice.lang:"en-US";u.rate=.95;
+  speechSynthesis.speak(u);
+}
+const quoteEntry=([who,a,b])=>[who,(t,half)=>say(half?b:a),"❝",0,"“"+a+" "+b+"” ("+who+")"];
+// 8 quotes per board, never two by the same person (their pads would look alike)
+function pickQuotes(){const who=new Set();return shuffle(QUOTES.slice()).filter(q=>!who.has(q[0])&&who.add(q[0])).slice(0,8).map(quoteEntry)}
+
 const DECKS={
   animals:[
     ["Cat",withClip("Cat",t=>voice(t,{f:[[0,480],[.18,820],[.65,430]],dur:.7,ft:"bandpass",fq:1300,q:2.5,vol:.7,atk:.08}))],
@@ -197,11 +248,12 @@ const DECKS={
     rh("Four even",[0,.2,.4,.6]),rh("Gallop",[0,.1,.2,.4,.5,.6]),rh("Swing",[0,.27,.4,.67]),
     rh("Triplet",[0,.13,.27,.4,.53,.67]),rh("Long-short",[0,.45,.6]),rh("Short-long",[0,.15,.6]),
     rh("Offbeat",[.1,.3,.5,.7]),rh("Stutter",[0,.05,.1,.5])
-  ]
+  ],
+  quotes:[] // filled with 8 random quotes on each new board
 };
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
-let deck="animals",cards=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false;
+let deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
@@ -222,7 +274,11 @@ function build(){
   $("bestBox").classList.remove("new");showBest();
   $("moves").textContent=0;$("pairs").textContent="0/8";$("time").textContent="0:00";
   $("status").textContent="Tap any pad to hear it.";$("status").className="status";
+  if(deck==="quotes"){DECKS.quotes=pickQuotes();$("status").textContent="Match each quote's opening to its ending. Tap any pad to hear it."}
+  else if(canSpeak)speechSynthesis.cancel();
   cards=shuffle([...Array(8).keys(),...Array(8).keys()]);
+  // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes)
+  const seen=new Set();half=cards.map(id=>seen.has(id)?1:(seen.add(id),0));
   const g=$("grid");g.innerHTML="";
   cards.forEach((id,i)=>{
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
@@ -231,10 +287,10 @@ function build(){
     b.onclick=()=>tap(i,b);g.appendChild(b);
   });
 }
-const DECKNAME={animals:"Animals",drums:"Drums",notes:"Notes",chords:"Chords",rhythm:"Rhythms"};
+const DECKNAME={animals:"Animals",drums:"Drums",notes:"Notes",chords:"Chords",rhythm:"Rhythms",quotes:"Quotes"};
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
-  audio();entry[1](ctx.currentTime+.02);
+  audio();entry[1](ctx.currentTime+.02,half[i]);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=entry[0];np.querySelector("small").textContent=DECKNAME[deck]}
   if(easy())$("status").textContent="Now playing: "+entry[0]+".";
@@ -256,7 +312,7 @@ function tap(i,b){
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
         const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
       pairs++;$("pairs").textContent=pairs+"/8";
-      $("status").textContent="Match: "+name+".";
+      $("status").textContent="Match: "+(entry[4]||name)+".";
       if(pairs===8){
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
