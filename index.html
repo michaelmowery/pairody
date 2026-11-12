@@ -21,6 +21,7 @@
 <script src="assets/best.js"></script>
 <script src="assets/update.js"></script>
 <script src="assets/info.js" defer></script>
+<script src="assets/analytics.js" defer></script>
 <style>
 .pad .lbl{font-size:.72rem;padding:4px;text-align:center;line-height:1.2;display:grid;gap:4px;justify-items:center}
 .pad .art{font-size:clamp(1.5rem,7vw,2.4rem);line-height:1;font-weight:600;color:var(--fg)}
@@ -199,6 +200,7 @@ const DECKS={
   ]
 };
 
+const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let deck="animals",cards=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -241,7 +243,8 @@ function playPad(i,b){
 function tap(i,b){
   if(lock||b.classList.contains("matched"))return;
   if(open.length===1&&open[0]===i){playPad(i,b);return}
-  if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500)}
+  if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500);
+    track("play/"+deck+(easy()?"/easy":""),"Board started: "+DECKNAME[deck]+(easy()?" (Easy)":""))}
   playPad(i,b);b.classList.add("open");open.push(i);
   if(open.length<2){if(!easy())$("status").textContent="Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
@@ -258,6 +261,8 @@ function tap(i,b){
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
         $("time").textContent=fmt(secs);
+        track("win/"+deck+(easyUsed?"/easy":""),"Board cleared: "+DECKNAME[deck]+(easyUsed?" (Easy)":""));
+        if(moves===8)track("perfect/"+deck,"Perfect board: "+DECKNAME[deck]);
         let msg="Board cleared in "+moves+" moves, "+fmt(secs)+". ";
         if(isNew&&prev)msg="New best for "+DECKNAME[deck]+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
         else if(isNew)msg="First board on "+DECKNAME[deck]+(easyUsed?" in Easy mode":"")+": "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
@@ -274,7 +279,7 @@ function tap(i,b){
   },950);
 }
 document.querySelectorAll(".decks button").forEach(btn=>btn.onclick=()=>{
-  deck=btn.dataset.deck;
+  deck=btn.dataset.deck;track("deck/"+deck,"Deck picked: "+DECKNAME[deck]);
   document.querySelectorAll(".decks button").forEach(x=>x.setAttribute("aria-pressed",x===btn));
   build();
 });
@@ -285,7 +290,7 @@ function applyEasy(){
   else if(!easy()&&easyUsed&&((!timer&&open.length===0)||pairs===8)){easyUsed=false;showBest()}
   document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
 try{$("easy").checked=localStorage.getItem("pairody-easy")==="1"}catch(e){}
-$("easy").onchange=applyEasy;applyEasy();
+$("easy").onchange=()=>{applyEasy();track(easy()?"easy/on":"easy/off",easy()?"Easy mode on":"Easy mode off")};applyEasy();
 $("reset").onclick=build;
 build();
 </script>

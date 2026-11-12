@@ -16,9 +16,12 @@
 <h3>Good to know</h3>
 <ul>
   <li>Headphones help. On iPhone, flip off silent mode or you won't hear the pads.</li>
-  <li>No ads, no accounts, no analytics. Your scores stay on this device. Your music plays through YouTube's own player.</li>
+  <li>No ads and no accounts. Your scores stay on this device. Your music plays through YouTube's own player.</li>
   <li>Animal sounds are public domain or CC0 recordings (<a href="https://github.com/michaelmowery/pairody/blob/main/sounds/CREDITS.md" target="_blank" rel="noopener">credits</a>).</li>
 </ul>
+<h3>Privacy</h3>
+<p>To learn which decks and features people use, Pairody sends anonymous counts (like "Animals board cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. Your playlists and song links are never sent.</p>
+<label class="toggle info-analytics"><input type="checkbox" name="analytics" checked><span>Anonymous usage counts (saved on this device)</span></label>
 <h3>Feedback</h3>
 <p>Found a bug, or have an idea for a deck? We'd love to hear it.</p>
 <div class="info-feedback"><a class="btn info-feedback-btn" href="mailto:mountmtech@gmail.com?subject=Pairody%20feedback">Send feedback</a>
