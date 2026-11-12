@@ -31,7 +31,7 @@
 <p id="welcomeUpdate" class="welcome-update" hidden></p>
 <p id="welcomeBody">Pairody is in early preview. It's free while we build it, new decks land often, and now and then something may wobble. Thanks for playing! Tap <b class="welcome-i">i</b> any time to see what's here.</p>
 <p class="welcome-optout" hidden>Don't need this after every update? Turn it off in <button type="button" class="welcome-prefs">Preferences</button>.</p>
-<form method="dialog" class="welcome-actions"><button class="btn primary welcome-ok">Got it</button></form>`;
+<form method="dialog" class="welcome-actions"><button type="button" class="btn welcome-demo" hidden>Show demo</button><button class="btn primary welcome-ok">Got it</button></form>`;
 
   // Preferences live in the info panel (assets/info.js puts the switch there).
   function wirePrefs(){
@@ -82,6 +82,17 @@
     dlg.addEventListener('close', () => { remember(); dlg.remove(); if (then) then(); });
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
     dlg.querySelector('.welcome-prefs').addEventListener('click', () => { then = openPrefs; dlg.close(); });
+    // Show demo (main game only): closes the note and starts the Demo for the selected deck.
+    // It clicks the Demo button inside this tap, so the browser lets the sound play.
+    const demoBtn = document.getElementById('demo'), showDemo = dlg.querySelector('.welcome-demo');
+    if (demoBtn) {
+      showDemo.hidden = false;
+      showDemo.addEventListener('click', () => {
+        dlg.close();
+        window.PairodyAnalytics?.track('welcome/demo', 'Show demo tapped on the preview note');
+        if (demoBtn.getAttribute('aria-pressed') !== 'true') demoBtn.click();
+      });
+    }
 
     // A beat after load, so the board shows first and the note feels like a greeting.
     // If another panel is already open, wait for it to close.

@@ -24,7 +24,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
 | page view (`/`, `/youtube.html`) | each page load |
 | `launch/installed-app`, `launch/browser` | each page load, by how Pairody was opened |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
-| `deck/<id>` | a deck button tapped (animals, quotes, notes) |
+| `deck/<id>` | a deck button tapped (animals, talk, quotes, jokes, wordplay, brain, melodies, notes, morse) |
 | `play/<id>[/difficult]` | first pad tapped on a new board (`/difficult` = sounds only, no names) |
 | `win/<id>[/difficult]` | board cleared |
 | `perfect/<id>` | board cleared in 8 moves |
@@ -32,6 +32,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
 | `demo/done/<id>` | Demo finished the board |
 | `demo/stop/<id>` | Demo stopped early (Stop demo, New board or a deck button) |
+| `welcome/demo` | Show demo tapped on the Early preview note (then `demo/start/<id>` follows) |
 | `yt/beta-unlocked` | Your music beta password entered |
 | `yt/load/playlist`, `yt/load/links` | Your music songs loaded (the playlist itself is not sent) |
 | `yt/win[/hard]` | Your music board cleared |
