@@ -25,10 +25,10 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
 | `launch/installed-app`, `launch/browser` | each page load, by how Pairody was opened |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
 | `deck/<id>` | a deck button tapped (animals, quotes, notes) |
-| `play/<id>[/easy]` | first pad tapped on a new board |
-| `win/<id>[/easy]` | board cleared |
+| `play/<id>[/difficult]` | first pad tapped on a new board (`/difficult` = sounds only, no names) |
+| `win/<id>[/difficult]` | board cleared |
 | `perfect/<id>` | board cleared in 8 moves |
-| `easy/on`, `easy/off` | Easy mode switched |
+| `difficult/on`, `difficult/off` | Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
 | `demo/done/<id>` | Demo finished the board |
 | `demo/stop/<id>` | Demo stopped early (Stop demo, New board or a deck button) |

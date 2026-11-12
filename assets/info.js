@@ -9,7 +9,7 @@
 <h3>What's here now</h3>
 <ul>
   <li><b>Three decks.</b> Animals uses real recordings. Quotes reads famous lines aloud: match each opening to its ending. Notes is ear training: find the matching musical notes.</li>
-  <li><b>Easy mode</b> shows each sound's name while it plays. Good for kids and first games.</li>
+  <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Difficult mode</b> for sounds only.</li>
   <li><b>Best scores</b> for each deck, saved on this device. No account or sign-up.</li>
   <li><b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist. It's open to beta testers for now.</li>
 </ul>
