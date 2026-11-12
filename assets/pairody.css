@@ -161,3 +161,26 @@ dialog.welcome .welcome-optout{margin:-6px 0 16px;font-size:.82rem}
 dialog.info .info-prefs-note{margin:6px 0 0;font-size:.78rem}
 /* Anonymous usage counts switch in the info panel (assets/analytics.js) */
 dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:1.35;margin:2px 0 0}
+/* Pad flips: a pad turns over when it's opened, turns back after a miss, and flips once more
+   to its matched face. Pure CSS on the open / miss / matched classes, so game and Demo timing
+   don't change. The open face is slightly lit so it reads as the other side of the pad. */
+.pad.open{background:linear-gradient(color-mix(in srgb,var(--pad-top) 82%,var(--led)),var(--pad))}
+.pad.open{animation:padflip .28s ease-in-out}
+.pad.miss{animation:padback .45s ease-in-out}
+.pad.matched{animation:padflip .36s ease-in-out}
+.pad.open .dot{animation:dotin .28s steps(1,end)}
+.pad.miss .dot{animation:dotout .45s steps(1,end) forwards}
+.pad.matched > *{animation:facein .36s steps(1,end)}
+/* The matched label or cover art pops in once the pad has turned (overrides the pages' own pop) */
+.grid .pad.matched .lbl,.grid .pad.matched > img{animation:pop .35s ease-out .18s both}
+@keyframes padflip{0%{transform:perspective(500px) rotateY(0)}50%{transform:perspective(500px) rotateY(90deg)}100%{transform:perspective(500px) rotateY(0)}}
+/* Hold for a beat so the red miss ring shows, then turn back over */
+@keyframes padback{0%,35%{transform:perspective(500px) rotateY(0)}68%{transform:perspective(500px) rotateY(-90deg)}100%{transform:perspective(500px) rotateY(0)}}
+/* Swap the face at the moment the pad is edge-on */
+@keyframes dotin{0%{background:#33375C;box-shadow:none}50%{background:var(--led)}}
+@keyframes dotout{0%{background:var(--led)}68%,100%{background:#33375C;box-shadow:none}}
+@keyframes facein{0%{visibility:hidden}50%{visibility:visible}}
+.easy .pad.open .np{animation:npin .2s ease-out .14s both}
+.easy .pad.miss .np{animation:npout .45s steps(1,end) forwards}
+@keyframes npout{0%{visibility:visible}68%,100%{visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.pad.open,.pad.miss,.pad.matched,.pad.open .dot,.pad.miss .dot,.pad.matched > *,.easy .pad.miss .np,.grid .pad.matched .lbl,.grid .pad.matched > img{animation:none}}
