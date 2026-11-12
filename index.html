@@ -149,7 +149,9 @@ const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"�
 
 // Real recordings for some sounds (public domain / CC0, see sounds/CREDITS.md).
 // Each clip is fetched once and decoded on first use; if it is missing or fails
-// to load, the pad plays the synth version below instead.
+// to load, the pad plays the synth version below instead. If it is just slow (over
+// 2.5s on the first tap), the synth fills in for the rest of that board only, and the
+// recording takes over from the next board.
 const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster"};
 const clipData={},clipBuf={};
 function loadClips(){
@@ -159,26 +161,27 @@ function loadClips(){
   }
 }
 const clipReady={};
+let clipLate={}; // clips that were too slow on this board (cleared by build)
 function decodeClip(name){
   if(clipReady[name]||!clipData[name])return;
   clipReady[name]=clipData[name]
     .then(ab=>ab&&new Promise((ok,bad)=>ctx.decodeAudioData(ab,ok,bad)))
-    .then(b=>{if(clipBuf[name]!==false)clipBuf[name]=b||false},()=>{clipBuf[name]=false});
+    .then(b=>{clipBuf[name]=b||false},()=>{clipBuf[name]=false});
 }
 function withClip(name,synth){
   const play=t=>{
-    const b=clipBuf[name];
+    const b=!clipLate[name]&&clipBuf[name];
     if(!b){synth(t);return}
     const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;
     s.buffer=b;s.connect(g);g.connect(master);s.start(t);
   };
   // If the clip is still loading on the very first tap, wait for it (briefly)
-  // so a pad never plays the synth once and the recording the next time.
+  // so a pad never plays the synth once and the recording the next time on one board.
   return t=>{
-    if(clipBuf[name]!==undefined||!clipReady[name]){play(t);return}
+    if(clipBuf[name]!==undefined||!clipReady[name]||clipLate[name]){play(t);return}
     let done=false;
     const go=()=>{if(!done){done=true;play(ctx.currentTime+.01)}};
-    setTimeout(()=>{if(!done)clipBuf[name]=false;go()},2500);
+    setTimeout(()=>{if(!done)clipLate[name]=true;go()},2500);
     clipReady[name].then(go);
   };
 }
@@ -355,7 +358,7 @@ const DECKGEN={quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:
 const BOARDMODE={wordplay:["Rhymes","Opposites"],brain:["Capitals","Times tables"]};
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
-let deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
+let board=0,deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
@@ -374,6 +377,8 @@ function showBest(){
 }
 function build(){
   if(demo)stopDemo(true);
+  board++; // a move still resolving from the old board is dropped (see tap)
+  clipLate={};
   clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
@@ -424,7 +429,9 @@ function tap(i,b){
   if(open.length<2){if(!easy())$("status").textContent=demo?"Demo: now it looks for the twin.":"Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
+  const thisBoard=board;
   setTimeout(()=>{
+    if(thisBoard!==board)return; // New board or a deck change came first
     if(cards[a]===cards[c]){
       const entry=DECKS[deck][cards[a]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3];
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
@@ -481,10 +488,13 @@ $("reset").onclick=build;
 // each one sounded like, and flips a pair as soon as it knows where both are.
 // It slips once now and then, like a person would. Not saved as a best score.
 const DEMO_GAP=1150,DEMO_NEXT=1650; // ms between the two flips, and after a move
-// Waits ms, then until the browser has finished reading aloud or a melody has ended
+// Waits ms, then until the browser has finished reading aloud or a melody has ended.
+// A melody runs 3 to 5 seconds, so the demo lets it play only a little past ms and then
+// moves on (the next flip cuts it off). Otherwise a Melodies demo takes over a minute and a half.
+const DEMO_MELODY=900;
 function demoWait(ms,fn){
-  const run=demo,ok=()=>demo&&demo===run;
-  const melody=()=>ctx&&ctx.currentTime<seqEnd;
+  const run=demo,ok=()=>demo&&demo===run,until=Date.now()+ms+DEMO_MELODY;
+  const melody=()=>ctx&&ctx.currentTime<seqEnd&&Date.now()<until;
   const check=()=>{if(!ok())return;if(canSpeak&&(speechSynthesis.speaking||speechSynthesis.pending)||melody())setTimeout(check,150);else fn()};
   setTimeout(()=>{if(!ok())return;if(canSpeak&&speechSynthesis.speaking||melody())setTimeout(check,350);else fn()},ms);
 }

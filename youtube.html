@@ -66,7 +66,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
     <textarea id="src" placeholder="https://music.youtube.com/playlist?list=...&#10;or one song link per line"></textarea>
     <div class="row">
       <label class="check"><input type="checkbox" id="hard"> Hard mode: pair clips come from different parts of the song</label>
-      <label class="toggle"><input type="checkbox" id="easy"><span>Easy mode: show the song title while a clip plays</span></label>
+      <label class="toggle"><input type="checkbox" id="difficult"><span>Difficult mode: clips only, no song titles</span></label>
       <button class="btn primary" id="go">Deal board</button>
     </div>
     <p class="status" id="setupStatus"></p>
@@ -92,10 +92,10 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
     <ul>
       <li>Playlists must be public or unlisted. Liked Music and private playlists won't load, so copy songs into an unlisted playlist.</li>
       <li>Some official music videos block playback outside YouTube. Pairody swaps those out when it has spare songs.</li>
-      <li>Easy mode shows each song's title and artist on the pad while its clip plays, like the now-playing card in YouTube Music.</li>
+      <li>Each pad shows the song's title and artist while its clip plays, like the now-playing card in YouTube Music. Turn on Difficult mode to hear the clips only.</li>
       <li>On iPhone, if the first pad is silent, tap it again.</li>
       <li>Videos play through YouTube's own player and stay on screen while they play.</li>
-      <li>Your best score is saved on this device for each playlist (or set of song links), with Hard and Easy mode boards kept separately.</li>
+      <li>Your best score is saved on this device for each playlist (or set of song links), with Hard and Difficult mode boards kept separately.</li>
     </ul>
   </div>
   </div>
@@ -106,15 +106,19 @@ const $=id=>document.getElementById(id);
 const CLIP=4, PAIRS=8;
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
-let clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
+let board=0, clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
 let srcKey="", boardKey="";
 
-try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("easy").checked=localStorage.getItem("pairody-easy")==="1"; }catch(e){}
-function easy(){return $("easy").checked}
+try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("difficult").checked=localStorage.getItem("pairody-yt-difficult")==="1"; }catch(e){}
+// Song titles show by default ("easy"), like the main game; Difficult mode hides them.
+// Best keys predate this: ":easy" = titles shown, no suffix = clips only.
+function easy(){return !$("difficult").checked}
 function applyEasy(){
+  // Seeing titles at any point makes this board a regular one; turning them off counts only before the first tap
   if(easy()&&boardKey&&!boardKey.includes(":easy")&&pairs<PAIRS){boardKey+=":easy";showBest()}
-  document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-easy",easy()?"1":"0")}catch(e){}}
-$("easy").onchange=applyEasy;applyEasy();
+  else if(!easy()&&boardKey.endsWith(":easy")&&!timer&&open.length===0){boardKey=boardKey.slice(0,-5);showBest()}
+  document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-yt-difficult",easy()?"0":"1")}catch(e){}}
+$("difficult").onchange=applyEasy;applyEasy();
 // Fill a pad's now-playing label from what we know about the song
 function showNP(i){
   if(i===null||i===undefined||!cards[i])return;
@@ -184,10 +188,12 @@ $("again").onclick=()=>pool.length&&deal();
 function modeKey(){return "yt:"+srcKey+($("hard").checked?":hard":"")+(easy()?":easy":"")}
 function showBest(){
   const b=Best.get(boardKey),h=boardKey.includes(":hard"),e=boardKey.includes(":easy");
-  $("bestLbl").textContent=(h&&e?"Hard+easy":h?"Hard":e?"Easy":"")+(h||e?" best":"Best");
+  const tag=[h?"Hard":"",e?"":"Difficult"].filter(Boolean).join("+");
+  $("bestLbl").textContent=tag?tag+" best":"Best";
   $("best").textContent=Best.fmt(b);
 }
 function deal(){
+  board++; // a move still resolving from the old board is dropped (see tap)
   clearInterval(timer);timer=null;stopClip();open=[];lock=false;moves=0;pairs=0;
   const hard=$("hard").checked;
   boardKey=modeKey();$("bestBox").classList.remove("new");showBest();
@@ -261,7 +267,9 @@ function tap(i){
   if(open.length<2){if(!easy())setStatus("Now find the other clip from that song.");return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open;
+  const thisBoard=board;
   setTimeout(()=>{
+    if(thisBoard!==board)return; // New board came first
     const pa=$("pad"+a),pc=$("pad"+c);
     if(cards[a].s===cards[c].s){
       const song=songs[cards[a].s],title=(meta[song.id]&&meta[song.id].title)||"Matched";
