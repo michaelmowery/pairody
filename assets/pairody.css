@@ -122,6 +122,11 @@ dialog.info li b{color:var(--fg);font-weight:600}
 @media (max-width:440px){.top-right{gap:6px}.nav a{padding:5px 9px;font-size:.8rem}.info-btn{width:28px;height:28px}}
 @media (max-width:400px){.logo{height:30px}.nav{gap:4px}.nav a{padding:4px 8px;font-size:.76rem}.beta{margin-left:3px;padding:1px 5px}}
 .top{flex-wrap:wrap}
+/* Feedback link in the info panel */
+.info-feedback{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:2px 0 0}
+.info-feedback-btn{text-decoration:none;display:inline-block}
+.info-email{font-size:.82rem;color:var(--muted);user-select:all}
+
 /* Updates: "Check for updates" in the info panel, and a quiet pill when a new version has arrived */
 .info-update{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:2px 0 0}
 .info-update-btn.busy{opacity:.7;cursor:progress}
