@@ -76,10 +76,10 @@ footer{color:var(--muted);font-size:.8rem;text-align:center}
 .pad .np b{display:block;font-family:var(--display);font-weight:600;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pad .np b::before{content:"♪ ";color:var(--led)}
 .pad .np small{display:block;font-size:.62rem;color:#C9C4D6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.easy .pad.playing .np,.easy .pad.open .np,.demo .pad.playing .np,.demo .pad.open .np{display:block;animation:npin .2s ease-out}
-.easy .pad.matched .np,.demo .pad.matched .np{display:none}
+.easy .pad.playing .np,.easy .pad.open .np{display:block;animation:npin .2s ease-out}
+.easy .pad.matched .np{display:none}
 @keyframes npin{from{transform:translateY(100%)}to{transform:none}}
-@media (prefers-reduced-motion:reduce){.easy .pad .np,.demo .pad .np{animation:none}}
+@media (prefers-reduced-motion:reduce){.easy .pad .np{animation:none}}
 @media (max-width:440px){.pad .np{padding:12px 5px 4px}.pad .np b{font-size:.68rem}.pad .np small{font-size:.56rem}}
 /* Beta badge and password gate for Your music */
 .beta{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:999px;background:var(--led);color:#14162B;

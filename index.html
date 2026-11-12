@@ -61,7 +61,7 @@
         <button data-deck="quotes" aria-pressed="false">Quotes</button>
         <button data-deck="notes" aria-pressed="false">Notes</button>
       </div>
-      <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of Animals by itself">Demo</button><button class="btn" id="reset">New board</button></div>
+      <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button><button class="btn" id="reset">New board</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
     <label class="toggle"><input type="checkbox" id="easy"><span>Easy mode: show each sound's name while it plays</span></label>
@@ -81,7 +81,7 @@
     <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Easy mode keeps its own bests, so a board where you used it doesn't count against your regular ones.</p>
     <p>New to it, or playing with kids? Turn on Easy mode and each pad shows the name of its sound while it plays, like the now-playing card in a music app.</p>
     <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
-    <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of Animals by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
+    <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of whichever deck you picked (Animals, Quotes or Notes) by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
     <p> Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
   <footer>© 2026 Mount M Technologies, LLC</footer>
@@ -273,7 +273,7 @@ function playPad(i,b){
   audio();entry[1](ctx.currentTime+.02,half[i]);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=entry[0];np.querySelector("small").textContent=DECKNAME[deck]}
-  if(easy()||demo)$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+entry[0]+".";
+  if(easy())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+entry[0]+".";
   b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),900);
 }
 function tap(i,b){
@@ -282,7 +282,7 @@ function tap(i,b){
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500);
     if(!demo)track("play/"+deck+(easy()?"/easy":""),"Board started: "+DECKNAME[deck]+(easy()?" (Easy)":""))}
   playPad(i,b);b.classList.add("open");open.push(i);
-  if(open.length<2){if(!easy()&&!demo)$("status").textContent="Now find its twin.";return}
+  if(open.length<2){if(!easy())$("status").textContent=demo?"Demo: now it looks for the twin.":"Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
   setTimeout(()=>{
@@ -297,7 +297,7 @@ function tap(i,b){
         // Demo boards never count toward best scores
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000);$("time").textContent=fmt(secs);
-        track("demo/done","Demo finished");
+        track("demo/done/"+deck,"Demo finished: "+DECKNAME[deck]);
         $("status").textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New board to play.";
         $("status").className="status win";endDemo();
       }else if(pairs===8){
@@ -336,11 +336,16 @@ try{$("easy").checked=localStorage.getItem("pairody-easy")==="1"}catch(e){}
 $("easy").onchange=()=>{applyEasy();track(easy()?"easy/on":"easy/off",easy()?"Easy mode on":"Easy mode off")};applyEasy();
 $("reset").onclick=build;
 
-// Demo: plays an Animals board by itself. It flips unknown pads, remembers what
+// Demo: plays a board of the current deck by itself. It flips unknown pads, remembers what
 // each one sounded like, and flips a pair as soon as it knows where both are.
 // It slips once now and then, like a person would. Not saved as a best score.
 const DEMO_GAP=1150,DEMO_NEXT=1650; // ms between the two flips, and after a move
-function demoWait(ms,fn){const run=demo;setTimeout(()=>{if(demo&&demo===run)fn()},ms)}
+// Waits ms, then (for Quotes) until the browser has finished reading aloud
+function demoWait(ms,fn){
+  const run=demo,ok=()=>demo&&demo===run;
+  const check=()=>{if(!ok())return;if(canSpeak&&(speechSynthesis.speaking||speechSynthesis.pending))setTimeout(check,150);else fn()};
+  setTimeout(()=>{if(!ok())return;if(canSpeak&&speechSynthesis.speaking)setTimeout(check,350);else fn()},ms);
+}
 function demoFlip(i){tap(i,$("pad"+i));demo.seen[i]=cards[i]}
 function demoMove(){
   const d=demo,left=i=>!$("pad"+i).classList.contains("matched");
@@ -372,14 +377,13 @@ function setDemoUi(on){
 }
 function endDemo(){demo=null;setDemoUi(false)}
 function stopDemo(silent){
-  if(!demo)return;track("demo/stop","Demo stopped early");endDemo();
+  if(!demo)return;track("demo/stop/"+deck,"Demo stopped early: "+DECKNAME[deck]);endDemo();
   if(!silent)build();
 }
 function startDemo(){
-  if(deck!=="animals"){deck="animals";document.querySelectorAll(".decks button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.deck==="animals"))}
   build();audio();
   demo={seen:{},slipped:false};setDemoUi(true);
-  track("demo/start","Demo started");
+  track("demo/start/"+deck,"Demo started: "+DECKNAME[deck]);
   $("status").textContent="Demo: watch and listen. Tap Stop demo any time.";
   demoWait(700,demoStep);
 }
