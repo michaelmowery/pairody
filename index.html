@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pairody: memory match, played by ear</title>
-<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, famous quotes and musical notes.">
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, famous quotes, jokes, old tunes, rhymes, Morse code and more.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Pairody">
@@ -57,8 +57,14 @@
     <div class="strip">
       <div class="decks" role="group" aria-label="Sound deck">
         <button data-deck="animals" aria-pressed="true">Animals</button>
+        <button data-deck="talk" aria-pressed="false">Animal Talk</button>
         <button data-deck="quotes" aria-pressed="false">Quotes</button>
+        <button data-deck="jokes" aria-pressed="false">Jokes</button>
+        <button data-deck="wordplay" aria-pressed="false">Word Play</button>
+        <button data-deck="brain" aria-pressed="false">Brain Food</button>
+        <button data-deck="melodies" aria-pressed="false">Melodies</button>
         <button data-deck="notes" aria-pressed="false">Notes</button>
+        <button data-deck="morse" aria-pressed="false">Morse Code</button>
       </div>
       <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button><button class="btn" id="reset">New board</button></div>
     </div>
@@ -80,7 +86,7 @@
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
     <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Difficult mode keeps its own bests, so a board played sounds-only is never compared with one where you could see the names.</p>
     <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
-    <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of whichever deck you picked (Animals, Quotes or Notes) by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
+    <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of whichever deck you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
     <p> Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
   <footer>© 2026 Mount M Technologies, LLC</footer>
@@ -94,11 +100,32 @@ function audio(){
   for(const name in CLIPS)decodeClip(name);
   return ctx;
 }
-function tone(freq,t,dur,type="sine",vol=.35){
+function tone(freq,t,dur,type="sine",vol=.35,out=master){
   const o=ctx.createOscillator(),g=ctx.createGain();
   o.type=type;o.frequency.setValueAtTime(freq,t);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);
-  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+  o.connect(g);g.connect(out);o.start(t);o.stop(t+dur+.05);
+}
+// Longer sounds (melodies, Morse) play through their own bus, so tapping another
+// pad cuts the last one off instead of playing on top of it. seqEnd is when the
+// current one finishes (the demo waits for it).
+let seqOut=null,seqEnd=0;
+function stopSeq(){
+  if(seqOut){const g=seqOut;g.gain.setTargetAtTime(0,ctx.currentTime,.02);setTimeout(()=>g.disconnect(),250);seqOut=null}
+  seqEnd=0;
+}
+function seqBus(){stopSeq();seqOut=ctx.createGain();seqOut.connect(master);return seqOut}
+// notes: [[freq or null for a rest, seconds], ...]
+function playSeq(notes,t,{type="triangle",vol=.32,beep=false}={}){
+  const out=seqBus();let x=t;
+  for(const [f,d] of notes){
+    if(f&&beep){const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;
+      g.gain.setValueAtTime(0,x);g.gain.linearRampToValueAtTime(vol,x+.008);g.gain.setValueAtTime(vol,x+d-.01);g.gain.linearRampToValueAtTime(0,x+d);
+      o.connect(g);g.connect(out);o.start(x);o.stop(x+d+.02)}
+    else if(f)tone(f,x,Math.max(.18,d*.95),type,vol,out);
+    x+=d;
+  }
+  seqEnd=x;
 }
 function noise(t,dur,hp=1000,vol=.4,bp){
   const len=Math.floor(ctx.sampleRate*dur),b=ctx.createBuffer(1,len,ctx.sampleRate),d=b.getChannelData(0);
@@ -204,9 +231,109 @@ function say(text){
   if(enVoice)u.voice=enVoice;u.lang=enVoice?enVoice.lang:"en-US";u.rate=.95;
   speechSynthesis.speak(u);
 }
-const quoteEntry=([who,a,b])=>[who,(t,half)=>say(half?b:a),"❝",0,"“"+a+" "+b+"” ("+who+")"];
+// A deck entry is [name, play(t, half), art, artIsText, matchMessage].
+// "half" is 0 for the first pad of a pair and 1 for its twin, so a pair can be two
+// different sounds (an opening and its ending, a word and its rhyme).
+// Picks n items from a pool, keeping only the first item for each key, so a board
+// never has two pairs that could be mixed up.
+function pickUnique(pool,key,n=8){const seen=new Set();return shuffle(pool.slice()).filter(x=>{const k=key(x);if(seen.has(k))return false;seen.add(k);return true}).slice(0,n)}
+// A pair that is two spoken lines: one pad says a, its twin says b
+const spoken=(name,a,b,art,txt,msg)=>[name,(t,half)=>say(half?b:a),art,txt,msg];
+const quoteEntry=([who,a,b])=>spoken(who,a,b,"❝",0,"“"+a+" "+b+"” ("+who+")");
 // 8 quotes per board, never two by the same person (their pads would look alike)
-function pickQuotes(){const who=new Set();return shuffle(QUOTES.slice()).filter(q=>!who.has(q[0])&&who.add(q[0])).slice(0,8).map(quoteEntry)}
+function pickQuotes(){return pickUnique(QUOTES,q=>q[0]).map(quoteEntry)}
+
+// Jokes & Riddles: one pad asks, its twin answers. Old schoolyard jokes and riddles.
+// [short name, question, answer]
+const JOKES=[
+  ["Chicken","Why did the chicken cross the road?","To get to the other side."],
+  ["Piano","What has keys but can't open locks?","A piano."],
+  ["Clock","What has hands but can't clap?","A clock."],
+  ["Towel","What gets wetter the more it dries?","A towel."],
+  ["Egg","What has to be broken before you can use it?","An egg."],
+  ["Cookie","Why did the cookie go to the doctor?","Because it felt crummy."],
+  ["Bear","What do you call a bear with no teeth?","A gummy bear."],
+  ["Skeleton","Why don't skeletons fight each other?","They don't have the guts."],
+  ["Bottle","What has a neck but no head?","A bottle."],
+  ["Cold","What can you catch but not throw?","A cold."],
+  ["Age","What goes up but never comes down?","Your age."],
+  ["Comb","What has lots of teeth but can't bite?","A comb."],
+  ["Six","Why was six afraid of seven?","Because seven ate nine."],
+  ["Ocean","What did the ocean say to the beach?","Nothing. It just waved."],
+  ["Needle","What has one eye but can't see?","A needle."],
+  ["River","What runs but never walks?","A river."],
+  ["Library","Which building has the most stories?","The library."],
+  ["Bicycle","Why can't a bicycle stand up by itself?","Because it's two tired."],
+  ["Book","What has words but never speaks?","A book."],
+  ["Month","Which month has twenty-eight days?","All of them."],
+  ["Scarecrow","Why did the scarecrow win an award?","Because he was outstanding in his field."],
+  ["Cheese","What do you call cheese that isn't yours?","Nacho cheese."],
+  ["Palm","What kind of tree fits in your hand?","A palm tree."],
+  ["Teacher","Why did the student eat his homework?","Because the teacher said it was a piece of cake."]
+];
+const pickJokes=()=>pickUnique(JOKES,j=>j[0]).map(([n,q,a])=>spoken(n,q,a,"😂",0,q+" "+a));
+
+// Classic Melodies: one pad plays how a tune starts, its twin how it goes on.
+// Only old public-domain tunes. Notes are name+octave (default 4), ":beats" (default 1).
+const NOTE={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function mel(str,beat){
+  return str.trim().split(/\s+/).map(tok=>{
+    const m=/^([A-Gr])(#|b)?(\d)?(?::([\d.]+))?$/.exec(tok),d=(m[4]?+m[4]:1)*beat;
+    if(m[1]==="r")return[null,d];
+    return[st(NOTE[m[1]]+(m[2]==="#"?1:m[2]==="b"?-1:0)+12*((m[3]?+m[3]:4)-4)),d];
+  });
+}
+// [name, beat in seconds, first part, second part]
+const MELODIES=[
+  ["Twinkle, Twinkle, Little Star",.38,"C C G G A A G:2","F F E E D D C:2"],
+  ["Mary Had a Little Lamb",.3,"E D C D E E E:2 D D D:2 E G G:2","E D C D E E E E D D E D C:4"],
+  ["Ode to Joy",.3,"E E F G G F E D C C D E E:1.5 D:.5 D:2","E E F G G F E D C C D E D:1.5 C:.5 C:2"],
+  ["Jingle Bells",.24,"E E E:2 E E E:2 E G C:1.5 D:.5 E:4","F F F:1.5 F:.5 F E E E:.5 E:.5 E D D E D:2 G:2"],
+  ["Row, Row, Row Your Boat",.3,"C:1.5 C:1.5 C D:.5 E:1.5 E D:.5 E F:.5 G:3","C5:.5 C5:.5 C5:.5 G:.5 G:.5 G:.5 E:.5 E:.5 E:.5 C:.5 C:.5 C:.5 G D:.5 E:1 D:.5 C:3"],
+  ["Frère Jacques",.34,"C D E C C D E C E F G:2 E F G:2","G:.5 A:.5 G:.5 F:.5 E C G:.5 A:.5 G:.5 F:.5 E C C G3 C:2"],
+  ["London Bridge",.3,"G:1.5 A:.5 G F E F G:2 D E F:2 E F G:2","G:1.5 A:.5 G F E F G:2 D:2 G:2 E C:2"],
+  ["Yankee Doodle",.25,"C C D E C E D G3 C C D E C:2 B3:2","C C D E F E D C B3 G3 A3 B3 C:2 C:2"],
+  ["When the Saints Go Marching In",.26,"C E F G:4 C E F G:4","C E F G:2 E:2 C:2 E:2 D:4"],
+  ["Hot Cross Buns",.36,"E D C:2 E D C:2","C:.5 C:.5 C:.5 C:.5 D:.5 D:.5 D:.5 D:.5 E D C:2"],
+  ["Oh! Susanna",.25,"C:.5 D:.5 E G G A:1.5 G:.5 E C:1.5 D:.5 E E D C D:3","C:.5 D:.5 E G G:1.5 A:.5 G E C:1.5 D:.5 E E D D C:3"],
+  ["Amazing Grace",.34,"G3 C:2 E:.5 C:.5 E:2 D C:2 A3 G3:2","G3 C:2 E:.5 C:.5 E:2 D G:3"]
+];
+const pickMelodies=()=>pickUnique(MELODIES,m=>m[0]).map(([n,beat,a,b])=>{
+  const A=mel(a,beat),B=mel(b,beat);
+  return[n,(t,half)=>playSeq(half?B:A,t),"🎵",0,n];
+});
+
+// Word Play: each board is all rhymes or all opposites (they alternate), never mixed,
+// so no word on a board could fit two pairs. Each rhyme pair has its own ending.
+const RHYMES=[["cat","hat"],["dog","frog"],["bee","tree"],["moon","spoon"],["cake","snake"],["bear","chair"],["mouse","house"],["boat","goat"],["star","car"],["king","ring"],["fish","dish"],["sock","clock"],["bed","red"],["bug","rug"],["kite","light"],["rain","train"]];
+// No two pairs share a meaning (so no high/low next to up/down, or soft next to loud/quiet)
+const OPPOSITES=[["hot","cold"],["up","down"],["big","small"],["fast","slow"],["happy","sad"],["day","night"],["open","closed"],["loud","quiet"],["wet","dry"],["full","empty"],["in","out"],["young","old"],["go","stop"],["on","off"],["push","pull"],["first","last"],["left","right"]];
+const cap=w=>w[0].toUpperCase()+w.slice(1);
+const pairName=(a,b)=>cap(a)+" · "+b;
+let boardMode={wordplay:1,brain:1}; // flips on each new board of that deck
+function pickWordplay(){
+  const r=boardMode.wordplay===0;
+  return pickUnique(r?RHYMES:OPPOSITES,p=>p[0]).map(([a,b])=>spoken(pairName(a,b),a,b,r?"🎶":"⇄",!r,cap(a)+(r?" rhymes with ":" is the opposite of ")+b));
+}
+
+// Brain Food: each board is all capitals or all times tables (they alternate).
+const CAPITALS=[["France","Paris"],["Japan","Tokyo"],["Italy","Rome"],["Egypt","Cairo"],["Canada","Ottawa"],["Spain","Madrid"],["Kenya","Nairobi"],["Peru","Lima"],["Germany","Berlin"],["Greece","Athens"],["Australia","Canberra"],["Russia","Moscow"],["China","Beijing"],["India","New Delhi"],["Brazil","Brasília"],["Ireland","Dublin"],["Norway","Oslo"],["Thailand","Bangkok"],["Cuba","Havana"],["Argentina","Buenos Aires"]];
+const TIMES=[];for(let a=2;a<=9;a++)for(let b=a;b<=9;b++)TIMES.push([a,b]);
+function pickBrain(){
+  if(boardMode.brain===0)return pickUnique(CAPITALS,c=>c[0]).map(([c,city])=>spoken(c+" · "+city,c,city,"🌍",0,"The capital of "+c+" is "+city));
+  // Every answer different on a board, so 3 × 4 and 2 × 6 never share one
+  return pickUnique(TIMES,([a,b])=>a*b).map(([a,b])=>spoken(a+" × "+b+" = "+a*b,a+" times "+b,String(a*b),"×",1,a+" times "+b+" is "+a*b));
+}
+
+// Morse Code: one pad says a letter, its twin beeps it in Morse.
+const MORSE={A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--.."};
+const MU=.09; // one Morse unit in seconds: dot 1, dash 3, gap 1
+const morseSeq=code=>[...code].flatMap(c=>[[700,c==="."?MU:3*MU],[null,MU]]);
+const morseArt=code=>code.replace(/\./g,"·").replace(/-/g,"−");
+const pickMorse=()=>pickUnique(Object.keys(MORSE),l=>l).map(l=>{
+  const seq=morseSeq(MORSE[l]);
+  return[l+"  "+morseArt(MORSE[l]),(t,half)=>half?playSeq(seq,t,{beep:true,vol:.28}):say("The letter "+l),"",1,"The letter "+l+" is "+morseArt(MORSE[l])];
+});
 
 const DECKS={
   animals:[
@@ -219,9 +346,13 @@ const DECKS={
     ["Frog",withClip("Frog",t=>[0,.32].forEach(g=>{for(let p=0;p<5;p++)voice(t+g+p*.028,{f:[[0,170],[.02,140]],dur:.022,fq:700,q:3,vol:.6,atk:.003})}))],
     ["Rooster",withClip("Rooster",t=>{voice(t,{f:[[0,420],[.12,620],[.3,600]],dur:.32,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.02});voice(t+.36,{f:[[0,640],[.2,760],[.9,820],[1.2,560]],dur:1.25,ft:"bandpass",fq:1500,q:1.5,vol:.65,atk:.04})})]
   ],
-  notes:[0,2,4,5,7,9,11,12].map((n,i)=>[["C","D","E","F","G","A","B","High C"][i],t=>tone(st(n),t,.8,"triangle",.32),"♪"+["C","D","E","F","G","A","B","C′"][i],1]),
-  quotes:[] // filled with 8 random quotes on each new board
+  notes:[0,2,4,5,7,9,11,12].map((n,i)=>[["C","D","E","F","G","A","B","High C"][i],t=>tone(st(n),t,.8,"triangle",.32),"♪"+["C","D","E","F","G","A","B","C′"][i],1])
 };
+// Animal Talk: one pad says the animal's name, its twin plays its call
+DECKS.talk=DECKS.animals.map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
+// Decks that pick a fresh set of 8 pairs on every new board
+const DECKGEN={quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,morse:pickMorse};
+const BOARDMODE={wordplay:["Rhymes","Opposites"],brain:["Capitals","Times tables"]};
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
@@ -248,8 +379,10 @@ function build(){
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
   $("moves").textContent=0;$("pairs").textContent="0/8";$("time").textContent="0:00";
   $("status").textContent="Tap any pad to hear it.";$("status").className="status";
-  if(deck==="quotes")DECKS.quotes=pickQuotes();
-  else if(canSpeak)speechSynthesis.cancel();
+  if(canSpeak)speechSynthesis.cancel();
+  if(ctx)stopSeq();
+  if(BOARDMODE[deck]){boardMode[deck]^=1;$("status").textContent+=" This board: "+BOARDMODE[deck][boardMode[deck]]+"."}
+  if(DECKGEN[deck])DECKS[deck]=DECKGEN[deck]();
   cards=shuffle([...Array(8).keys(),...Array(8).keys()]);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes)
   const seen=new Set();half=cards.map(id=>seen.has(id)?1:(seen.add(id),0));
@@ -261,20 +394,26 @@ function build(){
     b.onclick=()=>{if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";return}tap(i,b)};g.appendChild(b);
   });
 }
-const DECKNAME={animals:"Animals",quotes:"Quotes",notes:"Notes"};
+const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Brain Food",melodies:"Melodies",notes:"Notes",morse:"Morse Code"};
 // How each deck works, shown under the deck buttons
 const DECKHELP={
   animals:"Real recordings of eight animals, from a cat's meow to a rooster's crow. Find the two pads that make the same call.",
+  talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
   quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks 8 quotes from a bigger set.",
-  notes:"Eight notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. This one is real ear training."
+  jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every board picks 8 from a bigger set.",
+  wordplay:"Each board is either Rhymes (cat goes with hat) or Opposites (hot goes with cold), and the next board switches. Match each word to its partner.",
+  brain:"Each board is either Capitals (France goes with Paris) or Times tables (seven times eight goes with fifty-six), and the next board switches.",
+  melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song.",
+  notes:"Eight notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. This one is real ear training.",
+  morse:"One pad says a letter and its twin beeps that letter in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on."
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
-  audio();entry[1](ctx.currentTime+.02,half[i]);
+  audio();stopSeq();entry[1](ctx.currentTime+.02,half[i]);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=entry[0];np.querySelector("small").textContent=DECKNAME[deck]}
   if(easy())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+entry[0]+".";
-  b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),900);
+  b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),Math.max(900,(seqEnd-ctx.currentTime)*1000));
 }
 function tap(i,b){
   if(lock||b.classList.contains("matched"))return;
@@ -342,11 +481,12 @@ $("reset").onclick=build;
 // each one sounded like, and flips a pair as soon as it knows where both are.
 // It slips once now and then, like a person would. Not saved as a best score.
 const DEMO_GAP=1150,DEMO_NEXT=1650; // ms between the two flips, and after a move
-// Waits ms, then (for Quotes) until the browser has finished reading aloud
+// Waits ms, then until the browser has finished reading aloud or a melody has ended
 function demoWait(ms,fn){
   const run=demo,ok=()=>demo&&demo===run;
-  const check=()=>{if(!ok())return;if(canSpeak&&(speechSynthesis.speaking||speechSynthesis.pending))setTimeout(check,150);else fn()};
-  setTimeout(()=>{if(!ok())return;if(canSpeak&&speechSynthesis.speaking)setTimeout(check,350);else fn()},ms);
+  const melody=()=>ctx&&ctx.currentTime<seqEnd;
+  const check=()=>{if(!ok())return;if(canSpeak&&(speechSynthesis.speaking||speechSynthesis.pending)||melody())setTimeout(check,150);else fn()};
+  setTimeout(()=>{if(!ok())return;if(canSpeak&&speechSynthesis.speaking||melody())setTimeout(check,350);else fn()},ms);
 }
 function demoFlip(i){tap(i,$("pad"+i));demo.seen[i]=cards[i]}
 function demoMove(){
