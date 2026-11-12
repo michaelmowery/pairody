@@ -15,6 +15,7 @@ const SHELL = [
   './assets/info.js',
   './assets/update.js',
   './assets/welcome.js',
+  './assets/analytics.js',
   './assets/logo-light.svg',
   './assets/logo-dark.svg',
   './assets/mark.svg',
