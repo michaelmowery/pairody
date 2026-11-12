@@ -6,7 +6,7 @@ Each clip was trimmed to one call, mixed to mono, peak-normalized and encoded as
 
 | Sound | File | Source | Recordist | License | Edit |
 |---|---|---|---|---|---|
-| Cat | `animals/cat.mp3` | [Meow of a Siamese cat - freemaster2.wav](https://commons.wikimedia.org/wiki/File:Meow_of_a_Siamese_cat_-_freemaster2.wav) | freemaster2 | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | 1.3 s trimmed from the original |
+| Cat | `animals/cat.mp3` | [MeowUSA.wav](https://commons.wikimedia.org/wiki/File:MeowUSA.wav) | SalomeCzapiewski | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | one meow, 0.75 s |
 | Dog | `animals/dog.mp3` | [George vuf 1996.ogg](https://commons.wikimedia.org/wiki/File:George_vuf_1996.ogg) | Broadbeer | Public domain | the single bark played twice |
 | Sheep | `animals/sheep.mp3` | [Sheep bleating.ogg](https://commons.wikimedia.org/wiki/File:Sheep_bleating.ogg) | earthcalling | Public domain | first bleat, 1.25 s |
 | Songbird | `animals/songbird.mp3` | [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) on OpenGameArt (`birds-isaiah658.ogg`) | isaiah658 | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 1.9 s of chirps from 24.7 s, high-passed |
