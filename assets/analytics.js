@@ -2,7 +2,7 @@
 // (www/src/analytics.js) so both apps count the same way.
 //
 // What gets sent: which page loaded, and the names of a few actions (a deck picked, a board
-// cleared, Easy mode turned on, the info panel opened, the app installed). Never a playlist,
+// cleared, Difficult mode turned on, the info panel opened, the app installed). Never a playlist,
 // song link, or anything typed. GoatCounter sets no cookies and keeps no profile: it tells
 // visits apart with a short-lived hash, so nobody is followed around.
 //
