@@ -144,3 +144,5 @@ dialog.info .info-update-status:empty{display:none}
 .update-pill.leaving{opacity:0}
 @keyframes updatein{from{transform:translate(-50%,10px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.update-pill{animation:none}}
+/* Anonymous usage counts switch in the info panel (assets/analytics.js) */
+dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:1.35;margin:2px 0 0}

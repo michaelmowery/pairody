@@ -21,6 +21,7 @@
 <script src="assets/best.js"></script>
 <script src="assets/update.js"></script>
 <script src="assets/info.js" defer></script>
+<script src="assets/analytics.js" defer></script>
 <style>
 label.lbl{font-family:var(--display);font-weight:600;font-size:.9rem;color:var(--muted)}
 textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px}
@@ -102,6 +103,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
 <script>
 const $=id=>document.getElementById(id);
 const CLIP=4, PAIRS=8;
+const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
 let clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
 let srcKey="", boardKey="";
@@ -173,6 +175,7 @@ $("go").onclick=async()=>{
   st.textContent="Loaded "+all.length+" songs.";
   // Best scores are kept per playlist; loose song links are keyed by the set of songs
   srcKey=lists.length===1&&!ids.length?"pl:"+lists[0]:"set:"+Best.hash([...lists,...ids].sort());
+  track("yt/load/"+(lists.length?"playlist":"links"),"Your music: songs loaded ("+(lists.length?"playlist":"song links")+")");
   pool=all;deal();
 };
 $("again").onclick=()=>pool.length&&deal();
@@ -270,6 +273,7 @@ function tap(i){
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(boardKey,moves,secs);
         $("time").textContent=fmt(secs);
+        track("yt/win"+(boardKey.includes(":hard")?"/hard":""),"Your music: board cleared"+(boardKey.includes(":hard")?" (Hard)":""));
         let msg="Board cleared in "+moves+" moves, "+fmt(secs)+". ";
         if(isNew&&prev)msg="New best for these songs! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
         else if(isNew)msg="First board with these songs: "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
@@ -299,7 +303,7 @@ function unlock(){document.getElementById("gate").hidden=true;document.getElemen
   document.getElementById("gateForm").onsubmit=async e=>{
     e.preventDefault();
     const h=await sha256("pairody:"+document.getElementById("pw").value);
-    if(h===BETA_HASH){try{localStorage.setItem("pairody-beta",h)}catch(e){}unlock()}
+    if(h===BETA_HASH){try{localStorage.setItem("pairody-beta",h)}catch(e){}unlock();window.PairodyAnalytics&&PairodyAnalytics.track("yt/beta-unlocked","Your music: beta unlocked")}
     else{const s=document.getElementById("gateStatus");s.className="status err";s.textContent="That's not the beta password.";document.getElementById("pw").select()}
   };
 })();
