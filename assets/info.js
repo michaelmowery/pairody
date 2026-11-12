@@ -8,7 +8,7 @@
 <p>Pairody is new and still taking shape. It's free to play while we build it, and things may change, move around, or occasionally break.</p>
 <h3>What's here now</h3>
 <ul>
-  <li><b>Six decks.</b> Animals uses real recordings; Drums, Notes, Chords and Rhythms get harder as you go. Quotes reads famous lines aloud: match each opening to its ending.</li>
+  <li><b>Three decks.</b> Animals uses real recordings. Quotes reads famous lines aloud: match each opening to its ending. Notes is ear training: find the matching musical notes.</li>
   <li><b>Easy mode</b> shows each sound's name while it plays. Good for kids and first games.</li>
   <li><b>Best scores</b> for each deck, saved on this device. No account or sign-up.</li>
   <li><b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist. It's open to beta testers for now.</li>
