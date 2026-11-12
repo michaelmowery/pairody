@@ -139,3 +139,17 @@ dialog.info .info-update-status:empty{display:none}
 .update-pill.leaving{opacity:0}
 @keyframes updatein{from{transform:translate(-50%,10px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.update-pill{animation:none}}
+/* Early preview welcome note (assets/welcome.js) and its preference in the info panel */
+dialog.welcome{max-width:min(360px,calc(100vw - 32px));text-align:center;padding:22px 22px 18px}
+dialog.welcome h2{padding:0;font-size:1.3rem}
+dialog.welcome #welcomeBody{margin:0 0 16px;font-size:.95rem;line-height:1.5}
+dialog.welcome .welcome-update{margin:0 0 8px;color:var(--fg);font-weight:600}
+dialog.welcome .welcome-optout{margin:-6px 0 16px;font-size:.82rem}
+.welcome-i{font:italic 600 1em Georgia,"Times New Roman",serif;color:var(--fg)}
+.welcome-prefs{font:inherit;color:var(--led);background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.welcome-actions{margin:0}
+.welcome-ok{min-width:132px;padding:9px 22px;font-size:1rem}
+.info-prefs{border-radius:12px;padding:4px 6px;margin:0 -6px;transition:background .3s}
+.info-prefs.flash{background:var(--led-soft)}
+.info-prefs .toggle{align-items:flex-start;font-size:.85rem;line-height:1.35}
+dialog.info .info-prefs-note{margin:6px 0 0;font-size:.78rem}
