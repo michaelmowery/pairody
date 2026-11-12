@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pairody: memory match, played by ear</title>
-<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animals, drums, notes, chords, rhythms and famous quotes.">
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, famous quotes and musical notes.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Pairody">
@@ -27,6 +27,8 @@
 .pad .lbl{font-size:.72rem;padding:4px;text-align:center;line-height:1.2;display:grid;gap:4px;justify-items:center}
 .pad .art{font-size:clamp(1.5rem,7vw,2.4rem);line-height:1;font-weight:600;color:var(--fg)}
 .pad .art.txt{font-size:clamp(1rem,4.5vw,1.5rem);color:var(--ok)}
+.deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
+.deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
 .pad.matched .lbl{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
@@ -55,14 +57,12 @@
     <div class="strip">
       <div class="decks" role="group" aria-label="Sound deck">
         <button data-deck="animals" aria-pressed="true">Animals</button>
-        <button data-deck="drums" aria-pressed="false">Drums</button>
-        <button data-deck="notes" aria-pressed="false">Notes</button>
-        <button data-deck="chords" aria-pressed="false">Chords</button>
-        <button data-deck="rhythm" aria-pressed="false">Rhythms</button>
         <button data-deck="quotes" aria-pressed="false">Quotes</button>
+        <button data-deck="notes" aria-pressed="false">Notes</button>
       </div>
       <button class="btn" id="reset">New board</button>
     </div>
+    <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
     <label class="toggle"><input type="checkbox" id="easy"><span>Easy mode: show each sound's name while it plays</span></label>
     <div class="readout" aria-live="polite">
       <div><span>Moves</span><b id="moves">0</b></div>
@@ -79,7 +79,7 @@
     <p>16 pads hold 8 pairs of sounds. Flip one, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes 8 moves.</p>
     <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Easy mode keeps its own bests, so a board where you used it doesn't count against your regular ones.</p>
     <p>New to it, or playing with kids? Turn on Easy mode and each pad shows the name of its sound while it plays, like the now-playing card in a music app.</p>
-    <p>Decks get harder left to right: chords and rhythms are real ear training. Quotes works a little differently: one pad reads the start of a famous quote and its twin reads the ending, so you match each opening to the way it finishes. Every board picks 8 quotes from a bigger set.</p>
+    <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
     <p> Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
   <footer>© 2026 Mount M Technologies, LLC</footer>
@@ -97,12 +97,6 @@ function tone(freq,t,dur,type="sine",vol=.35){
   const o=ctx.createOscillator(),g=ctx.createGain();
   o.type=type;o.frequency.setValueAtTime(freq,t);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);
-  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
-}
-function sweep(f1,f2,t,dur,type="sine",vol=.6){
-  const o=ctx.createOscillator(),g=ctx.createGain();
-  o.type=type;o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+dur);
-  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
   o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
 }
 function noise(t,dur,hp=1000,vol=.4,bp){
@@ -123,13 +117,7 @@ function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}
   o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
 }
 const C4=261.63, st=n=>C4*Math.pow(2,n/12);
-const chord=(ints)=>t=>ints.forEach(n=>tone(st(n),t,1.1,"triangle",.16));
-const pattern=(hits)=>t=>hits.forEach(h=>tone(660,t+h,.09,"square",.12));
-const dots=hits=>{const s=Array(8).fill("·");hits.forEach(h=>s[Math.min(7,Math.round(h/.7*7))]="●");return s.join("")};
-const rh=(n,h)=>[n,pattern(h),dots(h),1];
-const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",
-  Kick:"🦶",Snare:"🥁","Closed hat":"ts","Open hat":"tsss",Clap:"👏","Low tom":"🪘",Cowbell:"🔔",Zap:"⚡"};
-const TXT=new Set(["ts","tsss"]);
+const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓"};
 
 // Real recordings for some sounds (public domain / CC0, see sounds/CREDITS.md).
 // Each clip is fetched once and decoded on first use; if it is missing or fails
@@ -230,26 +218,7 @@ const DECKS={
     ["Frog",withClip("Frog",t=>[0,.32].forEach(g=>{for(let p=0;p<5;p++)voice(t+g+p*.028,{f:[[0,170],[.02,140]],dur:.022,fq:700,q:3,vol:.6,atk:.003})}))],
     ["Rooster",withClip("Rooster",t=>{voice(t,{f:[[0,420],[.12,620],[.3,600]],dur:.32,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.02});voice(t+.36,{f:[[0,640],[.2,760],[.9,820],[1.2,560]],dur:1.25,ft:"bandpass",fq:1500,q:1.5,vol:.65,atk:.04})})]
   ],
-  drums:[
-    ["Kick",t=>sweep(150,40,t,.45)],
-    ["Snare",t=>{noise(t,.2,1500,.45);tone(190,t,.12,"triangle",.3)}],
-    ["Closed hat",t=>noise(t,.05,7000,.35)],
-    ["Open hat",t=>noise(t,.4,7000,.25)],
-    ["Clap",t=>[0,.012,.024,.04].forEach(d=>noise(t+d,.12,0,.3,1200))],
-    ["Low tom",t=>sweep(140,90,t,.4,"sine",.55)],
-    ["Cowbell",t=>{tone(540,t,.3,"square",.08);tone(800,t,.3,"square",.08)}],
-    ["Zap",t=>sweep(1800,120,t,.25,"sawtooth",.15)]
-  ],
   notes:[0,2,4,5,7,9,11,12].map((n,i)=>[["C","D","E","F","G","A","B","High C"][i],t=>tone(st(n),t,.8,"triangle",.32),"♪"+["C","D","E","F","G","A","B","C′"][i],1]),
-  chords:[
-    ["Major",chord([0,4,7]),"C",1],["Minor",chord([0,3,7]),"Cm",1],["Diminished",chord([0,3,6]),"C°",1],["Augmented",chord([0,4,8]),"C+",1],
-    ["Sus2",chord([0,2,7]),"Csus2",1],["Sus4",chord([0,5,7]),"Csus4",1],["Major 7",chord([0,4,7,11]),"Cmaj7",1],["Dominant 7",chord([0,4,7,10]),"C7",1]
-  ],
-  rhythm:[
-    rh("Four even",[0,.2,.4,.6]),rh("Gallop",[0,.1,.2,.4,.5,.6]),rh("Swing",[0,.27,.4,.67]),
-    rh("Triplet",[0,.13,.27,.4,.53,.67]),rh("Long-short",[0,.45,.6]),rh("Short-long",[0,.15,.6]),
-    rh("Offbeat",[.1,.3,.5,.7]),rh("Stutter",[0,.05,.1,.5])
-  ],
   quotes:[] // filled with 8 random quotes on each new board
 };
 
@@ -273,9 +242,10 @@ function showBest(){
 function build(){
   clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();
   $("bestBox").classList.remove("new");showBest();
+  const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
   $("moves").textContent=0;$("pairs").textContent="0/8";$("time").textContent="0:00";
   $("status").textContent="Tap any pad to hear it.";$("status").className="status";
-  if(deck==="quotes"){DECKS.quotes=pickQuotes();$("status").textContent="Match each quote's opening to its ending. Tap any pad to hear it."}
+  if(deck==="quotes")DECKS.quotes=pickQuotes();
   else if(canSpeak)speechSynthesis.cancel();
   cards=shuffle([...Array(8).keys(),...Array(8).keys()]);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes)
@@ -288,7 +258,13 @@ function build(){
     b.onclick=()=>tap(i,b);g.appendChild(b);
   });
 }
-const DECKNAME={animals:"Animals",drums:"Drums",notes:"Notes",chords:"Chords",rhythm:"Rhythms",quotes:"Quotes"};
+const DECKNAME={animals:"Animals",quotes:"Quotes",notes:"Notes"};
+// How each deck works, shown under the deck buttons
+const DECKHELP={
+  animals:"Real recordings of eight animals, from a cat's meow to a rooster's crow. Find the two pads that make the same call.",
+  quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks 8 quotes from a bigger set.",
+  notes:"Eight notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. This one is real ear training."
+};
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
   audio();entry[1](ctx.currentTime+.02,half[i]);
@@ -308,7 +284,7 @@ function tap(i,b){
   const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
   setTimeout(()=>{
     if(cards[a]===cards[c]){
-      const entry=DECKS[deck][cards[a]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3]||TXT.has(art);
+      const entry=DECKS[deck][cards[a]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3];
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
         const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});

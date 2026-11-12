@@ -13,3 +13,6 @@ const Best={
   // Short, stable key for a list of strings (for boards built from loose song links)
   hash(list){let h=5381;for(const ch of list.join(","))h=((h<<5)+h+ch.charCodeAt(0))|0;return (h>>>0).toString(36)}
 };
+
+// Clear bests left over from decks that were removed (Drums, Chords, Rhythms, Nov 2026).
+try{["drums","chords","rhythm"].forEach(d=>["",":easy"].forEach(e=>localStorage.removeItem("pairody-best:"+d+e)))}catch(e){}
