@@ -106,7 +106,7 @@ const $=id=>document.getElementById(id);
 const CLIP=4, PAIRS=8;
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
-let clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
+let board=0, clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
 let srcKey="", boardKey="";
 
 try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("easy").checked=localStorage.getItem("pairody-easy")==="1"; }catch(e){}
@@ -188,6 +188,7 @@ function showBest(){
   $("best").textContent=Best.fmt(b);
 }
 function deal(){
+  board++; // a move still resolving from the old board is dropped (see tap)
   clearInterval(timer);timer=null;stopClip();open=[];lock=false;moves=0;pairs=0;
   const hard=$("hard").checked;
   boardKey=modeKey();$("bestBox").classList.remove("new");showBest();
@@ -261,7 +262,9 @@ function tap(i){
   if(open.length<2){if(!easy())setStatus("Now find the other clip from that song.");return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open;
+  const thisBoard=board;
   setTimeout(()=>{
+    if(thisBoard!==board)return; // New board came first
     const pa=$("pad"+a),pc=$("pad"+c);
     if(cards[a].s===cards[c].s){
       const song=songs[cards[a].s],title=(meta[song.id]&&meta[song.id].title)||"Matched";

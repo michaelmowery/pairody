@@ -224,7 +224,7 @@ const DECKS={
 };
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
-let deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
+let board=0,deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
@@ -243,6 +243,7 @@ function showBest(){
 }
 function build(){
   if(demo)stopDemo(true);
+  board++; // a move still resolving from the old board is dropped (see tap)
   clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
@@ -285,7 +286,9 @@ function tap(i,b){
   if(open.length<2){if(!easy())$("status").textContent=demo?"Demo: now it looks for the twin.":"Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
+  const thisBoard=board;
   setTimeout(()=>{
+    if(thisBoard!==board)return; // New board or a deck change came first
     if(cards[a]===cards[c]){
       const entry=DECKS[deck][cards[a]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3];
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
