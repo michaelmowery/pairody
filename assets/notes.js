@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-15', title: 'More sounds in every deck', items: [
+      '<b>13 more real animals:</b> hen, goose, donkey, raven, bear, cow, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada. Animals and Animal Talk now pick from 25.',
+      'Bigger sets for every deck: about twice as many quotes, jokes, rhymes, opposites, capitals and tunes, numbers in Morse Code, and times tables up to 10.',
+      'Each new board deals fresh pairs, like a shuffled deck: you hear everything in a deck before anything comes back.',
+    ]},
     { date: '2026-11-15', title: 'Board sizes and release notes', items: [
       '<b>Pick your board size:</b> Small (6 pairs), Classic (8 pairs) or Big (12 pairs, with the Pairody logo in the middle). Best scores are kept for each size.',
       'The board now shrinks to fit your window on laptops and desktops, so you never have to scroll to reach the bottom row.',
