@@ -144,6 +144,20 @@ dialog.info .info-update-status:empty{display:none}
 .update-pill.leaving{opacity:0}
 @keyframes updatein{from{transform:translate(-50%,10px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.update-pill{animation:none}}
+/* Release notes (assets/notes.js): "What's new" in the info panel, the full list, and the update note */
+.info-news{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:10px 0 2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+dialog.info .info-news-latest{flex:1 1 180px;margin:0;font-size:.88rem}
+.info-news-latest b{color:var(--fg);font-weight:600}
+.info-news-latest span{white-space:nowrap}
+dialog.notes .note{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+dialog.notes .note:first-of-type{border-top:0;padding-top:0}
+dialog.notes .note-title{margin:0}
+dialog.notes .note-date{margin:0 0 4px;font-size:.8rem}
+dialog.welcome .welcome-news{text-align:left;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+dialog.welcome .welcome-news h3{margin:0 0 4px;font-size:.9rem}
+dialog.welcome .welcome-news ul{font-size:.88rem}
+dialog.welcome .welcome-news .welcome-notes{font-size:.85rem}
+
 /* Early preview welcome note (assets/welcome.js) and its preference in the info panel */
 dialog.welcome{max-width:min(360px,calc(100vw - 32px));text-align:center;padding:22px 22px 18px}
 dialog.welcome h2{padding:0;font-size:1.3rem}
@@ -151,7 +165,7 @@ dialog.welcome #welcomeBody{margin:0 0 16px;font-size:.95rem;line-height:1.5}
 dialog.welcome .welcome-update{margin:0 0 8px;color:var(--fg);font-weight:600}
 dialog.welcome .welcome-optout{margin:-6px 0 16px;font-size:.82rem}
 .welcome-i{font:italic 600 1em Georgia,"Times New Roman",serif;color:var(--fg)}
-.welcome-prefs{font:inherit;color:var(--led);background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.welcome-prefs,.welcome-notes{font:inherit;color:var(--led);background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .welcome-actions{margin:0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .welcome-demo{padding:9px 18px;font-size:1rem}
 .welcome-ok{min-width:132px;padding:9px 22px;font-size:1rem}

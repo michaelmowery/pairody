@@ -6,6 +6,10 @@
 <p class="info-tag">Preview</p>
 <h2 id="infoTitle">You're playing an early preview</h2>
 <p>Pairody is new and still taking shape. It's free to play while we build it, and things may change, move around, or occasionally break.</p>
+<div class="info-news" hidden>
+  <p class="info-news-latest"></p>
+  <button type="button" class="btn info-news-btn">What's new</button>
+</div>
 <h3>What's here now</h3>
 <ul>
   <li><b>Nine decks.</b> Animals uses real recordings, and Animal Talk matches each animal’s name to its call. Quotes, Jokes, Word Play and Brain Food read pairs aloud: an opening and its ending, a riddle and its answer, rhymes or opposites, countries and capitals or times tables. Melodies splits old tunes in two. Notes is ear training, and Morse Code matches letters to their beeps.</li>
@@ -54,7 +58,16 @@
     // Tap outside the panel to close it
     dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
     setupUpdates(dlg);btn.addEventListener("click",()=>{resetUpdateUi(dlg);setFeedbackLink(dlg)});
-    setFeedbackLink(dlg);
+    setFeedbackLink(dlg);setupNews(dlg);
+  }
+  // "What's new": the newest release note's title and date, and a button for the full list (assets/notes.js)
+  function setupNews(dlg){
+    const N=window.PairodyNotes,box=dlg.querySelector(".info-news");
+    if(!N||!N.list.length)return;
+    const n=N.list[0];
+    box.querySelector(".info-news-latest").innerHTML="<b>Latest:</b> "+n.title+" <span>· "+N.fmt(n.date)+"</span>";
+    box.querySelector(".info-news-btn").addEventListener("click",()=>N.open("info"));
+    box.hidden=false;
   }
   // "Send feedback": prefill the email with the version and page so bug reports say where they came from
   function setFeedbackLink(dlg){

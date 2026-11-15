@@ -29,6 +29,7 @@
 <p class="info-tag">Early preview</p>
 <h2 id="welcomeTitle">Welcome to Pairody</h2>
 <p id="welcomeUpdate" class="welcome-update" hidden></p>
+<div id="welcomeNews" class="welcome-news" hidden></div>
 <p id="welcomeBody">Pairody is in early preview. It's free while we build it, new decks land often, and now and then something may wobble. Thanks for playing! Tap <b class="welcome-i">i</b> any time to see what's here.</p>
 <p class="welcome-optout" hidden>Don't need this after every update? Turn it off in <button type="button" class="welcome-prefs">Preferences</button>.</p>
 <form method="dialog" class="welcome-actions"><button type="button" class="btn welcome-demo" hidden>Show demo</button><button class="btn primary welcome-ok">Got it</button></form>`;
@@ -74,12 +75,26 @@
       line.hidden = false;
       dlg.querySelector('.welcome-optout').hidden = false;
       dlg.setAttribute('aria-describedby', 'welcomeUpdate welcomeBody');
+      // What's new since this device last saw the release notes (assets/notes.js), in place of the
+      // generic preview blurb. A deploy with no new note just shows the blurb as before.
+      const N = window.PairodyNotes, fresh = N ? N.unseen() : [];
+      if (fresh.length) {
+        const items = fresh.flatMap((n) => n.items).slice(0, 5);
+        const news = dlg.querySelector('#welcomeNews');
+        news.innerHTML = `<h3>${fresh.length === 1 ? fresh[0].title : "What's new"}</h3>`
+          + `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`
+          + `<button type="button" class="welcome-notes">All release notes</button>`;
+        news.hidden = false;
+        dlg.querySelector('#welcomeBody').hidden = true;
+        dlg.setAttribute('aria-describedby', 'welcomeUpdate welcomeNews');
+        news.querySelector('.welcome-notes').addEventListener('click', () => { then = () => N.open('welcome'); dlg.close(); });
+      }
     }
     document.body.appendChild(dlg);
 
-    let then = null;
+    let then = null; // something to open once the note has closed (Preferences or release notes)
     // Got it, Escape, or a tap outside all close it, and closing is what marks it seen.
-    dlg.addEventListener('close', () => { remember(); dlg.remove(); if (then) then(); });
+    dlg.addEventListener('close', () => { remember(); window.PairodyNotes?.markSeen(); dlg.remove(); if (then) then(); });
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
     dlg.querySelector('.welcome-prefs').addEventListener('click', () => { then = openPrefs; dlg.close(); });
     // Show demo (main game only): closes the note and starts the Demo for the selected deck.

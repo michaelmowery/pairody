@@ -38,6 +38,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
 | `yt/load/playlist`, `yt/load/links` | Your music songs loaded (the playlist itself is not sent) |
 | `yt/win[/hard]` | Your music board cleared |
 | `info/open` | info panel opened |
+| `notes/open/info`, `notes/open/welcome` | release notes opened from the info panel's What's new, or from All release notes on the New version note (added 2026-11-15) |
 | `feedback` | Send feedback tapped |
 | `analytics/off` | usage counts switched off (the last count sent) |
 
