@@ -14,5 +14,9 @@ Each clip was trimmed to one call, mixed to mono, peak-normalized and encoded as
 | Duck | `animals/duck.mp3` | [Ducks snatching.ogg](https://commons.wikimedia.org/wiki/File:Ducks_snatching.ogg) | Bert76 | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | four quacks, 1.2 s |
 | Frog | `animals/frog.mp3` | [PigFrog EvergladesNP.ogg](https://commons.wikimedia.org/wiki/File:PigFrog_EvergladesNP.ogg) | NPS Natural Sounds & Night Skies Division | Public domain | two grunts, 0.6 s |
 | Rooster | `animals/rooster.mp3` | [Medium rooster crowing.ogg](https://commons.wikimedia.org/wiki/File:Medium_rooster_crowing.ogg) | alys | Public domain | one crow, 2.4 s |
+| Horse | `animals/horse.mp3` | [Wiehern.ogg](https://commons.wikimedia.org/wiki/File:Wiehern.ogg) | Hü | Public domain | one neigh, 1.9 s |
+| Elephant | `animals/elephant.mp3` | [Elephant voice - trumpeting.ogg](https://commons.wikimedia.org/wiki/File:Elephant_voice_-_trumpeting.ogg) | Wikimedia Commons contributor (see source page) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | one trumpet, 1.15 s |
+| Wolf | `animals/wolf.mp3` | [Wolf howls.ogg](https://commons.wikimedia.org/wiki/File:Wolf_howls.ogg) | uploaded by Duk | Public domain | 2.6 s of howling from 0.2 s, faded out |
+| Goat | `animals/goat.mp3` | [Herd of goats bleating.ogg](https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg) | stephan | Public domain | one bleat from 4.35 s, 0.8 s |
 
 Before adding a sound, check its source page: only CC0 or public-domain files go in this folder.
