@@ -107,7 +107,7 @@ const $=id=>document.getElementById(id);
 const CLIP=4, PAIRS=8;
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
-let board=0, clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
+let board=0, clipAt=0, clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
 let srcKey="", boardKey="";
 
 try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("difficult").checked=localStorage.getItem("pairody-yt-difficult")==="1"; }catch(e){}
@@ -236,17 +236,40 @@ function onState(e){
       meta[song.id]=Object.assign(meta[song.id]||{},{dur},vd&&vd.title?{title:vd.title,author:vd.author||""}:{});
       showNP(i);
       pending=null;player.seekTo(Math.floor(dur*song.frac[card.c]),true);player.unMute();
-      clipTimer=setTimeout(()=>stopClip(),CLIP*1000+600);
+      clipAt=Date.now()+600;clipTimer=setTimeout(()=>stopClip(),CLIP*1000+600);
     }
     return;
   }
   if(vd&&vd.video_id&&vd.title){meta[vd.video_id]=Object.assign(meta[vd.video_id]||{},{title:vd.title,author:vd.author||""});showNP(playingPad)}
-  if(armFor!==null&&!clipTimer){const i=armFor;armFor=null;clipTimer=setTimeout(()=>stopClip(),CLIP*1000)}
+  if(armFor!==null&&!clipTimer){const i=armFor;armFor=null;clipAt=Date.now();clipTimer=setTimeout(()=>stopClip(),CLIP*1000)}
 }
 function stopClip(keepPlaying){
-  clearTimeout(clipTimer);clipTimer=null;armFor=null;
+  clearTimeout(clipTimer);clipTimer=null;armFor=null;clipAt=0;fadeId++;
   if(playingPad!==null){const b=$("pad"+playingPad);b&&b.classList.remove("playing");playingPad=null}
   if(!keepPlaying&&player&&player.pauseVideo)player.pauseVideo();
+  // Pause first, then put the volume back, so the old clip never blips loud
+  if(fadeFrom!==null){const v=fadeFrom;fadeFrom=null;player&&player.setVolume&&player.setVolume(v)}
+}
+// On a match the clip fades out fast (about a quarter second) instead of playing to the end
+let fadeId=0,fadeFrom=null; // fadeFrom: the player's volume before the fade, put back after
+function fadeOutClip(){
+  if(!player||!player.setVolume||!player.getVolume){stopClip();return}
+  const id=++fadeId;fadeFrom=player.getVolume();let v=fadeFrom;const dv=Math.max(5,fadeFrom/4);
+  const step=()=>{if(id!==fadeId)return;v-=dv;if(v<=0){stopClip();return}player.setVolume(v);setTimeout(step,60)};
+  step();
+}
+// Short bright two-note chime for a match (the page has no other sound of its own)
+let chimeCtx=null;
+function matchChime(){
+  try{
+    chimeCtx=chimeCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(chimeCtx.state==="suspended")chimeCtx.resume();
+    const t=chimeCtx.currentTime+.01;
+    [[1046.5,0,.18],[1396.9,.08,.35]].forEach(([f,d,len])=>{
+      const o=chimeCtx.createOscillator(),g=chimeCtx.createGain();o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.15,t+d+.01);g.gain.exponentialRampToValueAtTime(.001,t+d+len);
+      o.connect(g);g.connect(chimeCtx.destination);o.start(t+d);o.stop(t+d+len+.05)});
+  }catch(e){}
 }
 function onErr(e){
   const vid=player.getVideoData&&player.getVideoData().video_id;
@@ -268,11 +291,12 @@ function tap(i){
   if(open.length<2){if(!easy())setStatus("Now find the other clip from that song.");return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open;
-  const thisBoard=board;
-  setTimeout(()=>{
+  const thisBoard=board,same=cards[a].s===cards[c].s,t0=Date.now();
+  const resolve=()=>{
     if(thisBoard!==board)return; // New board came first
     const pa=$("pad"+a),pc=$("pad"+c);
-    if(cards[a].s===cards[c].s){
+    if(same){
+      fadeOutClip();matchChime();
       const song=songs[cards[a].s],title=(meta[song.id]&&meta[song.id].title)||"Matched";
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");
         p.innerHTML="";const img=new Image();img.alt="";img.src="https://i.ytimg.com/vi/"+song.id+"/mqdefault.jpg";p.appendChild(img);
@@ -296,7 +320,16 @@ function tap(i){
       setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
     }
     open=[];lock=false;
-  },CLIP*1000+300);
+  };
+  // A miss plays the whole clip so you can learn it. A match only needs a moment of the
+  // second clip: once it has played about a second, it fades out and the pair turns over.
+  if(!same){setTimeout(resolve,CLIP*1000+300);return}
+  const MATCH_HEAR=1100;
+  const check=()=>{
+    if(thisBoard!==board)return;
+    if((clipAt&&Date.now()-clipAt>=MATCH_HEAR)||Date.now()-t0>=CLIP*1000+300)resolve();else setTimeout(check,100);
+  };
+  setTimeout(check,MATCH_HEAR);
 }
 </script>
 <script>

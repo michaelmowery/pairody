@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-15', title: 'Matches you can hear', items: [
+      'When you find a pair, the sound now stops right away and a little chime plays, so you know it was a match.',
+      'Tapping a new pad cuts off the one before it, so sounds never pile up.',
+      '<b>Your music:</b> a matching clip now fades out after about a second instead of playing to the end.',
+    ]},
     { date: '2026-11-15', title: 'Board sizes and release notes', items: [
       '<b>Pick your board size:</b> Small (6 pairs), Classic (8 pairs) or Big (12 pairs, with the Pairody logo in the middle). Best scores are kept for each size.',
       'The board now shrinks to fit your window on laptops and desktops, so you never have to scroll to reach the bottom row.',
