@@ -69,12 +69,19 @@
       <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button><button class="btn" id="reset">New board</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
-    <label class="toggle"><input type="checkbox" id="difficult"><span>Difficult mode: sounds only, no names</span></label>
+    <div class="opts">
+      <label class="toggle"><input type="checkbox" id="difficult"><span>Difficult mode: sounds only, no names</span></label>
+      <div class="sizes" role="group" aria-label="Board size">
+        <button data-size="small" aria-pressed="false" title="12 pads, 6 pairs">Small <small>3×4</small></button>
+        <button data-size="classic" aria-pressed="true" title="16 pads, 8 pairs">Classic <small>4×4</small></button>
+        <button data-size="big" aria-pressed="false" title="25 pads: 12 pairs and a free center tile">Big <small>5×5</small></button>
+      </div>
+    </div>
     <div class="readout" aria-live="polite">
       <div><span>Moves</span><b id="moves">0</b></div>
       <div><span>Pairs</span><b id="pairs">0/8</b></div>
       <div><span>Time</span><b id="time">0:00</b></div>
-      <div class="best" id="bestBox" title="Your best on this deck: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
+      <div class="best" id="bestBox" title="Your best on this deck and board size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
     <div class="grid" id="grid"></div>
     <p class="status" id="status">Tap any pad to hear it.</p>
@@ -82,9 +89,9 @@
 
   <div class="notes">
     <h2>How to play</h2>
-    <p>16 pads hold 8 pairs of sounds. Flip one, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes 8 moves.</p>
+    <p>Pick a board: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes one move per pair.</p>
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
-    <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Difficult mode keeps its own bests, so a board played sounds-only is never compared with one where you could see the names.</p>
+    <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Each board size keeps its own bests, and so does Difficult mode, so a board played sounds-only is never compared with one where you could see the names.</p>
     <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of whichever deck you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
     <p> Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
@@ -145,14 +152,14 @@ function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}
   o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
 }
 const C4=261.63, st=n=>C4*Math.pow(2,n/12);
-const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓"};
+const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",Horse:"🐴",Elephant:"🐘",Wolf:"🐺",Goat:"🐐"};
 
 // Real recordings for some sounds (public domain / CC0, see sounds/CREDITS.md).
 // Each clip is fetched once and decoded on first use; if it is missing or fails
 // to load, the pad plays the synth version below instead. If it is just slow (over
 // 2.5s on the first tap), the synth fills in for the rest of that board only, and the
 // recording takes over from the next board.
-const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster"};
+const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat"};
 const clipData={},clipBuf={};
 function loadClips(){
   for(const [name,file] of Object.entries(CLIPS)){
@@ -239,11 +246,11 @@ function say(text){
 // different sounds (an opening and its ending, a word and its rhyme).
 // Picks n items from a pool, keeping only the first item for each key, so a board
 // never has two pairs that could be mixed up.
-function pickUnique(pool,key,n=8){const seen=new Set();return shuffle(pool.slice()).filter(x=>{const k=key(x);if(seen.has(k))return false;seen.add(k);return true}).slice(0,n)}
+function pickUnique(pool,key,n=NP){const seen=new Set();return shuffle(pool.slice()).filter(x=>{const k=key(x);if(seen.has(k))return false;seen.add(k);return true}).slice(0,n)}
 // A pair that is two spoken lines: one pad says a, its twin says b
 const spoken=(name,a,b,art,txt,msg)=>[name,(t,half)=>say(half?b:a),art,txt,msg];
 const quoteEntry=([who,a,b])=>spoken(who,a,b,"❝",0,"“"+a+" "+b+"” ("+who+")");
-// 8 quotes per board, never two by the same person (their pads would look alike)
+// One quote per pair, never two by the same person (their pads would look alike)
 function pickQuotes(){return pickUnique(QUOTES,q=>q[0]).map(quoteEntry)}
 
 // Jokes & Riddles: one pad asks, its twin answers. Old schoolyard jokes and riddles.
@@ -338,8 +345,8 @@ const pickMorse=()=>pickUnique(Object.keys(MORSE),l=>l).map(l=>{
   return[l+"  "+morseArt(MORSE[l]),(t,half)=>half?playSeq(seq,t,{beep:true,vol:.28}):say("The letter "+l),"",1,"The letter "+l+" is "+morseArt(MORSE[l])];
 });
 
-const DECKS={
-  animals:[
+// Every animal has a recording and a synth stand-in. Each board picks as many as it has pairs.
+const ANIMALS=[
     ["Cat",withClip("Cat",t=>voice(t,{f:[[0,480],[.18,820],[.65,430]],dur:.7,ft:"bandpass",fq:1300,q:2.5,vol:.7,atk:.08}))],
     ["Dog",withClip("Dog",t=>[0,.28].forEach(d=>{voice(t+d,{f:[[0,320],[.04,560],[.16,260]],dur:.17,ft:"bandpass",fq:900,q:1.2,vol:.8,atk:.005});noise(t+d,.1,0,.25,800)}))],
     ["Sheep",withClip("Sheep",t=>voice(t,{f:[[0,330],[.15,370],[.9,320]],dur:1,ft:"bandpass",fq:900,q:2,vol:.7,atk:.06}))],
@@ -347,15 +354,30 @@ const DECKS={
     ["Owl",withClip("Owl",t=>[[0,.4],[.55,.18],[.78,.35]].forEach(([d,l])=>voice(t+d,{type:"sine",f:[[0,390],[l,340]],dur:l,ft:"lowpass",fq:900,vol:.45,atk:.06})))],
     ["Duck",withClip("Duck",t=>[0,.2,.4].forEach((d,i)=>voice(t+d,{type:"square",f:[[0,250-i*15],[.13,190]],dur:.14,ft:"bandpass",fq:1100,q:5,vol:.6,atk:.005})))],
     ["Frog",withClip("Frog",t=>[0,.32].forEach(g=>{for(let p=0;p<5;p++)voice(t+g+p*.028,{f:[[0,170],[.02,140]],dur:.022,fq:700,q:3,vol:.6,atk:.003})}))],
-    ["Rooster",withClip("Rooster",t=>{voice(t,{f:[[0,420],[.12,620],[.3,600]],dur:.32,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.02});voice(t+.36,{f:[[0,640],[.2,760],[.9,820],[1.2,560]],dur:1.25,ft:"bandpass",fq:1500,q:1.5,vol:.65,atk:.04})})]
-  ],
-  notes:[0,2,4,5,7,9,11,12].map((n,i)=>[["C","D","E","F","G","A","B","High C"][i],t=>tone(st(n),t,.8,"triangle",.32),"♪"+["C","D","E","F","G","A","B","C′"][i],1])
-};
+    ["Rooster",withClip("Rooster",t=>{voice(t,{f:[[0,420],[.12,620],[.3,600]],dur:.32,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.02});voice(t+.36,{f:[[0,640],[.2,760],[.9,820],[1.2,560]],dur:1.25,ft:"bandpass",fq:1500,q:1.5,vol:.65,atk:.04})})],
+  ["Horse",withClip("Horse",t=>voice(t,{f:[[0,700],[.15,1100],[.5,900],[1.1,600]],dur:1.2,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.03}))],
+  ["Elephant",withClip("Elephant",t=>voice(t,{type:"sawtooth",f:[[0,500],[.12,900],[.9,820]],dur:1,ft:"bandpass",fq:1100,q:2,vol:.65,atk:.05}))],
+  ["Wolf",withClip("Wolf",t=>voice(t,{type:"sine",f:[[0,380],[.4,620],[1.4,600],[1.9,420]],dur:2,ft:"lowpass",fq:1400,vol:.45,atk:.2}))],
+  ["Goat",withClip("Goat",t=>voice(t,{f:[[0,520],[.1,560],[.6,480]],dur:.65,ft:"bandpass",fq:1100,q:2,vol:.65,atk:.03}))]
+];
+const NOTENAME=["C","C♯","D","E♭","E","F","F♯","G","A♭","A","B♭","B","High C"];
+const noteEntry=n=>[NOTENAME[n],t=>tone(st(n),t,.8,"triangle",.32),"♪"+NOTENAME[n].replace("High C","C′"),1];
+const pickSome=a=>shuffle(a.slice()).slice(0,NP);
+const pickAnimals=()=>pickSome(ANIMALS);
 // Animal Talk: one pad says the animal's name, its twin plays its call
-DECKS.talk=DECKS.animals.map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
-// Decks that pick a fresh set of 8 pairs on every new board
-const DECKGEN={quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,morse:pickMorse};
+const pickTalk=()=>pickSome(ANIMALS).map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
+// Notes: the C major scale (Small picks 6 of its 8 notes); Big uses all 12 notes from C to B, sharps and flats too
+const pickNotes=()=>NP>8?[0,1,2,3,4,5,6,7,8,9,10,11].map(noteEntry):pickSome([0,2,4,5,7,9,11,12].map(noteEntry));
+const DECKS={};
+// Every deck picks a fresh set of pairs on every new board, as many as the board size needs
+const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,morse:pickMorse};
 const BOARDMODE={wordplay:["Rhymes","Opposites"],brain:["Capitals","Times tables"]};
+// Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
+const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
+let size="classic";try{const s=localStorage.getItem("pairody-size");if(SIZES[s])size=s}catch(e){}
+let NP=SIZES[size].pairs; // pairs on the current board
+const sizeName=()=>size==="classic"?"":" ("+SIZES[size].name+")";
+const sizeTag=()=>size==="classic"?"":"/"+size; // analytics suffix; Classic boards keep their old event names
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let board=0,deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
@@ -365,7 +387,8 @@ function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
 
 // Best scores: one per deck, with Difficult (sounds-only) boards kept separately.
 // Keys predate Difficult mode: "<deck>:easy" = names shown (the default), "<deck>" = sounds only.
-const bestKey=d=>d+(easyUsed?":easy":"");
+// Small and Big boards add "@small" / "@big" after the deck ("animals@big:easy"); Classic keeps the old keys.
+const bestKey=d=>d+SIZES[size].key+(easyUsed?":easy":"");
 function showBest(){
   $("bestLbl").textContent=easyUsed?"Best":"Difficult best";
   $("best").textContent=Best.fmt(Best.get(bestKey(deck)));
@@ -379,37 +402,51 @@ function build(){
   if(demo)stopDemo(true);
   board++; // a move still resolving from the old board is dropped (see tap)
   clipLate={};
-  clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();
+  clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();NP=SIZES[size].pairs;
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
-  $("moves").textContent=0;$("pairs").textContent="0/8";$("time").textContent="0:00";
+  $("moves").textContent=0;$("pairs").textContent="0/"+NP;$("time").textContent="0:00";
   $("status").textContent="Tap any pad to hear it.";$("status").className="status";
   if(canSpeak)speechSynthesis.cancel();
   if(ctx)stopSeq();
   if(BOARDMODE[deck]){boardMode[deck]^=1;$("status").textContent+=" This board: "+BOARDMODE[deck][boardMode[deck]]+"."}
   if(DECKGEN[deck])DECKS[deck]=DECKGEN[deck]();
-  cards=shuffle([...Array(8).keys(),...Array(8).keys()]);
+  cards=shuffle([...Array(NP).keys(),...Array(NP).keys()]);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes)
   const seen=new Set();half=cards.map(id=>seen.has(id)?1:(seen.add(id),0));
-  const g=$("grid");g.innerHTML="";
+  const g=$("grid"),S=SIZES[size];g.innerHTML="";g.dataset.size=size;
+  g.style.setProperty("--cols",S.cols);g.style.setProperty("--rows",S.rows);
   cards.forEach((id,i)=>{
+    if(i===S.free){const f=document.createElement("div");f.className="freepad";f.setAttribute("aria-hidden","true");f.innerHTML='<img src="assets/mark.svg" alt="">';g.appendChild(f)}
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
     b.setAttribute("aria-label","Pad "+(i+1)+", hidden sound");
     b.innerHTML='<span class="dot"></span><span class="rings"><i></i><i></i></span><span class="lbl"></span><span class="np" aria-hidden="true"><b></b><small></small></span>';
     b.onclick=()=>{if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";return}tap(i,b)};g.appendChild(b);
   });
+  fitGrid();
 }
+// On wide screens the board shrinks to fit the window's height, so the whole board and the
+// status line under it are on screen without scrolling. Phones scroll as before.
+function fitGrid(){
+  const g=$("grid"),S=SIZES[size];g.style.maxWidth="";
+  if(innerWidth<700)return;
+  const top=g.getBoundingClientRect().top+scrollY,gap=10;
+  const h=Math.max(300,innerHeight-top-($("status").offsetHeight+60));
+  const w=(h-gap*(S.rows-1))/S.rows*S.cols+gap*(S.cols-1);
+  if(w<g.parentElement.clientWidth)g.style.maxWidth=Math.floor(w)+"px";
+}
+addEventListener("resize",()=>fitGrid());
 const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Brain Food",melodies:"Melodies",notes:"Notes",morse:"Morse Code"};
 // How each deck works, shown under the deck buttons
 const DECKHELP={
-  animals:"Real recordings of eight animals, from a cat's meow to a rooster's crow. Find the two pads that make the same call.",
+  animals:"Real recordings of twelve animals, from a cat's meow to an elephant's trumpet. Find the two pads that make the same call. Each board picks its animals from the twelve.",
   talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
-  quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks 8 quotes from a bigger set.",
-  jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every board picks 8 from a bigger set.",
+  quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks its quotes from a bigger set.",
+  jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every board picks its jokes from a bigger set.",
   wordplay:"Each board is either Rhymes (cat goes with hat) or Opposites (hot goes with cold), and the next board switches. Match each word to its partner.",
   brain:"Each board is either Capitals (France goes with Paris) or Times tables (seven times eight goes with fifty-six), and the next board switches.",
   melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song.",
-  notes:"Eight notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. This one is real ear training.",
+  notes:"Notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. A Big board uses all twelve notes from C to B, sharps and flats too. This one is real ear training.",
   morse:"One pad says a letter and its twin beeps that letter in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on."
 };
 function playPad(i,b){
@@ -424,7 +461,7 @@ function tap(i,b){
   if(lock||b.classList.contains("matched"))return;
   if(open.length===1&&open[0]===i){playPad(i,b);return}
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500);
-    if(!demo)track("play/"+deck+(easy()?"":"/difficult"),"Board started: "+DECKNAME[deck]+(easy()?"":" (Difficult)"))}
+    if(!demo)track("play/"+deck+sizeTag()+(easy()?"":"/difficult"),"Board started: "+DECKNAME[deck]+sizeName()+(easy()?"":" (Difficult)"))}
   playPad(i,b);b.classList.add("open");open.push(i);
   if(open.length<2){if(!easy())$("status").textContent=demo?"Demo: now it looks for the twin.":"Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
@@ -437,25 +474,25 @@ function tap(i,b){
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
         const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
-      pairs++;$("pairs").textContent=pairs+"/8";
+      pairs++;$("pairs").textContent=pairs+"/"+NP;
       $("status").textContent=(demo?"Demo: ":"")+"Match: "+(entry[4]||name)+".";
-      if(pairs===8&&demo){
+      if(pairs===NP&&demo){
         // Demo boards never count toward best scores
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000);$("time").textContent=fmt(secs);
         track("demo/done/"+deck,"Demo finished: "+DECKNAME[deck]);
         $("status").textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New board to play.";
         $("status").className="status win";endDemo();
-      }else if(pairs===8){
+      }else if(pairs===NP){
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
         $("time").textContent=fmt(secs);
-        track("win/"+deck+(easyUsed?"":"/difficult"),"Board cleared: "+DECKNAME[deck]+(easyUsed?"":" (Difficult)"));
-        if(moves===8)track("perfect/"+deck,"Perfect board: "+DECKNAME[deck]);
+        track("win/"+deck+sizeTag()+(easyUsed?"":"/difficult"),"Board cleared: "+DECKNAME[deck]+sizeName()+(easyUsed?"":" (Difficult)"));
+        if(moves===NP)track("perfect/"+deck+sizeTag(),"Perfect board: "+DECKNAME[deck]+sizeName());
         let msg="Board cleared in "+moves+" moves, "+fmt(secs)+". ";
-        if(isNew&&prev)msg="New best for "+DECKNAME[deck]+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
-        else if(isNew)msg="First board on "+DECKNAME[deck]+(easyUsed?"":" in Difficult mode")+": "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
-        msg+=moves===8?"A perfect board!":"Perfect is 8.";
+        if(isNew&&prev)msg="New best for "+DECKNAME[deck]+sizeName()+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
+        else if(isNew)msg="First "+(size==="classic"?"":SIZES[size].name+" ")+"board on "+DECKNAME[deck]+(easyUsed?"":" in Difficult mode")+": "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
+        msg+=moves===NP?"A perfect board!":"Perfect is "+NP+".";
         $("status").textContent=msg;$("status").className="status win";
         showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
       }
@@ -477,12 +514,21 @@ function easy(){return !$("difficult").checked}
 function applyEasy(){
   // Seeing names at any point makes this board count as a regular (not Difficult) one
   if(easy()&&!easyUsed&&$("bestBox")){easyUsed=true;showBest()}
-  else if(!easy()&&easyUsed&&((!timer&&open.length===0)||pairs===8)){easyUsed=false;showBest()}
+  else if(!easy()&&easyUsed&&((!timer&&open.length===0)||pairs===NP)){easyUsed=false;showBest()}
   document.body.classList.toggle("easy",easy());try{localStorage.setItem("pairody-difficult",easy()?"0":"1")}catch(e){}}
 // New key, so everyone starts with names on. The old "pairody-easy" was written on every load, so it doesn't show a real choice.
 try{$("difficult").checked=localStorage.getItem("pairody-difficult")==="1"}catch(e){}
 $("difficult").onchange=()=>{applyEasy();track(easy()?"difficult/off":"difficult/on",easy()?"Difficult mode off":"Difficult mode on")};applyEasy();
 $("reset").onclick=build;
+// Board size: a new size starts a new board, like picking a deck
+function showSize(){document.querySelectorAll(".sizes button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.size===size))}
+document.querySelectorAll(".sizes button").forEach(btn=>btn.onclick=()=>{
+  if(btn.dataset.size===size&&!demo)return;
+  size=btn.dataset.size;try{localStorage.setItem("pairody-size",size)}catch(e){}
+  track("size/"+size,"Board size picked: "+SIZES[size].name);
+  showSize();build();
+});
+showSize();
 
 // Demo: plays a board of the current deck by itself. It flips unknown pads, remembers what
 // each one sounded like, and flips a pair as soon as it knows where both are.
@@ -518,7 +564,7 @@ function demoMove(){
   }];
 }
 function demoStep(){
-  if(pairs===8)return;
+  if(pairs===NP)return;
   const [a,b]=demoMove();
   demoFlip(a);
   demoWait(DEMO_GAP,()=>{demoFlip(typeof b==="function"?b():b);demoWait(DEMO_NEXT,demoStep)});

@@ -44,7 +44,7 @@ button:focus-visible,a:focus-visible,textarea:focus-visible,input:focus-visible{
 .readout div{display:grid}
 .readout span{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .readout b{font-size:1.25rem;font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:10px;width:100%;justify-self:center}
 .pad{aspect-ratio:1;border:0;border-radius:14px;cursor:pointer;position:relative;overflow:hidden;padding:0;
   background:linear-gradient(var(--pad-top),var(--pad));box-shadow:0 3px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
   display:grid;place-items:center;color:#FFF4E6;font-family:var(--display);transition:transform .08s, box-shadow .15s}
@@ -184,3 +184,20 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
 .easy .pad.miss .np{animation:npout .45s steps(1,end) forwards}
 @keyframes npout{0%{visibility:visible}68%,100%{visibility:hidden}}
 @media (prefers-reduced-motion:reduce){.pad.open,.pad.miss,.pad.matched,.pad.open .dot,.pad.miss .dot,.pad.matched > *,.easy .pad.miss .np,.grid .pad.matched .lbl,.grid .pad.matched > img{animation:none}}
+/* Board sizes (Small 4 by 3, Classic 4 by 4, Big 5 by 5 with a free center tile) */
+.opts{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.sizes{display:flex;gap:6px}
+.sizes button{font-family:var(--display);font-weight:600;font-size:.85rem;background:transparent;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
+.sizes button small{font-weight:500;opacity:.75}
+.sizes button[aria-pressed="true"]{color:var(--fg);border-color:var(--led);box-shadow:inset 0 0 0 1px var(--led)}
+.freepad{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line)}
+.freepad img{width:62%;height:auto;opacity:.9}
+.grid[data-size="big"] .pad .dot{width:6px;height:6px;top:7px;right:7px}
+@media (max-width:440px){
+  .grid[data-size="big"]{gap:6px}
+  .grid[data-size="big"] .pad .lbl{font-size:.56rem;padding:2px;letter-spacing:-.01em}
+  .grid[data-size="big"] .pad .np{padding:10px 4px 3px}
+  .grid[data-size="big"] .pad .np b{font-size:.6rem}
+  .grid[data-size="big"] .pad .np small{display:none}
+}
