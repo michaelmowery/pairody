@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-15', title: 'Matches you can hear', items: [
+      'When you find a pair, the sound now stops right away and a little chime plays, so you know it was a match.',
+      'Tapping a new pad cuts off the one before it, so sounds never pile up.',
+      '<b>Your music:</b> a matching clip now fades out after about a second instead of playing to the end.',
+    ]},
     { date: '2026-11-15', title: 'More sounds in every deck', items: [
       'Bigger sets for every deck: about twice as many quotes, jokes, rhymes, opposites, capitals and tunes, numbers in Morse Code, and times tables up to 10.',
       'Each new board deals fresh pairs, like a shuffled deck: you hear everything in a deck before anything comes back.',

@@ -108,7 +108,22 @@ function audio(){
   for(const name in CLIPS)decodeClip(name);
   return ctx;
 }
-function tone(freq,t,dur,type="sine",vol=.35,out=master){
+// Every pad's sound plays through its own bus (padOut), so a new tap or a match can cut
+// it off at once. The match chime plays straight to master so it is never cut.
+let padOut=null;
+function bus(){return padOut||master}
+function newPadBus(){cutPad(.03);padOut=ctx.createGain();padOut.connect(master);return padOut}
+// Fade the current pad sound out over about `fade` seconds, and stop any reading aloud
+function cutPad(fade=.06){
+  if(padOut){const g=padOut;g.gain.setTargetAtTime(0,ctx.currentTime,fade/3);setTimeout(()=>g.disconnect(),fade*1000+300);padOut=null}
+  seqOut=null;seqEnd=0;
+}
+// Short bright two-note chime for a match
+function matchChime(){
+  if(!ctx)return;const t=ctx.currentTime+.01;
+  tone(st(19),t,.18,"sine",.22,master);tone(st(24),t+.08,.35,"sine",.22,master);
+}
+function tone(freq,t,dur,type="sine",vol=.35,out=bus()){
   const o=ctx.createOscillator(),g=ctx.createGain();
   o.type=type;o.frequency.setValueAtTime(freq,t);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);
@@ -122,7 +137,7 @@ function stopSeq(){
   if(seqOut){const g=seqOut;g.gain.setTargetAtTime(0,ctx.currentTime,.02);setTimeout(()=>g.disconnect(),250);seqOut=null}
   seqEnd=0;
 }
-function seqBus(){stopSeq();seqOut=ctx.createGain();seqOut.connect(master);return seqOut}
+function seqBus(){stopSeq();seqOut=ctx.createGain();seqOut.connect(bus());return seqOut}
 // notes: [[freq or null for a rest, seconds], ...]
 function playSeq(notes,t,{type="triangle",vol=.32,beep=false}={}){
   const out=seqBus();let x=t;
@@ -141,7 +156,7 @@ function noise(t,dur,hp=1000,vol=.4,bp){
   const s=ctx.createBufferSource();s.buffer=b;
   const f=ctx.createBiquadFilter();f.type=bp?"bandpass":"highpass";f.frequency.value=bp||hp;
   const g=ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
-  s.connect(f);f.connect(g);g.connect(master);s.start(t);
+  s.connect(f);f.connect(g);g.connect(bus());s.start(t);
 }
 function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}){
   const o=ctx.createOscillator(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
@@ -150,7 +165,7 @@ function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}
   fl.type=ft;fl.frequency.value=fq;fl.Q.value=q;
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+atk);
   g.gain.setValueAtTime(vol,t+Math.max(atk,dur*.7));g.gain.linearRampToValueAtTime(0,t+dur);
-  o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+  o.connect(fl);fl.connect(g);g.connect(bus());o.start(t);o.stop(t+dur+.05);
 }
 const C4=261.63, st=n=>C4*Math.pow(2,n/12);
 const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",Horse:"🐴",Elephant:"🐘",Wolf:"🐺",Goat:"🐐"};
@@ -181,14 +196,15 @@ function withClip(name,synth){
     const b=!clipLate[name]&&clipBuf[name];
     if(!b){synth(t);return}
     const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;
-    s.buffer=b;s.connect(g);g.connect(master);s.start(t);
+    s.buffer=b;s.connect(g);g.connect(bus());s.start(t);
   };
   // If the clip is still loading on the very first tap, wait for it (briefly)
   // so a pad never plays the synth once and the recording the next time on one board.
   return t=>{
     if(clipBuf[name]!==undefined||!clipReady[name]||clipLate[name]){play(t);return}
-    let done=false;
-    const go=()=>{if(!done){done=true;play(ctx.currentTime+.01)}};
+    let done=false;const mine=padOut;
+    // Skip it if the pad was cut (another tap or a match) while the clip loaded
+    const go=()=>{if(!done){done=true;if(padOut===mine)play(ctx.currentTime+.01)}};
     setTimeout(()=>{if(!done)clipLate[name]=true;go()},2500);
     clipReady[name].then(go);
   };
@@ -497,7 +513,7 @@ function build(){
   $("moves").textContent=0;$("pairs").textContent="0/"+NP;$("time").textContent="0:00";
   $("status").textContent="Tap any pad to hear it.";$("status").className="status";
   if(canSpeak)speechSynthesis.cancel();
-  if(ctx)stopSeq();
+  if(ctx){stopSeq();cutPad()}
   if(BOARDMODE[deck]){boardMode[deck]^=1;$("status").textContent+=" This board: "+BOARDMODE[deck][boardMode[deck]]+"."}
   if(DECKGEN[deck])DECKS[deck]=DECKGEN[deck]();
   cards=shuffle([...Array(NP).keys(),...Array(NP).keys()]);
@@ -540,7 +556,7 @@ const DECKHELP={
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
-  audio();stopSeq();entry[1](ctx.currentTime+.02,half[i]);
+  audio();stopSeq();newPadBus();entry[1](ctx.currentTime+.02,half[i]);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=entry[0];np.querySelector("small").textContent=DECKNAME[deck]}
   if(easy())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+entry[0]+".";
@@ -563,6 +579,9 @@ function tap(i,b){
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
         const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
+      // Cut the sound right away so the match is obvious, then chime
+      cutPad();if(canSpeak)speechSynthesis.cancel();matchChime();
+      [pa,pc].forEach(p=>p.classList.remove("playing"));
       pairs++;$("pairs").textContent=pairs+"/"+NP;
       $("status").textContent=(demo?"Demo: ":"")+"Match: "+(entry[4]||name)+".";
       if(pairs===NP&&demo){
