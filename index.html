@@ -112,7 +112,7 @@ function audio(){
 // it off at once. The match chime plays straight to master so it is never cut.
 let padOut=null;
 function bus(){return padOut||master}
-function newPadBus(){cutPad(.03);padOut=ctx.createGain();padOut.connect(master);return padOut}
+function newPadBus(){cutPad(.02);if(canSpeak)speechSynthesis.cancel();padOut=ctx.createGain();padOut.connect(master);return padOut}
 // Fade the current pad sound out over about `fade` seconds, and stop any reading aloud
 function cutPad(fade=.06){
   if(padOut){const g=padOut;g.gain.setTargetAtTime(0,ctx.currentTime,fade/3);setTimeout(()=>g.disconnect(),fade*1000+300);padOut=null}
@@ -485,7 +485,7 @@ const sizeName=()=>size==="classic"?"":" ("+SIZES[size].name+")";
 const sizeTag=()=>size==="classic"?"":"/"+size; // analytics suffix; Classic boards keep their old event names
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
-let board=0,deck="animals",cards=[],half=[],open=[],lock=false,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
+let board=0,deck="animals",cards=[],half=[],open=[],lock=false,settle=null,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
@@ -507,7 +507,7 @@ function build(){
   if(demo)stopDemo(true);
   board++; // a move still resolving from the old board is dropped (see tap)
   clipLate={};
-  clearInterval(timer);timer=null;open=[];lock=false;moves=0;pairs=0;easyUsed=easy();NP=SIZES[size].pairs;
+  clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;easyUsed=easy();NP=SIZES[size].pairs;
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
   $("moves").textContent=0;$("pairs").textContent="0/"+NP;$("time").textContent="0:00";
@@ -563,7 +563,10 @@ function playPad(i,b){
   b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),Math.max(900,(seqEnd-ctx.currentTime)*1000));
 }
 function tap(i,b){
-  if(lock||b.classList.contains("matched"))return;
+  if(b.classList.contains("matched"))return;
+  // Tapping a new pad while a pair is still showing settles that pair at once, so the
+  // new pad plays right away instead of the tap being ignored
+  if(lock){if(!settle||open.includes(i))return;settle(true);if(b.classList.contains("matched"))return}
   if(open.length===1&&open[0]===i){playPad(i,b);return}
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500);
     if(!demo)track("play/"+deck+sizeTag()+(easy()?"":"/difficult"),"Board started: "+DECKNAME[deck]+sizeName()+(easy()?"":" (Difficult)"))}
@@ -571,9 +574,10 @@ function tap(i,b){
   if(open.length<2){if(!easy())$("status").textContent=demo?"Demo: now it looks for the twin.":"Now find its twin.";return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open, pa=$("pad"+a), pc=$("pad"+c);
-  const thisBoard=board;
-  setTimeout(()=>{
-    if(thisBoard!==board)return; // New board or a deck change came first
+  const thisBoard=board;let done=false;
+  settle=fast=>{
+    if(done||thisBoard!==board)return; // already settled, or New board / a deck change came first
+    done=true;settle=null;
     if(cards[a]===cards[c]){
       const entry=DECKS[deck][cards[a]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3];
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
@@ -607,10 +611,12 @@ function tap(i,b){
     }else{
       [pa,pc].forEach(p=>p.classList.add("miss"));
       $("status").textContent=demo?"Demo: different sounds. It remembers where they were.":"Different sounds. Remember where they were.";
-      setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
+      const back=()=>[pa,pc].forEach(p=>p.classList.remove("miss","open"));
+      if(fast)back();else setTimeout(back,450);
     }
     open=[];lock=false;
-  },950);
+  };
+  setTimeout(()=>settle&&settle(),950);
 }
 document.querySelectorAll(".decks button").forEach(btn=>btn.onclick=()=>{
   deck=btn.dataset.deck;track("deck/"+deck,"Deck picked: "+DECKNAME[deck]);

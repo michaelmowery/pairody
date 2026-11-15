@@ -107,7 +107,7 @@ const $=id=>document.getElementById(id);
 const CLIP=4, PAIRS=8;
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let player, ready=false, pool=[], songs=[], cards=[], open=[], lock=false, moves=0, pairs=0, start=0, timer=null;
-let board=0, clipAt=0, clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
+let board=0, settle=null, clipAt=0, clipTimer=null, pending=null, playingPad=null, bad=new Set(), meta={};
 let srcKey="", boardKey="";
 
 try{ $("src").value=localStorage.getItem("pairody-src")||""; $("hard").checked=localStorage.getItem("pairody-hard")==="1"; $("difficult").checked=localStorage.getItem("pairody-yt-difficult")==="1"; }catch(e){}
@@ -195,7 +195,7 @@ function showBest(){
 }
 function deal(){
   board++; // a move still resolving from the old board is dropped (see tap)
-  clearInterval(timer);timer=null;stopClip();open=[];lock=false;moves=0;pairs=0;
+  clearInterval(timer);timer=null;stopClip();open=[];lock=false;settle=null;moves=0;pairs=0;
   const hard=$("hard").checked;
   boardKey=modeKey();$("bestBox").classList.remove("new");showBest();
   songs=shuffle([...pool]).slice(0,PAIRS).map(id=>newSong(id,hard));
@@ -218,7 +218,7 @@ function setStatus(t,cls=""){const s=$("status");s.textContent=t;s.className="st
 
 // Play a clip: start muted at 0 to learn duration, then seek and unmute
 function playPad(i){
-  stopClip(true);
+  stopClip(); // pause the old clip at once, so a new tap never waits for the next video to load
   const card=cards[i],song=songs[card.s];
   const b=$("pad"+i);b.classList.add("playing");playingPad=i;showNP(i);
   const d=meta[song.id]&&meta[song.id].dur;
@@ -284,7 +284,10 @@ function onErr(e){
 
 function tap(i){
   const b=$("pad"+i);
-  if(lock||b.classList.contains("matched"))return;
+  if(b.classList.contains("matched"))return;
+  // Tapping a new pad while a pair is still playing settles that pair at once, so the
+  // new clip starts right away instead of the tap being ignored
+  if(lock){if(!settle||open.includes(i))return;settle(true);if(b.classList.contains("matched"))return}
   if(open.length===1&&open[0]===i){playPad(i);return}
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500)}
   playPad(i);b.classList.add("open");open.push(i);
@@ -292,8 +295,10 @@ function tap(i){
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open;
   const thisBoard=board,same=cards[a].s===cards[c].s,t0=Date.now();
-  const resolve=()=>{
-    if(thisBoard!==board)return; // New board came first
+  let done=false;
+  const resolve=fast=>{
+    if(done||thisBoard!==board)return; // already settled, or New board came first
+    done=true;settle=null;
     const pa=$("pad"+a),pc=$("pad"+c);
     if(same){
       fadeOutClip();matchChime();
@@ -317,16 +322,18 @@ function tap(i){
       }
     }else{
       [pa,pc].forEach(p=>p.classList.add("miss"));setStatus("Different songs. Remember where they were.");
-      setTimeout(()=>[pa,pc].forEach(p=>p.classList.remove("miss","open")),450);
+      const back=()=>[pa,pc].forEach(p=>p.classList.remove("miss","open"));
+      if(fast){back();stopClip()}else setTimeout(back,450);
     }
     open=[];lock=false;
   };
+  settle=resolve;
   // A miss plays the whole clip so you can learn it. A match only needs a moment of the
   // second clip: once it has played about a second, it fades out and the pair turns over.
-  if(!same){setTimeout(resolve,CLIP*1000+300);return}
+  if(!same){setTimeout(()=>resolve(),CLIP*1000+300);return}
   const MATCH_HEAR=1100;
   const check=()=>{
-    if(thisBoard!==board)return;
+    if(thisBoard!==board||done)return;
     if((clipAt&&Date.now()-clipAt>=MATCH_HEAR)||Date.now()-t0>=CLIP*1000+300)resolve();else setTimeout(check,100);
   };
   setTimeout(check,MATCH_HEAR);
