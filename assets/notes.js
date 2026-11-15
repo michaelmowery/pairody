@@ -17,6 +17,10 @@
       'Tapping a new pad cuts off the one before it, so sounds never pile up.',
       '<b>Your music:</b> a matching clip now fades out after about a second instead of playing to the end.',
     ]},
+    { date: '2026-11-15', title: 'More sounds in every deck', items: [
+      'Bigger sets for every deck: about twice as many quotes, jokes, rhymes, opposites, capitals and tunes, numbers in Morse Code, and times tables up to 10.',
+      'Each new board deals fresh pairs, like a shuffled deck: you hear everything in a deck before anything comes back.',
+    ]},
     { date: '2026-11-15', title: 'Board sizes and release notes', items: [
       '<b>Pick your board size:</b> Small (6 pairs), Classic (8 pairs) or Big (12 pairs, with the Pairody logo in the middle). Best scores are kept for each size.',
       'The board now shrinks to fit your window on laptops and desktops, so you never have to scroll to reach the bottom row.',

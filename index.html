@@ -241,7 +241,39 @@ const QUOTES=[
   ["Archimedes","Give me a place to stand,","and I will move the Earth."],
   ["Heraclitus","No man ever steps","in the same river twice."],
   ["Mark Twain","The reports of my death","are greatly exaggerated."],
-  ["Ralph Waldo Emerson","The only way to have a friend","is to be one."]
+  ["Ralph Waldo Emerson","The only way to have a friend","is to be one."],
+  ["Aesop","Slow and steady","wins the race."],
+  ["Isaac Newton","If I have seen further,","it is by standing on the shoulders of giants."],
+  ["Galileo Galilei","And yet","it moves."],
+  ["Voltaire","The best","is the enemy of the good."],
+  ["Oscar Wilde","I can resist everything","except temptation."],
+  ["Charles Dickens","It was the best of times,","it was the worst of times."],
+  ["Henry David Thoreau","Our life is frittered away by detail.","Simplify, simplify."],
+  ["Winston Churchill","We shall fight on the beaches,","we shall never surrender."],
+  ["Thomas Edison","Genius is one percent inspiration","and ninety-nine percent perspiration."],
+  ["Napoleon Bonaparte","An army marches","on its stomach."],
+  ["John Paul Jones","I have not yet begun","to fight!"],
+  ["Horace Greeley","Go West, young man,","and grow up with the country."],
+  ["George Washington","It is better to be alone","than in bad company."],
+  ["Helen Keller","Alone we can do so little;","together we can do so much."],
+  ["Susan B. Anthony","Failure","is impossible."],
+  ["Frederick Douglass","If there is no struggle,","there is no progress."],
+  ["Abigail Adams","Remember","the ladies."],
+  ["Robert Frost","Two roads diverged in a wood, and I,","I took the one less traveled by."],
+  ["Emily Dickinson","Hope is the thing","with feathers."],
+  ["Edgar Allan Poe","Quoth the Raven,","Nevermore."],
+  ["Lewis Carroll","Curiouser","and curiouser!"],
+  ["John Muir","The mountains are calling","and I must go."],
+  ["Walt Whitman","I celebrate myself,","and sing myself."],
+  ["Confucius","Real knowledge is to know the extent","of one's ignorance."],
+  ["Sun Tzu","Know your enemy and know yourself,","and you need not fear a hundred battles."],
+  ["Samuel Johnson","When a man is tired of London,","he is tired of life."],
+  ["Alexander Pope","A little learning","is a dangerous thing."],
+  ["William Shakespeare","Brevity","is the soul of wit."],
+  ["Thomas Paine","These are the times","that try men's souls."],
+  ["John Adams","Facts","are stubborn things."],
+  ["Gertrude Stein","A rose is a rose","is a rose is a rose."],
+  ["Aristotle","The whole is greater","than the sum of its parts."]
 ];
 const canSpeak="speechSynthesis" in window&&"SpeechSynthesisUtterance" in window;
 let enVoice=null;
@@ -261,9 +293,23 @@ function say(text){
 // A deck entry is [name, play(t, half), art, artIsText, matchMessage].
 // "half" is 0 for the first pad of a pair and 1 for its twin, so a pair can be two
 // different sounds (an opening and its ending, a word and its rhyme).
-// Picks n items from a pool, keeping only the first item for each key, so a board
-// never has two pairs that could be mixed up.
-function pickUnique(pool,key,n=NP){const seen=new Set();return shuffle(pool.slice()).filter(x=>{const k=key(x);if(seen.has(k))return false;seen.add(k);return true}).slice(0,n)}
+// Picks n items from a pool, at most one per key, so a board never has two pairs that
+// could be mixed up. Each pool is dealt like a shuffled deck of cards: nothing comes back
+// until the whole pool has been used, and when the deck is reshuffled the last board's
+// items go to the bottom, so two boards in a row share as little as possible.
+const bags=new Map(),lastDealt=new Map();
+function pickUnique(pool,key=x=>x,n=NP){
+  const bag=bags.get(pool)||[],last=lastDealt.get(pool)||new Set(),out=[],keys=new Set();
+  const take=()=>{for(let i=0;i<bag.length&&out.length<n;){const x=bag[i],k=key(x);if(keys.has(k)){i++;continue}keys.add(k);out.push(x);bag.splice(i,1)}};
+  take();
+  if(out.length<n){
+    const rest=shuffle(pool.filter(x=>!bag.includes(x)&&!out.includes(x)));
+    rest.sort((a,b)=>last.has(a)-last.has(b)); // last board's items to the bottom
+    bag.push(...rest);take();
+  }
+  bags.set(pool,bag);lastDealt.set(pool,new Set(out));
+  return out;
+}
 // A pair that is two spoken lines: one pad says a, its twin says b
 const spoken=(name,a,b,art,txt,msg)=>[name,(t,half)=>say(half?b:a),art,txt,msg];
 const quoteEntry=([who,a,b])=>spoken(who,a,b,"❝",0,"“"+a+" "+b+"” ("+who+")");
@@ -296,7 +342,33 @@ const JOKES=[
   ["Scarecrow","Why did the scarecrow win an award?","Because he was outstanding in his field."],
   ["Cheese","What do you call cheese that isn't yours?","Nacho cheese."],
   ["Palm","What kind of tree fits in your hand?","A palm tree."],
-  ["Teacher","Why did the student eat his homework?","Because the teacher said it was a piece of cake."]
+  ["Teacher","Why did the student eat his homework?","Because the teacher said it was a piece of cake."],
+  ["Stamp","What can travel around the world while staying in a corner?","A stamp."],
+  ["Footsteps","The more you take, the more you leave behind. What are they?","Footsteps."],
+  ["Candle","I'm tall when I'm young and short when I'm old. What am I?","A candle."],
+  ["Map","What has cities but no houses, and rivers but no water?","A map."],
+  ["Hole","What gets bigger the more you take away from it?","A hole."],
+  ["Cow","What do you call a cow with no legs?","Ground beef."],
+  ["Math book","Why was the math book sad?","It had too many problems."],
+  ["Tomato","Why did the tomato turn red?","Because it saw the salad dressing."],
+  ["Dinosaur","What do you call a sleeping dinosaur?","A dino-snore."],
+  ["Golfer","Why did the golfer bring two pairs of pants?","In case he got a hole in one."],
+  ["Sponge","What is full of holes but still holds water?","A sponge."],
+  ["Magic dog","What do you call a dog magician?","A labracadabrador."],
+  ["Bee","What do you call a bee that can't make up its mind?","A maybe."],
+  ["Ghost","Why are ghosts bad at lying?","Because you can see right through them."],
+  ["Elephant","Why don't elephants use computers?","They're afraid of the mouse."],
+  ["Owl","What do you call an owl that does magic tricks?","Hoo-dini."],
+  ["Banana","Why did the banana go to the doctor?","Because it wasn't peeling well."],
+  ["Snowman","What do you call a snowman in summer?","A puddle."],
+  ["Sun","Why doesn't the sun go to college?","Because it already has a million degrees."],
+  ["Computer","Why did the computer go to the doctor?","Because it had a virus."],
+  ["Cat","What is a cat's favorite color?","Purr-ple."],
+  ["Envelope","What starts with E, ends with E, and has only one letter in it?","An envelope."],
+  ["Silence","What breaks when you say its name?","Silence."],
+  ["Name","What belongs to you, but other people use it more than you do?","Your name."],
+  ["Coin","What has a head and a tail but no body?","A coin."],
+  ["Mushroom","Why did the mushroom go to the party?","Because he was a fun guy."]
 ];
 const pickJokes=()=>pickUnique(JOKES,j=>j[0]).map(([n,q,a])=>spoken(n,q,a,"😂",0,q+" "+a));
 
@@ -323,7 +395,22 @@ const MELODIES=[
   ["When the Saints Go Marching In",.26,"C E F G:4 C E F G:4","C E F G:2 E:2 C:2 E:2 D:4"],
   ["Hot Cross Buns",.36,"E D C:2 E D C:2","C:.5 C:.5 C:.5 C:.5 D:.5 D:.5 D:.5 D:.5 E D C:2"],
   ["Oh! Susanna",.25,"C:.5 D:.5 E G G A:1.5 G:.5 E C:1.5 D:.5 E E D C D:3","C:.5 D:.5 E G G:1.5 A:.5 G E C:1.5 D:.5 E E D D C:3"],
-  ["Amazing Grace",.34,"G3 C:2 E:.5 C:.5 E:2 D C:2 A3 G3:2","G3 C:2 E:.5 C:.5 E:2 D G:3"]
+  ["Amazing Grace",.34,"G3 C:2 E:.5 C:.5 E:2 D C:2 A3 G3:2","G3 C:2 E:.5 C:.5 E:2 D G:3"],
+  ["Happy Birthday",.3,"G:.75 G:.25 A G C5 B:2 G:.75 G:.25 A G D5 C5:2","G:.75 G:.25 G5 E5 C5 B A:2 F5:.75 F5:.25 E5 C5 D5 C5:2"],
+  ["Old MacDonald",.3,"C C C G3 A3 A3 G3:2","E E D D C:3"],
+  ["The Wheels on the Bus",.28,"C F F:.5 F:.5 F A C5 A F:2","G E C:2 C5 A F:2"],
+  ["Brahms' Lullaby",.32,"E:.5 E:.5 G:2 E:.5 E:.5 G:2 E:.5 G:.5 C5 B:1.5 A:.5 A G:2","D:.5 E:.5 F D D:.5 E:.5 F:2 D:.5 F:.5 B A:1.5 G:.5 B C5:2"],
+  ["Für Elise",.22,"E5 D#5 E5 D#5 E5 B D5 C5 A:2","C E A B:2 E G# B C5:2"],
+  ["Greensleeves",.26,"A3 C:2 D E:1.5 F:.5 E D:2 B3 G3:1.5 A3:.5 B3 C:2 A3","A3:1.5 G#3:.5 A3 B3:2 G#3 E3:2"],
+  ["Auld Lang Syne",.3,"G3 C:1.5 C:.5 C E D:1.5 C:.5 D E:.5 D:.5 C:1.5 C:.5 E G A:3","A G:1.5 E:.5 E C D:1.5 C:.5 D E:.5 D:.5 C:1.5 A3:.5 A3 G3 C:3"],
+  ["This Old Man",.3,"G E G:2 G E G:2 A G F E D E F:2","E F G C C C:.5 C:.5 C D E F G:2"],
+  ["Here Comes the Bride",.4,"G3 C:1.5 C:.5 C:2 G3 D:1.5 B3:.5 C:2","G3 C F F:1.5 E:.5 D:1.5 C:.5 B3:1.5 C:.5 D:2"],
+  ["In the Hall of the Mountain King",.22,"A3 B3 C D E C E:2 D# B3 D#:2 D Bb3 D:2","A3 B3 C D E C E A G E C E G:3"],
+  ["Oh My Darling, Clementine",.28,"C C C G3:2 E E E C:2 C E G:2 G F E D:3","D E F:2 F E D E C:2 C E D:2 G3 B3 D C:3"],
+  ["Deck the Halls",.28,"G:1.5 F:.5 E D C D E C D:.5 E:.5 F:.5 D:.5 E:1.5 D:.5 C B3 C:2","D:1.5 E:.5 F D E:1.5 F:.5 G D E:.5 F#:.5 G A:.5 B:.5 C5 B A G:2"],
+  ["We Wish You a Merry Christmas",.28,"G3 C C:.5 D:.5 C:.5 B3:.5 A3 A3 A3 D D:.5 E:.5 D:.5 C:.5 B3 G3","G3 E E:.5 F:.5 E:.5 D:.5 C A3 G3:.5 G3:.5 A3 D B3 C:2"],
+  ["Silent Night",.3,"G:1.5 A:.5 G E:3 G:1.5 A:.5 G E:3","D5:2 D5 B:3 C5:2 C5 G:3"],
+  ["Joy to the World",.32,"C5 B:.75 A:.25 G:1.5 F:.5 E D C:2","G:.5 A:1.5 A:.5 B:1.5 B:.5 C5:3"]
 ];
 const pickMelodies=()=>pickUnique(MELODIES,m=>m[0]).map(([n,beat,a,b])=>{
   const A=mel(a,beat),B=mel(b,beat);
@@ -332,9 +419,9 @@ const pickMelodies=()=>pickUnique(MELODIES,m=>m[0]).map(([n,beat,a,b])=>{
 
 // Word Play: each board is all rhymes or all opposites (they alternate), never mixed,
 // so no word on a board could fit two pairs. Each rhyme pair has its own ending.
-const RHYMES=[["cat","hat"],["dog","frog"],["bee","tree"],["moon","spoon"],["cake","snake"],["bear","chair"],["mouse","house"],["boat","goat"],["star","car"],["king","ring"],["fish","dish"],["sock","clock"],["bed","red"],["bug","rug"],["kite","light"],["rain","train"]];
+const RHYMES=[["cat","hat"],["dog","frog"],["bee","tree"],["moon","spoon"],["cake","snake"],["bear","chair"],["mouse","house"],["boat","goat"],["star","car"],["king","ring"],["fish","dish"],["sock","clock"],["bed","red"],["bug","rug"],["kite","light"],["rain","train"],["pig","wig"],["hen","pen"],["fox","box"],["duck","truck"],["sun","bun"],["map","cap"],["bell","shell"],["pan","van"],["hill","mill"],["pie","sky"],["nose","rose"],["sand","hand"],["toy","boy"],["cone","stone"],["mail","snail"],["seal","wheel"],["horn","corn"],["cub","tub"],["nest","vest"],["peach","beach"],["cheese","keys"],["glove","dove"],["shoe","zoo"],["ball","wall"],["mop","top"]];
 // No two pairs share a meaning (so no high/low next to up/down, or soft next to loud/quiet)
-const OPPOSITES=[["hot","cold"],["up","down"],["big","small"],["fast","slow"],["happy","sad"],["day","night"],["open","closed"],["loud","quiet"],["wet","dry"],["full","empty"],["in","out"],["young","old"],["go","stop"],["on","off"],["push","pull"],["first","last"],["left","right"]];
+const OPPOSITES=[["hot","cold"],["up","down"],["big","small"],["fast","slow"],["happy","sad"],["day","night"],["open","closed"],["loud","quiet"],["wet","dry"],["full","empty"],["in","out"],["young","old"],["go","stop"],["on","off"],["push","pull"],["first","last"],["left","right"],["long","short"],["heavy","light"],["thick","thin"],["sweet","sour"],["win","lose"],["give","take"],["rich","poor"],["clean","dirty"],["early","late"],["near","far"],["front","back"],["true","false"],["easy","hard"],["strong","weak"],["sharp","dull"],["asleep","awake"],["question","answer"],["friend","enemy"],["summer","winter"],["north","south"],["east","west"],["remember","forget"],["always","never"],["smooth","rough"],["wide","narrow"],["catch","throw"]];
 const cap=w=>w[0].toUpperCase()+w.slice(1);
 const pairName=(a,b)=>cap(a)+" · "+b;
 let boardMode={wordplay:1,brain:1}; // flips on each new board of that deck
@@ -344,8 +431,8 @@ function pickWordplay(){
 }
 
 // Brain Food: each board is all capitals or all times tables (they alternate).
-const CAPITALS=[["France","Paris"],["Japan","Tokyo"],["Italy","Rome"],["Egypt","Cairo"],["Canada","Ottawa"],["Spain","Madrid"],["Kenya","Nairobi"],["Peru","Lima"],["Germany","Berlin"],["Greece","Athens"],["Australia","Canberra"],["Russia","Moscow"],["China","Beijing"],["India","New Delhi"],["Brazil","Brasília"],["Ireland","Dublin"],["Norway","Oslo"],["Thailand","Bangkok"],["Cuba","Havana"],["Argentina","Buenos Aires"]];
-const TIMES=[];for(let a=2;a<=9;a++)for(let b=a;b<=9;b++)TIMES.push([a,b]);
+const CAPITALS=[["France","Paris"],["Japan","Tokyo"],["Italy","Rome"],["Egypt","Cairo"],["Canada","Ottawa"],["Spain","Madrid"],["Kenya","Nairobi"],["Peru","Lima"],["Germany","Berlin"],["Greece","Athens"],["Australia","Canberra"],["Russia","Moscow"],["China","Beijing"],["India","New Delhi"],["Brazil","Brasília"],["Ireland","Dublin"],["Norway","Oslo"],["Thailand","Bangkok"],["Cuba","Havana"],["Argentina","Buenos Aires"],["Sweden","Stockholm"],["Portugal","Lisbon"],["Netherlands","Amsterdam"],["Poland","Warsaw"],["Austria","Vienna"],["Hungary","Budapest"],["Turkey","Ankara"],["South Korea","Seoul"],["Vietnam","Hanoi"],["Indonesia","Jakarta"],["Philippines","Manila"],["Chile","Santiago"],["Colombia","Bogotá"],["Finland","Helsinki"],["Denmark","Copenhagen"],["Belgium","Brussels"],["Switzerland","Bern"],["New Zealand","Wellington"],["Iran","Tehran"],["Ghana","Accra"],["Morocco","Rabat"],["Venezuela","Caracas"],["Czechia","Prague"],["Jamaica","Kingston"],["Ethiopia","Addis Ababa"]];
+const TIMES=[];for(let a=2;a<=10;a++)for(let b=a;b<=10;b++)TIMES.push([a,b]);
 function pickBrain(){
   if(boardMode.brain===0)return pickUnique(CAPITALS,c=>c[0]).map(([c,city])=>spoken(c+" · "+city,c,city,"🌍",0,"The capital of "+c+" is "+city));
   // Every answer different on a board, so 3 × 4 and 2 × 6 never share one
@@ -353,13 +440,14 @@ function pickBrain(){
 }
 
 // Morse Code: one pad says a letter, its twin beeps it in Morse.
-const MORSE={A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--.."};
+const MORSE={A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",6:"-....",7:"--...",8:"---..",9:"----."};
+const MORSEKEYS=Object.keys(MORSE); // letters A to Z and digits 0 to 9
 const MU=.09; // one Morse unit in seconds: dot 1, dash 3, gap 1
 const morseSeq=code=>[...code].flatMap(c=>[[700,c==="."?MU:3*MU],[null,MU]]);
 const morseArt=code=>code.replace(/\./g,"·").replace(/-/g,"−");
-const pickMorse=()=>pickUnique(Object.keys(MORSE),l=>l).map(l=>{
-  const seq=morseSeq(MORSE[l]);
-  return[l+"  "+morseArt(MORSE[l]),(t,half)=>half?playSeq(seq,t,{beep:true,vol:.28}):say("The letter "+l),"",1,"The letter "+l+" is "+morseArt(MORSE[l])];
+const pickMorse=()=>pickUnique(MORSEKEYS).map(l=>{
+  const seq=morseSeq(MORSE[l]),what=(/\d/.test(l)?"The number ":"The letter ")+l;
+  return[l+"  "+morseArt(MORSE[l]),(t,half)=>half?playSeq(seq,t,{beep:true,vol:.28}):say(what),"",1,what+" is "+morseArt(MORSE[l])];
 });
 
 // Every animal has a recording and a synth stand-in. Each board picks as many as it has pairs.
@@ -380,9 +468,9 @@ const ANIMALS=[
 const NOTENAME=["C","C♯","D","E♭","E","F","F♯","G","A♭","A","B♭","B","High C"];
 const noteEntry=n=>[NOTENAME[n],t=>tone(st(n),t,.8,"triangle",.32),"♪"+NOTENAME[n].replace("High C","C′"),1];
 const pickSome=a=>shuffle(a.slice()).slice(0,NP);
-const pickAnimals=()=>pickSome(ANIMALS);
+const pickAnimals=()=>pickUnique(ANIMALS,a=>a[0]);
 // Animal Talk: one pad says the animal's name, its twin plays its call
-const pickTalk=()=>pickSome(ANIMALS).map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
+const pickTalk=()=>pickUnique(ANIMALS,a=>a[0]).map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
 // Notes: the C major scale (Small picks 6 of its 8 notes); Big uses all 12 notes from C to B, sharps and flats too
 const pickNotes=()=>NP>8?[0,1,2,3,4,5,6,7,8,9,10,11].map(noteEntry):pickSome([0,2,4,5,7,9,11,12].map(noteEntry));
 const DECKS={};
@@ -456,15 +544,15 @@ addEventListener("resize",()=>fitGrid());
 const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Brain Food",melodies:"Melodies",notes:"Notes",morse:"Morse Code"};
 // How each deck works, shown under the deck buttons
 const DECKHELP={
-  animals:"Real recordings of twelve animals, from a cat's meow to an elephant's trumpet. Find the two pads that make the same call. Each board picks its animals from the twelve.",
+  animals:"Real recordings of twelve animals, from a cat's meow to an elephant's trumpet. Find the two pads that make the same call. Each board picks a different mix, so you won't hear the same ones every time.",
   talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
   quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks its quotes from a bigger set.",
   jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every board picks its jokes from a bigger set.",
-  wordplay:"Each board is either Rhymes (cat goes with hat) or Opposites (hot goes with cold), and the next board switches. Match each word to its partner.",
+  wordplay:"Each board is either Rhymes (cat goes with hat) or Opposites (hot goes with cold), and the next board switches. Match each word to its partner. Every board picks its words from a bigger set.",
   brain:"Each board is either Capitals (France goes with Paris) or Times tables (seven times eight goes with fifty-six), and the next board switches.",
-  melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song.",
+  melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song. Every board picks its tunes from a bigger set.",
   notes:"Notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. A Big board uses all twelve notes from C to B, sharps and flats too. This one is real ear training.",
-  morse:"One pad says a letter and its twin beeps that letter in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on."
+  morse:"One pad says a letter or number and its twin beeps it in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on."
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
