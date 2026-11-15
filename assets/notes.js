@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-15', title: 'Snappier taps', items: [
+      'Tapping a new pad stops whatever is playing right away, including read-aloud words.',
+      'No more waiting after a miss: tap the next pad and the last two flip back at once.',
+      '<b>Your music:</b> a new tap pauses the old clip immediately instead of waiting for the next video to load, and you can tap on while a missed pair is still playing.',
+    ]},
     { date: '2026-11-15', title: 'Matches you can hear', items: [
       'When you find a pair, the sound now stops right away and a little chime plays, so you know it was a match.',
       'Tapping a new pad cuts off the one before it, so sounds never pile up.',
