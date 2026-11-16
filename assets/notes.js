@@ -16,6 +16,11 @@
       'Some decks and board styles now carry a small <span class="tier-tag">Plus</span> tag. They will be part of Pairody Plus, a one-time unlock, later on. Animals, Jokes, Pairs, Daily, every board size and Difficult mode stay free.',
       'Nothing is locked: every deck and style is still free for everyone today.',
     ]},
+    { date: '2026-11-16', title: 'Your score card', items: [
+      'See every best score on one card: each deck, board size and style, with and without Difficult mode. Perfect boards get a star.',
+      'Open it by tapping <b>Best</b> above the board, from <b>All best scores</b> on the Well done card, or under <b class="welcome-i">i</b>.',
+      'Want a fresh start? <b>Clear best scores</b> on the card asks first, and keeps your settings and Daily streak.',
+    ]},
     { date: '2026-11-16', title: 'Well done!', items: [
       'Clear a board and it lights up with a green ring, then a <b>Well done</b> card shows your time and moves, with a <b>New board</b> button right there.',
       'New bests, perfect boards and Daily streaks get called out on the card. In <b>2 Players</b> it names the winner.',

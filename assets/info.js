@@ -26,6 +26,11 @@
   <li>No ads and no accounts. Your scores stay on this device.<span class="web-only"> Your music plays through YouTube's own player.</span></li>
   <li>Animal sounds are public domain or CC0 recordings (<a href="https://github.com/michaelmowery/pairody/blob/main/sounds/CREDITS.md" target="_blank" rel="noopener">credits</a>).</li>
 </ul>
+<div class="info-scores-box" hidden>
+<h3>Best scores</h3>
+<p>Every best score saved on this device, by deck, board size and style. You can clear them there too.</p>
+<div class="info-scores"><button type="button" class="btn info-scores-btn">See best scores</button></div>
+</div>
 <h3>Privacy</h3>
 <p>To learn which decks and features people use, Pairody sends anonymous counts (like "Animals board cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. <span class="web-only">Your playlists and song links are never sent. </span><a href="privacy.html">Privacy policy</a></p>
 <label class="toggle info-analytics"><input type="checkbox" name="analytics" checked><span>Anonymous usage counts (saved on this device)</span></label>
@@ -62,7 +67,14 @@
     // Tap outside the panel to close it
     dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
     setupUpdates(dlg);btn.addEventListener("click",()=>{resetUpdateUi(dlg);setFeedbackLink(dlg)});
-    setFeedbackLink(dlg);setupNews(dlg);
+    setFeedbackLink(dlg);setupNews(dlg);setupScores(dlg);
+  }
+  // "See best scores": the score card (assets/scores.js), on pages that load it
+  function setupScores(dlg){
+    const box=dlg.querySelector(".info-scores-box");
+    if(!window.PairodyScores)return;
+    box.querySelector(".info-scores-btn").addEventListener("click",()=>window.PairodyScores.open("info"));
+    box.hidden=false;
   }
   // "What's new": the newest release note's title and date, and a button for the full list (assets/notes.js)
   function setupNews(dlg){

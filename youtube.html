@@ -22,6 +22,7 @@
 <script src="assets/native.js"></script>
 <script src="assets/update.js"></script>
 <script src="assets/notes.js" defer></script>
+<script src="assets/scores.js" defer></script>
 <script src="assets/info.js" defer></script>
 <script src="assets/welcome.js" defer></script>
 <script src="assets/analytics.js" defer></script>
@@ -194,6 +195,7 @@ function showBest(){
   $("bestLbl").textContent=tag?tag+" best":"Best";
   $("best").textContent=Best.fmt(b);
 }
+addEventListener("pairody:bests-cleared",()=>{if(boardKey)showBest()});
 function deal(){
   board++; // a move still resolving from the old board is dropped (see tap)
   clearInterval(timer);timer=null;stopClip();open=[];lock=false;settle=null;moves=0;pairs=0;
