@@ -35,6 +35,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | `timed/out/<id>[/small\|/big]` | a Timed board ran out of time |
 | `done/new`, `done/close` | on the Well done card shown after a board is cleared: New board, or See board (closes the card). Added 2026-11-16. |
 | `daily/streak/<n>` | a Daily streak grew to n days (n capped at 30) |
+| `daily/on`, `daily/off` | Daily Pairody turned on or off with its pill (added 2026-11-16). Since then Daily is not a style: `style/daily` stops, and Daily games add `/daily` after the style suffix in play/win/perfect (for example `win/jokes/big/triples/daily`; Pairs shows just `/daily`). Before, `/daily` was the style suffix of a per-board Daily game. |
 | `daily/card/play` | Play today's game tapped on the Daily game card above the board (added 2026-11-16) |
 | `daily/share/card`, `daily/share/done` | a Daily result shared through the share sheet, from the Daily game card or the Well done card |
 | `daily/copy/card`, `daily/copy/done` | a Daily result copied instead (no share sheet, or sharing failed) |
