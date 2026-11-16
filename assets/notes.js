@@ -12,6 +12,13 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Four new ways to play', items: [
+      'Pick a <b>style</b> under the deck buttons. <b>Pairs</b> is the game you know.',
+      '<b>Triples:</b> every sound is on three pads, and you find all three in one move.',
+      '<b>Timed:</b> clear the board before the clock runs out.',
+      '<b>2 Players:</b> take turns on one phone. Find a match and you go again; the pads you win show in your color.',
+      '<b>Daily:</b> one board a day, the same for everyone playing that deck and size. Clear one every day to build a streak.',
+    ]},
     { date: '2026-11-16', title: 'Your music joins the deck list', items: [
       '<b>Your music</b> moved from the top of the page to the end of the deck buttons, so every way to play is in one list.',
     ]},

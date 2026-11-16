@@ -25,9 +25,12 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | `launch/installed-app`, `launch/browser`, `launch/ios-app` | each page load, by how Pairody was opened (`ios-app` = the App Store app; its page views are tagged `/app/...`) |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
 | `deck/<id>` | a deck button tapped (animals, talk, quotes, jokes, wordplay, brain, melodies, notes, morse); `deck/youtube` = the Your music tile (web only) |
-| `play/<id>[/small\|/big][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; `/difficult` = sounds only, no names) |
-| `win/<id>[/small\|/big][/difficult]` | board cleared |
-| `perfect/<id>[/small\|/big]` | board cleared in one move per pair (6, 8 or 12) |
+| `play/<id>[/small\|/big][/triples\|/timed\|/2p\|/daily][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; the style suffix is left out for Pairs, the original game; `/difficult` = sounds only, no names) |
+| `win/<id>[/small\|/big][/<style>][/difficult]` | board cleared (style suffix as for `play`) |
+| `perfect/<id>[/small\|/big][/<style>]` | board cleared in one move per pair, or per set in Triples (not counted for 2 Players) |
+| `style/<style>` | board style picked (pairs, triples, timed, duo, daily). Styles added 2026-11-16; earlier counts are all Pairs. Note the picker id for 2 Players is `duo` but its play/win suffix is `/2p`. |
+| `timed/out/<id>[/small\|/big]` | a Timed board ran out of time |
+| `daily/streak/<n>` | a Daily streak grew to n days (n capped at 30) |
 | `size/<size>` | board size picked (small, classic, big). Sizes added 2026-11-15; earlier play/win counts are all Classic. |
 | `difficult/on`, `difficult/off` | Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
