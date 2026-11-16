@@ -492,18 +492,16 @@ const pickMelodies=()=>pickUnique(MELODIES,m=>m[0]).map(([n,beat,a,b])=>{
   return[n,(t,half)=>playSeq(half?B:A,t),"🎵",0,n];
 });
 
-// Word Play: each board is all rhymes or all opposites (they alternate), never mixed,
-// so no word on a board could fit two pairs. Each rhyme pair has its own ending.
+// Rhymes (board id "wordplay", from when it was Word Play, so best scores carry over) and
+// Opposites. Each rhyme pair has its own ending, so no word could fit two pairs.
 const RHYMES=[["cat","hat"],["dog","frog"],["bee","tree"],["moon","spoon"],["cake","snake"],["bear","chair"],["mouse","house"],["boat","goat"],["star","car"],["king","ring"],["fish","dish"],["sock","clock"],["bed","red"],["bug","rug"],["kite","light"],["rain","train"],["pig","wig"],["hen","pen"],["fox","box"],["duck","truck"],["sun","bun"],["map","cap"],["bell","shell"],["pan","van"],["hill","mill"],["pie","sky"],["nose","rose"],["sand","hand"],["toy","boy"],["cone","stone"],["mail","snail"],["seal","wheel"],["horn","corn"],["cub","tub"],["nest","vest"],["peach","beach"],["cheese","keys"],["glove","dove"],["shoe","zoo"],["ball","wall"],["mop","top"]];
 // No two pairs share a meaning (so no high/low next to up/down, or soft next to loud/quiet)
 const OPPOSITES=[["hot","cold"],["up","down"],["big","small"],["fast","slow"],["happy","sad"],["day","night"],["open","closed"],["loud","quiet"],["wet","dry"],["full","empty"],["in","out"],["young","old"],["go","stop"],["on","off"],["push","pull"],["first","last"],["left","right"],["long","short"],["heavy","light"],["thick","thin"],["sweet","sour"],["win","lose"],["give","take"],["rich","poor"],["clean","dirty"],["early","late"],["near","far"],["front","back"],["true","false"],["easy","hard"],["strong","weak"],["sharp","dull"],["asleep","awake"],["question","answer"],["friend","enemy"],["summer","winter"],["north","south"],["east","west"],["remember","forget"],["always","never"],["smooth","rough"],["wide","narrow"],["catch","throw"]];
 const cap=w=>w[0].toUpperCase()+w.slice(1);
 const pairName=(a,b)=>cap(a)+" · "+b;
-let boardMode={wordplay:1}; // flips on each new board of that deck
-function pickWordplay(){
-  const r=boardMode.wordplay===0;
-  return pickUnique(r?RHYMES:OPPOSITES,p=>p[0]).map(([a,b])=>spoken(pairName(a,b),a,b,r?"🎶":"⇄",!r,cap(a)+(r?" rhymes with ":" is the opposite of ")+b));
-}
+let boardMode={}; // for a board whose games alternate between two kinds (see BOARDMODE)
+const pickWordplay=()=>pickUnique(RHYMES,p=>p[0]).map(([a,b])=>spoken(pairName(a,b),a,b,"🎶",0,cap(a)+" rhymes with "+b));
+const pickOpposites=()=>pickUnique(OPPOSITES,p=>p[0]).map(([a,b])=>spoken(pairName(a,b),a,b,"⇄",1,cap(a)+" is the opposite of "+b));
 
 // Brain Food: each board is all capitals or all times tables (they alternate).
 const CAPITALS=[["France","Paris"],["Japan","Tokyo"],["Italy","Rome"],["Egypt","Cairo"],["Canada","Ottawa"],["Spain","Madrid"],["Kenya","Nairobi"],["Peru","Lima"],["Germany","Berlin"],["Greece","Athens"],["Australia","Canberra"],["Russia","Moscow"],["China","Beijing"],["India","New Delhi"],["Brazil","Brasília"],["Ireland","Dublin"],["Norway","Oslo"],["Thailand","Bangkok"],["Cuba","Havana"],["Argentina","Buenos Aires"],["Sweden","Stockholm"],["Portugal","Lisbon"],["Netherlands","Amsterdam"],["Poland","Warsaw"],["Austria","Vienna"],["Hungary","Budapest"],["Turkey","Ankara"],["South Korea","Seoul"],["Vietnam","Hanoi"],["Indonesia","Jakarta"],["Philippines","Manila"],["Chile","Santiago"],["Colombia","Bogotá"],["Finland","Helsinki"],["Denmark","Copenhagen"],["Belgium","Brussels"],["Switzerland","Bern"],["New Zealand","Wellington"],["Iran","Tehran"],["Ghana","Accra"],["Morocco","Rabat"],["Venezuela","Caracas"],["Czechia","Prague"],["Jamaica","Kingston"],["Ethiopia","Addis Ababa"]];
@@ -965,10 +963,10 @@ const pickHomophones=()=>pickUnique(HOMOPHONES,h=>h[0]).map(([a,am,b,bm])=>
   spoken(a+" · "+b,a+". "+am[0].toUpperCase()+am.slice(1)+".",b+". "+bm[0].toUpperCase()+bm.slice(1)+".","👂",0,"“"+a+"” and “"+b+"” sound the same"));
 const DECKS={};
 // Every deck picks a fresh set of pairs on every new board, as many as the board size needs
-const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,times:pickTimes,morse:pickMorse,
+const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,opposites:pickOpposites,brain:pickBrain,times:pickTimes,morse:pickMorse,
   everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad,
   weather:pickWeather,vehicles:pickVehicles,ringtones:pickRingtones,homophones:pickHomophones};
-const BOARDMODE={wordplay:["Rhymes","Opposites"]};
+const BOARDMODE={}; // id: [first kind, second kind], for a board whose games alternate
 // Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
 const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
 let size="classic";try{const s=localStorage.getItem("pairody-size");if(SIZES[s])size=s}catch(e){}
@@ -1122,7 +1120,7 @@ function fitGrid(){
   if(w<g.parentElement.clientWidth)g.style.maxWidth=Math.floor(w)+"px";
 }
 addEventListener("resize",()=>fitGrid());
-const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
+const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Rhymes",opposites:"Opposites",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
   everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad",
   weather:"Weather",vehicles:"Vehicles",ringtones:"Ringtones",homophones:"Homophones"};
 // How each deck works, shown under the deck chip
@@ -1131,7 +1129,8 @@ const DECKHELP={
   talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
   quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every game picks its quotes from a bigger set.",
   jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every game picks its jokes from a bigger set.",
-  wordplay:"Each game is either Rhymes (cat goes with hat) or Opposites (hot goes with cold), and the next game switches. Match each word to its partner. Every game picks its words from a bigger set.",
+  wordplay:"One pad says a word and its twin says a word that rhymes with it, like cat and hat. Every game picks its words from a bigger set.",
+  opposites:"One pad says a word and its twin says its opposite, like hot and cold. Every game picks its words from a bigger set.",
   brain:"One pad says a country and its twin says its capital, like France and Paris. Every game picks its countries from a bigger set.",
   times:"One pad says a times table and its twin says the answer, like seven times eight and fifty-six. No two answers in a game are the same.",
   melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song. Every game picks its tunes from a bigger set.",
@@ -1317,7 +1316,8 @@ const DECKCARD={
   jokes:["words",["Why?","😂"],"Match each joke to its punchline"],
   twisters:["words",["She sells…","…seashells"],"Finish the tongue twister"],
   hello:["words",["Bonjour","French"],"Hello in many languages"],
-  wordplay:["words",["cat","hat"],"Rhymes one game, opposites the next"],
+  wordplay:["words",["cat","hat"],"Match each word to its rhyme"],
+  opposites:["words",["hot","cold"],"Match each word to its opposite"],
   homophones:["words",["Knight","Night"],"Words that sound alike"],
   brain:["learning",["France","Paris"],"Match each country to its capital"],
   times:["learning",["7×8","56"],"Match each times table to its answer"]
@@ -1325,7 +1325,7 @@ const DECKCARD={
 const FEATURED=["animals","jokes","brain","melodies"];
 // The deck chip's little icon
 const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",weather:"⛈️",vehicles:"🚂",ringtones:"📱",homophones:"👂",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
-  talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🔤",brain:"🌍",times:"✖️"};
+  talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🎶",opposites:"⇄",brain:"🌍",times:"✖️"};
 const deckName=id=>id==="youtube"?"Your music":DECKNAME[id];
 const deckView=()=>{try{return localStorage.getItem("pairody-deckview")==="all"?"all":"grouped"}catch(e){return "grouped"}};
 function deckTile(id,showKind,from){
