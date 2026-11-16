@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Usage counts in the iPhone app', items: [
+      'The iPhone and iPad app now sends the same anonymous usage counts as the website, like which boards get played, so we know what to build next. Nothing about you is sent.',
+      'Switch it off any time: tap <b>i</b>, then turn off <b>Anonymous usage counts</b> under Privacy.',
+    ]},
     { date: '2026-11-16', title: 'A real 2 Players scoreboard', items: [
       'In <b>2 Players</b> a big scoreboard sits above the pads: each player\'s matches, and whose turn it is lit up in their color, teal or coral. The board\'s ring changes color with the turn too.',
       'Tap a name on the scoreboard to type your own. Names are saved on this device.',

@@ -17,12 +17,28 @@ counts** in the info panel (saved in localStorage `pairody.prefs` as `{"analytic
 Counting starts as soon as the code is live on pairody.app. To turn analytics off everywhere,
 set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 
+## The iOS app
+
+The App Store app counts the same events as the website, with the same opt-out switch, but every
+count is tagged so the two never mix:
+
+- every event starts with `ios/`: `ios/deck/animals`, `ios/play/jokes/big/triples`,
+  `ios/win/capitals/daily`, `ios/players/2`, `ios/launch` (each app start), and so on. Titles
+  start with `iOS:`.
+- page views start with `/app` (`/app/index.html`).
+
+In the dashboard, type `ios/` in the filter box to see only the app. Because the filter matches
+part of a name, `win/animals` shows web and app together, and `ios/win/animals` the app only.
+The app reaches `https://pairody.goatcounter.com` directly (its pages load from
+`capacitor://localhost`); no extra app setup or App Tracking Transparency prompt is needed, since
+nothing identifies the player. `/youtube.html` and the `yt/` events never come from the app.
+
 ## What is counted
 
 | Event | When |
 | --- | --- |
 | page view (`/`, `/youtube.html`) | each page load |
-| `launch/installed-app`, `launch/browser`, `launch/ios-app` | each page load, by how Pairody was opened (`ios-app` = the App Store app; its page views are tagged `/app/...`) |
+| `launch/installed-app`, `launch/browser` | each page load on the website, by how Pairody was opened. The App Store app sends `ios/launch` instead (see The iOS app above). |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
 | `deck/<id>` | a deck picked (a card in the deck picker since 2026-11-16, a deck button before that) (animals, talk, everyday, instruments, seasonal, quotes, jokes, twisters, hello, wordplay, opposites, brain, times, melodies, notes, keypad, morse, weather, vehicles, ringtones, homophones, synonyms, elements, planets, presidents; the six after talk/before keypad were added 2026-11-16, and weather, vehicles, ringtones, homophones were added later that day, then synonyms, elements, planets, presidents after them; `brain` is the Capitals deck, called Brain Food until 2026-11-16 when its times tables moved to their own `times` deck; `wordplay` is the Rhymes deck, called Word Play until 2026-11-16 when its opposites moved to their own `opposites` deck). Seasonal boards are not split by season; the season follows the date (Halloween Oct 1 to Nov 7, Holidays Nov 8 to Jan 6, Spring to May 31, Summer to Sep 30); `deck/youtube` = the Your music tile (web only) |
 | `decks/open` | deck picker opened (the deck chip at the top of the board; added 2026-11-16) |
