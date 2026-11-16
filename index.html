@@ -22,6 +22,7 @@
 <script src="assets/best.js"></script>
 <script src="assets/update.js"></script>
 <script src="assets/notes.js" defer></script>
+<script src="assets/scores.js" defer></script>
 <script src="assets/info.js" defer></script>
 <script src="assets/welcome.js" defer></script>
 <script src="assets/analytics.js" defer></script>
@@ -59,6 +60,9 @@
 .donecard p{margin:6px 0 0;color:var(--muted);font-size:.92rem;line-height:1.35}
 .donecard .btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .donecard .btn{padding:9px 16px}
+.donecard .linkish{margin-top:10px;background:none;border:0;padding:4px;color:var(--muted);font:inherit;font-size:.85rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.donecard .linkish:hover{color:var(--fg)}
+.donecard .linkish[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.grid.done,.donecard .card{animation:none}}
 </style>
 </head>
@@ -114,7 +118,7 @@
       <div><span>Pairs</span><b id="pairs">0/8</b></div>
       <div id="timeBox"><span id="timeLbl">Time</span><b id="time">0:00</b></div>
       <div class="duo" id="duoBox" hidden><span>Score</span><b><i id="s0"><small>P1</small>0</i> <i id="s1"><small>P2</small>0</i></b></div>
-      <div class="best" id="bestBox" title="Your best on this deck and board size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
+      <div class="best tap" id="bestBox" role="button" tabindex="0" title="Your best on this deck and board size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
     <div class="board">
       <div class="grid" id="grid"></div>
@@ -123,6 +127,7 @@
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p id="doneInfo"></p>
         <div class="btns"><button class="btn primary" id="doneNew">New board</button><button class="btn" id="doneClose">See board</button></div>
+        <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
     </div>
     <p class="status" id="status">Tap any pad to hear it.</p>
@@ -132,7 +137,7 @@
     <h2>How to play</h2>
     <p>Pick a board: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect board takes one move per pair.</p>
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
-    <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Each board size keeps its own bests, and so does Difficult mode, so a board played sounds-only is never compared with one where you could see the names.</p>
+    <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Tap <b>Best</b> above the board to see all of them on one score card, where you can also clear them. Each board size keeps its own bests, and so does Difficult mode, so a board played sounds-only is never compared with one where you could see the names.</p>
     <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on decks with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. <b>2 Players</b> takes turns on one device: find a match and you go again, miss and it's the other player's turn. <b>Daily</b> is one board a day, the same for everyone playing that deck and size; clear one every day to build a streak. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
     <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of whichever deck you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
@@ -849,11 +854,11 @@ function showBest(){
   const bx=$("bestBox");bx.hidden=style==="duo";$("duoBox").hidden=style!=="duo";
   if(style==="daily"){
     const n=Daily.streak();$("bestLbl").textContent="Streak";$("best").textContent=n+(n===1?" day":" days");
-    bx.title="Days in a row you've cleared a Daily board. Saved on this device.";
+    bx.title="Days in a row you've cleared a Daily board. Saved on this device. Tap to see all your best scores.";
   }else{
     $("bestLbl").textContent=(easyUsed?"Best":"Difficult best");
     $("best").textContent=style==="duo"?"—":Best.fmt(Best.get(bestKey(deck)));
-    bx.title="Your best on this deck, board size and style: fewest moves, then fastest time. Saved on this device.";
+    bx.title="Your best on this deck, board size and style: fewest moves, then fastest time. Saved on this device. Tap to see all your best scores.";
   }
   document.querySelectorAll(".decks button").forEach(btn=>{
     let sm=btn.querySelector("small");if(!sm){sm=document.createElement("small");btn.appendChild(sm)}
@@ -1061,7 +1066,7 @@ function showDone(title,big,lbl,info,p1){
   finishFanfare(title===null);
   if(title===null)return;
   $("doneTitle").textContent=title;$("doneLbl").textContent=lbl;$("doneTime").textContent=big;$("doneInfo").textContent=info;
-  c.classList.toggle("p1",!!p1);
+  c.classList.toggle("p1",!!p1);$("doneScores").hidden=style==="duo";
   const thisBoard=board,calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
   clearTimeout(doneTimer);
   doneTimer=setTimeout(()=>{if(thisBoard!==board||demo)return;c.hidden=false;$("doneNew").focus()},calm?250:900);
@@ -1069,6 +1074,12 @@ function showDone(title,big,lbl,info,p1){
 function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
 $("doneNew").onclick=()=>{track("done/new","Well done card: New board");build()};
 $("doneClose").onclick=()=>{track("done/close","Well done card: See board");hideDone();$("reset").focus({preventScroll:true})};
+// Best scores screen (assets/scores.js): from the Well done card, or by tapping the Best box
+const openScores=from=>window.PairodyScores&&PairodyScores.open(from);
+$("doneScores").onclick=()=>openScores("done");
+$("bestBox").onclick=()=>openScores(style==="daily"||style==="duo"?"streak":"best");
+$("bestBox").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("bestBox").click()}};
+addEventListener("pairody:bests-cleared",()=>showBest());
 addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("doneCard").hidden&&!document.querySelector("dialog[open]"))$("doneClose").click()});
 // Board cleared
 function finish(){
