@@ -270,10 +270,11 @@ dialog.scores .sc-done:empty{display:none}
 [data-kind="music"]{--k:139,108,255;--kink:#6A4FD6}
 [data-kind="words"]{--k:255,107,91;--kink:#C9382E}
 [data-kind="learning"]{--k:242,179,61;--kink:#9A6400}
+[data-kind="yours"]{--k:74,144,226;--kink:#2A6CB8}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) [data-kind="sounds"]{--kink:#4FD8CB}:root:not([data-theme="light"]) [data-kind="music"]{--kink:#B6A2FF}
-  :root:not([data-theme="light"]) [data-kind="words"]{--kink:#FF8E80}:root:not([data-theme="light"]) [data-kind="learning"]{--kink:#F6C866}}
+  :root:not([data-theme="light"]) [data-kind="words"]{--kink:#FF8E80}:root:not([data-theme="light"]) [data-kind="learning"]{--kink:#F6C866}:root:not([data-theme="light"]) [data-kind="yours"]{--kink:#7DB4F0}}
 :root[data-theme="dark"] [data-kind="sounds"]{--kink:#4FD8CB} :root[data-theme="dark"] [data-kind="music"]{--kink:#B6A2FF}
-:root[data-theme="dark"] [data-kind="words"]{--kink:#FF8E80} :root[data-theme="dark"] [data-kind="learning"]{--kink:#F6C866}
+:root[data-theme="dark"] [data-kind="words"]{--kink:#FF8E80} :root[data-theme="dark"] [data-kind="learning"]{--kink:#F6C866} :root[data-theme="dark"] [data-kind="yours"]{--kink:#7DB4F0}
 .deck-chip{display:flex;align-items:center;gap:10px;min-width:0;max-width:100%;padding:6px 12px 6px 6px;cursor:pointer;
   background:rgba(var(--k,46,196,182),.1);border:1px solid rgba(var(--k,46,196,182),.45);border-radius:14px;color:var(--fg);font:inherit;text-align:left}
 .deck-chip:hover{background:rgba(var(--k),.18)}
@@ -303,6 +304,8 @@ dialog.deckpick .dp-head h2{flex:1 1 auto;min-width:0;margin:0;padding:0;font-si
 dialog.deckpick .dp-sec-head h3{margin:0;font-family:var(--display);font-weight:600;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--kink,var(--led))}
 dialog.deckpick .dp-sec-head p{margin:0;font-size:.85rem;color:var(--muted)}
 .dp-featured .dp-sec-head h3{color:var(--led)!important}
+.dp-free .dp-sec-head h3{color:var(--ok)!important}
+.dp-plus .dp-sec-head h3{color:var(--led)!important}
 .dp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 @media (max-width:640px){.dp-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:480px){.dp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.decks{padding:2px 12px 14px}}

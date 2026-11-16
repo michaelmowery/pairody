@@ -16,7 +16,7 @@
   <li><b>Twenty boards.</b> Animals uses real recordings, and Animal Talk matches each animal’s name to its call. Everyday Sounds, Weather, Vehicles, Instruments and Ringtones are sounds to match by ear, and Seasonal changes with the calendar. Quotes, Jokes, Tongue Twisters, Say Hello, Homophones, Word Play, Capitals and Times Tables read pairs aloud: an opening and its ending, a riddle and its answer, hello and its language, words that sound alike, rhymes or opposites, countries and capitals or times tables. Melodies splits old tunes in two. Notes is ear training, and Phone Keypad and Morse Code match keys and letters to their beeps.</li>
   <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Difficult mode</b> for sounds only.</li>
   <li><b>Best scores</b> for each board, saved on this device. No account or sign-up.</li>
-  <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Music in the board picker.</li>
+  <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Your Music in the board picker.</li>
   <li class="web-only"><b>Free and Plus.</b> Animals, Jokes, every game size, Pairs, Daily and Difficult mode are free. Boards and styles tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
 </ul>
 <h3>Good to know</h3>
