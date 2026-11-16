@@ -64,9 +64,10 @@
   const canPlay = (deck) => !LOCKED || owns(deckTier(deck)) || triesLeft('deck:' + deck) > 0;
   const canPlayStyle = (style) => !LOCKED || owns(styleTier(style)) || triesLeft('style:' + style) > 0;
 
-  // The little "Plus" pill shown next to a Plus deck, style or feature. Free items get no tag.
-  function tierTag(tier){
-    if (tier === 'free') return null;
+  // The little "Plus" pill shown next to a Plus deck, style or feature. Free items get no tag,
+  // except in the deck picker's cards, which say Free too (showFree), like Noodlit's scene menu.
+  function tierTag(tier, showFree){
+    if (tier === 'free' && !showFree) return null;
     const tag = document.createElement('span');
     tag.className = 'tier-tag tier-' + tier;
     tag.textContent = TIERS[tier].label;
@@ -74,18 +75,20 @@
     return tag;
   }
 
-  function tagButtons(selector, tierOf, key){
+  function tagButtons(selector, tierOf, key, showFree){
     document.querySelectorAll(selector).forEach((btn) => {
       if (btn.querySelector('.tier-tag')) return;
-      const tag = tierTag(tierOf(btn.dataset[key]));
+      const tier = tierOf(btn.dataset[key]);
+      const tag = tierTag(tier, showFree);
       if (!tag) return;
-      // Before the best-score <small> on deck buttons, so the two don't jumble
-      btn.insertBefore(tag, btn.querySelector('small'));
-      btn.title = (btn.title ? btn.title + '. ' : '') + TIERS.plus.hint;
+      // Deck cards: after the name. Elsewhere: before the best-score <small>, so the two don't jumble
+      const host = btn.querySelector('.dt-name') || btn;
+      host.insertBefore(tag, host === btn ? btn.querySelector('small') : null);
+      if (tier !== 'free') btn.title = (btn.title ? btn.title + '. ' : '') + TIERS.plus.hint;
     });
   }
   function tagAll(){
-    tagButtons('.decks button[data-deck]', deckTier, 'deck');
+    tagButtons('.decks button[data-deck]', deckTier, 'deck', true);
     tagButtons('.styles button[data-style]', styleTier, 'style');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tagAll);

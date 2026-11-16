@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'A new deck picker', items: [
+      'Tap the deck name above the board to open the new <b>deck picker</b>: every deck is a card with a little picture of a matching pair and one line on how it plays.',
+      'Switch between <b>Grouped</b> (Sounds, Music, Words, Learning) and <b>All</b>, one A to Z list. <b>Featured</b> decks sit on top as a good place to start.',
+      'Each card shows your best score on that deck.',
+    ]},
     { date: '2026-11-16', title: 'Twelve more animals', items: [
       '<b>12 more real animal recordings:</b> hen, goose, donkey, raven, bear, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
       'Animals and Animal Talk now pick from 24 animals, so boards change much more from game to game.',

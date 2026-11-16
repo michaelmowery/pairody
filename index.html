@@ -80,45 +80,11 @@
 
   <div class="chassis">
     <div class="strip">
-      <div class="decks" role="group" aria-label="Sound deck">
-        <div class="deck-group">
-          <span class="deck-cat" aria-hidden="true">Sounds</span>
-          <div class="deck-row" role="group" aria-label="Sounds">
-            <button data-deck="animals" aria-pressed="true">Animals</button>
-            <button data-deck="everyday" aria-pressed="false">Everyday Sounds</button>
-            <button data-deck="keypad" aria-pressed="false">Phone Keypad</button>
-            <button data-deck="morse" aria-pressed="false">Morse Code</button>
-          </div>
-        </div>
-        <div class="deck-group">
-          <span class="deck-cat" aria-hidden="true">Music</span>
-          <div class="deck-row" role="group" aria-label="Music">
-            <button data-deck="notes" aria-pressed="false">Notes</button>
-            <button data-deck="melodies" aria-pressed="false">Melodies</button>
-            <button data-deck="instruments" aria-pressed="false">Instruments</button>
-            <button data-deck="seasonal" aria-pressed="false">Seasonal</button>
-            <a class="deck-link web-only" href="youtube.html" title="Play with songs from a YouTube playlist">Your music<span class="beta">Beta</span></a>
-          </div>
-        </div>
-        <div class="deck-group">
-          <span class="deck-cat" aria-hidden="true">Words</span>
-          <div class="deck-row" role="group" aria-label="Words">
-            <button data-deck="talk" aria-pressed="false">Animal Talk</button>
-            <button data-deck="quotes" aria-pressed="false">Quotes</button>
-            <button data-deck="jokes" aria-pressed="false">Jokes</button>
-            <button data-deck="twisters" aria-pressed="false">Tongue Twisters</button>
-            <button data-deck="hello" aria-pressed="false">Say Hello</button>
-            <button data-deck="wordplay" aria-pressed="false">Word Play</button>
-          </div>
-        </div>
-        <div class="deck-group">
-          <span class="deck-cat" aria-hidden="true">Learning</span>
-          <div class="deck-row" role="group" aria-label="Learning">
-            <button data-deck="brain" aria-pressed="false">Capitals</button>
-            <button data-deck="times" aria-pressed="false">Times Tables</button>
-          </div>
-        </div>
-      </div>
+      <button type="button" class="deck-chip" id="deckChip" aria-haspopup="dialog" aria-controls="deckPick">
+        <span class="dc-art" id="dcArt" aria-hidden="true">🦁</span>
+        <span class="dc-text"><span class="dc-cat" id="dcCat">Sounds</span><span class="dc-name" id="dcName">Animals</span></span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
+      </button>
       <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
@@ -166,10 +132,21 @@
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
     <p>Your best score for each deck (fewest moves, then fastest time) is saved on this device and shows next to the deck name. Tap <b>Best</b> above the board to see all of them on one score card, where you can also clear them. Each board size keeps its own bests, and so does Difficult mode, so a board played sounds-only is never compared with one where you could see the names.</p>
     <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily</b> is one board a day, the same for everyone playing that deck and size; clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on decks with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. <b>2 Players</b> takes turns on one device: find a match and you go again, miss and it's the other player's turn. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
-    <p>Each deck plays a little differently; the note under the deck buttons explains the one you picked.</p>
+    <p>Tap the deck name at the top to see every deck as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each deck plays a little differently; the note under the deck name explains the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a board of whichever deck you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo boards don't count toward your best scores.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </div>
+  <dialog class="info deckpick" id="deckPick" aria-labelledby="deckPickTitle">
+    <div class="dp-head">
+      <h2 id="deckPickTitle">Choose a deck</h2>
+      <div class="dp-view" role="radiogroup" aria-label="Show decks">
+        <button type="button" role="radio" data-view="all" aria-label="All decks, A to Z" title="All decks, A to Z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14M5 12h14M5 17.5h14"/></svg><span>All</span></button>
+        <button type="button" role="radio" data-view="grouped" aria-label="Grouped by kind" title="Grouped by kind"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Grouped</span></button>
+      </div>
+      <form method="dialog" class="dp-x"><button aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+    </div>
+    <div class="decks" id="deckBody" role="group" aria-label="Sound deck"></div>
+  </dialog>
   <footer>© 2026 Mount M Technologies, LLC</footer>
 </div>
 
@@ -1007,7 +984,7 @@ function fitGrid(){
 addEventListener("resize",()=>fitGrid());
 const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
   everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad"};
-// How each deck works, shown under the deck buttons
+// How each deck works, shown under the deck chip
 const DECKHELP={
   animals:"Real recordings of 24 animals, from a cat's meow to a humpback whale's moo. Find the two pads that make the same call. Each board picks a different mix, so you won't hear the same ones every time.",
   talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
@@ -1163,12 +1140,122 @@ function finish(){
     +(isNew&&prev?" Your old best was "+Best.fmt(prev).replace(" · "," moves, ")+".":isNew?" That's your best to beat.":moves===NP?"":" Perfect is "+NP+"."));
   showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
 }
-const ytLink=document.querySelector(".deck-link");if(ytLink)ytLink.addEventListener("click",()=>track("deck/youtube","Deck picked: Your music"));
-document.querySelectorAll(".decks button").forEach(btn=>btn.onclick=()=>{
-  deck=btn.dataset.deck;track("deck/"+deck,"Deck picked: "+DECKNAME[deck]);
-  document.querySelectorAll(".decks button").forEach(x=>x.setAttribute("aria-pressed",x===btn));
-  build();
+// ---- Deck picker: a chip shows the deck you're on; tapping it opens a panel of deck cards ----
+// Same pattern as Noodlit's scene menu: Featured on top, then either one A to Z list or a section
+// per kind (Sounds, Music, Words, Learning). Each card has a little picture of a matched pair, the
+// deck's kind, its name, a Free/Plus pill (assets/plus.js; hidden in the iOS app) and one line on
+// how it plays. A new deck: add it to DECKNAME/DECKHELP/DECKGEN as usual, then one line in DECKCARD.
+const DECKKINDS={
+  sounds:{name:"Sounds",hint:"Real and everyday sounds"},
+  music:{name:"Music",hint:"Notes, tunes and instruments"},
+  words:{name:"Words",hint:"Spoken pairs that go together"},
+  learning:{name:"Learning",hint:"Practice while you play"}
+};
+// id: [kind, the two pads in the picture, one line]. Order inside a kind = order in Grouped view.
+const DECKCARD={
+  animals:["sounds",["🦁","🦁"],"Real calls from 24 animals"],
+  everyday:["sounds",["🔔","🔔"],"Doorbells, kettles, sirens and more"],
+  keypad:["sounds",["5","☎️"],"Match each key to its dial tone"],
+  morse:["sounds",["S","···"],"Match a letter to its beeps"],
+  notes:["music",["C","C"],"Same pitch twice: real ear training"],
+  melodies:["music",["Twinkle…","…little star"],"Match the two halves of old tunes"],
+  instruments:["music",["🎻","🎻"],"One tune, played on many instruments"],
+  seasonal:["music",[SEASONS[season].art,SEASONS[season].art],"Changes with the calendar. Now: "+SEASONS[season].name],
+  youtube:["music",["▶","▶"],"Songs from your own YouTube playlist"],
+  talk:["words",["Cat","🐱"],"Match an animal's name to its call"],
+  quotes:["words",["To be…","…or not"],"Match a famous quote's start and end"],
+  jokes:["words",["Why?","😂"],"Match each joke to its punchline"],
+  twisters:["words",["She sells…","…seashells"],"Finish the tongue twister"],
+  hello:["words",["Bonjour","French"],"Hello in many languages"],
+  wordplay:["words",["cat","hat"],"Rhymes one board, opposites the next"],
+  brain:["learning",["France","Paris"],"Match each country to its capital"],
+  times:["learning",["7×8","56"],"Match each times table to its answer"]
+};
+const FEATURED=["animals","jokes","brain","melodies"];
+// The deck chip's little icon
+const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
+  talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🔤",brain:"🌍",times:"✖️"};
+const deckName=id=>id==="youtube"?"Your music":DECKNAME[id];
+const deckView=()=>{try{return localStorage.getItem("pairody-deckview")==="all"?"all":"grouped"}catch(e){return "grouped"}};
+function deckTile(id,showKind,from){
+  const [kind,pair,line]=DECKCARD[id],yt=id==="youtube";
+  const t=document.createElement(yt?"a":"button");
+  t.className="deck-tile";t.dataset.kind=kind;
+  if(yt){t.href="youtube.html";t.classList.add("web-only");t.addEventListener("click",()=>track("deck/youtube","Deck picked: Your music"))}
+  else{t.type="button";t.dataset.deck=id;t.setAttribute("aria-pressed",id===deck);t.onclick=()=>pickDeck(id,from)}
+  const thumb=document.createElement("span");thumb.className="dt-thumb";thumb.setAttribute("aria-hidden","true");
+  pair.forEach(x=>{const p=document.createElement("i");p.textContent=x;if(!/\p{Extended_Pictographic}/u.test(x)&&x.length>3)p.className="w";thumb.appendChild(p)});
+  t.appendChild(thumb);
+  if(showKind){const k=document.createElement("span");k.className="dt-kind";k.textContent=DECKKINDS[kind].name;t.appendChild(k)}
+  const n=document.createElement("span");n.className="dt-name";n.textContent=deckName(id);
+  if(yt){const b=document.createElement("span");b.className="beta";b.textContent="Beta";n.append(" ",b)}
+  t.appendChild(n);
+  const l=document.createElement("span");l.className="dt-line";l.textContent=line;t.appendChild(l);
+  if(!yt)t.title=DECKHELP[id].replace(/<[^>]+>/g,"");
+  return t;
+}
+function deckSection(cls,title,hint,ids,showKind,from,kind){
+  const sec=document.createElement("section");sec.className="dp-sec "+cls;if(kind)sec.dataset.kind=kind;
+  const h=document.createElement("div");h.className="dp-sec-head";
+  h.innerHTML="<h3>"+title+"</h3>"+(hint?"<p>"+hint+"</p>":"");
+  const g=document.createElement("div");g.className="dp-grid";ids.forEach(id=>g.appendChild(deckTile(id,showKind,from)));
+  sec.append(h,g);return sec;
+}
+function buildDeckPicker(){
+  const body=$("deckBody");body.textContent="";
+  const ids=Object.keys(DECKCARD);
+  const grouped=document.createElement("div");grouped.className="dp-grouped";
+  grouped.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));
+  Object.keys(DECKKINDS).forEach(k=>grouped.appendChild(deckSection("dp-kind",DECKKINDS[k].name,DECKKINDS[k].hint,ids.filter(id=>DECKCARD[id][0]===k),false,"grouped",k)));
+  const all=document.createElement("div");all.className="dp-all";
+  all.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));
+  const az=ids.slice().sort((a,b)=>deckName(a).localeCompare(deckName(b)));
+  all.appendChild(deckSection("dp-az","All decks","A to Z",az,true,"all"));
+  body.append(grouped,all);applyDeckView();
+}
+function applyDeckView(){
+  const v=deckView();
+  document.querySelectorAll(".dp-view [data-view]").forEach(b=>{const on=b.dataset.view===v;b.setAttribute("aria-checked",on);b.tabIndex=on?0:-1});
+  $("deckBody").querySelector(".dp-grouped").hidden=v!=="grouped";
+  $("deckBody").querySelector(".dp-all").hidden=v!=="all";
+}
+document.querySelectorAll(".dp-view [data-view]").forEach(b=>b.onclick=()=>{
+  if(b.dataset.view===deckView())return;
+  try{localStorage.setItem("pairody-deckview",b.dataset.view)}catch(e){}
+  track("decks/view/"+b.dataset.view,"Deck picker view: "+b.dataset.view);
+  applyDeckView();$("deckBody").scrollTop=0;$("deckPick").scrollTop=0;
 });
+document.querySelector(".dp-view").addEventListener("keydown",e=>{
+  if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key))return;
+  e.preventDefault();const nx=document.querySelector('.dp-view [data-view]:not([data-view="'+deckView()+'"])');nx.click();nx.focus();
+});
+function showDeckChip(){
+  const kind=DECKCARD[deck][0];
+  $("dcArt").textContent=DECKICON[deck]||"♪";
+  $("dcCat").textContent=DECKKINDS[kind].name;$("dcName").textContent=DECKNAME[deck];
+  $("deckChip").dataset.kind=kind;
+  $("deckChip").setAttribute("aria-label","Deck: "+DECKNAME[deck]+", "+DECKKINDS[kind].name+". Choose a deck.");
+  document.querySelectorAll(".decks button[data-deck]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.deck===deck));
+}
+function pickDeck(id,from){
+  $("deckPick").close();
+  deck=id;track("deck/"+deck,"Deck picked: "+DECKNAME[deck]);
+  if(from==="featured")track("decks/featured/"+deck,"Featured deck picked: "+DECKNAME[deck]);
+  showDeckChip();build();$("deckChip").focus();
+}
+$("deckChip").onclick=()=>{
+  document.querySelectorAll("dialog.info[open]").forEach(d=>d.close());
+  const dp=$("deckPick");dp.showModal();
+  track("decks/open","Deck picker opened");
+  const cur=dp.querySelector((deckView()==="all"?".dp-all .dp-az":".dp-grouped .dp-kind")+' [data-deck="'+deck+'"]');
+  if(cur){cur.focus({preventScroll:true});if(!FEATURED.includes(deck))cur.scrollIntoView({block:"center"});else dp.scrollTop=0}
+};
+// Tap outside the panel to close it
+$("deckPick").addEventListener("click",e=>{
+  if(e.target!==e.currentTarget)return;const r=e.currentTarget.getBoundingClientRect();
+  if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.currentTarget.close();
+});
+buildDeckPicker();showDeckChip();
 // Names show by default ("easy"); Difficult mode hides them.
 function easy(){return !$("difficult").checked}
 function applyEasy(){

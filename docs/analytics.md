@@ -24,7 +24,10 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | page view (`/`, `/youtube.html`) | each page load |
 | `launch/installed-app`, `launch/browser`, `launch/ios-app` | each page load, by how Pairody was opened (`ios-app` = the App Store app; its page views are tagged `/app/...`) |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
-| `deck/<id>` | a deck button tapped (animals, talk, everyday, instruments, seasonal, quotes, jokes, twisters, hello, wordplay, brain, times, melodies, notes, keypad, morse; the six after talk/before keypad were added 2026-11-16; `brain` is the Capitals deck, called Brain Food until 2026-11-16 when its times tables moved to their own `times` deck). Seasonal boards are not split by season; the season follows the date (Halloween Oct 1 to Nov 7, Holidays Nov 8 to Jan 6, Spring to May 31, Summer to Sep 30); `deck/youtube` = the Your music tile (web only) |
+| `deck/<id>` | a deck picked (a card in the deck picker since 2026-11-16, a deck button before that) (animals, talk, everyday, instruments, seasonal, quotes, jokes, twisters, hello, wordplay, brain, times, melodies, notes, keypad, morse; the six after talk/before keypad were added 2026-11-16; `brain` is the Capitals deck, called Brain Food until 2026-11-16 when its times tables moved to their own `times` deck). Seasonal boards are not split by season; the season follows the date (Halloween Oct 1 to Nov 7, Holidays Nov 8 to Jan 6, Spring to May 31, Summer to Sep 30); `deck/youtube` = the Your music tile (web only) |
+| `decks/open` | deck picker opened (the deck chip at the top of the board; added 2026-11-16) |
+| `decks/view/all`, `decks/view/grouped` | deck picker switched between one A to Z list and Grouped by kind (Grouped is the default) |
+| `decks/featured/<id>` | a deck picked from the picker's Featured row (also counted as `deck/<id>`) |
 | `play/<id>[/small\|/big][/triples\|/timed\|/2p\|/daily][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; the style suffix is left out for Pairs, the original game; `/difficult` = sounds only, no names) |
 | `win/<id>[/small\|/big][/<style>][/difficult]` | board cleared (style suffix as for `play`) |
 | `perfect/<id>[/small\|/big][/<style>]` | board cleared in one move per pair, or per set in Triples (not counted for 2 Players) |
@@ -36,7 +39,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | `difficult/on`, `difficult/off` | Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
 | `demo/done/<id>` | Demo finished the board |
-| `demo/stop/<id>` | Demo stopped early (Stop demo, New board or a deck button) |
+| `demo/stop/<id>` | Demo stopped early (Stop demo, New board or picking a deck) |
 | `welcome/demo` | Show demo tapped on the Early preview note (then `demo/start/<id>` follows) |
 | `yt/beta-unlocked` | Your music beta password entered |
 | `yt/load/playlist`, `yt/load/links` | Your music songs loaded (the playlist itself is not sent) |
