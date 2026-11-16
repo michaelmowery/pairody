@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Rhymes and Opposites', items: [
+      '<b>Word Play</b> is now <b>Rhymes</b>: every game is words and their rhymes. Your best scores carry over.',
+      '<b>Opposites</b> is its own board now, so you can pick it any time instead of every other game.',
+    ]},
     { date: '2026-11-16', title: 'Free boards first, and Your Music on its own', items: [
       'In <b>Choose a board</b>, the free boards now come first: at the top of each group, and in their own <b>Free</b> section in the All list.',
       '<b>Your music</b> has its own group, <b>Your Music</b>, at the end of the Grouped list.',

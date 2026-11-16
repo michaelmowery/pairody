@@ -13,7 +13,7 @@
     // Music
     ['notes','Notes'],['melodies','Melodies'],['instruments','Instruments'],['ringtones','Ringtones'],['seasonal','Seasonal'],
     // Words
-    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Word Play'],['homophones','Homophones'],
+    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Rhymes'],['opposites','Opposites'],['homophones','Homophones'],
     // Learning
     ['brain','Capitals'],['times','Times Tables'],
   ];
