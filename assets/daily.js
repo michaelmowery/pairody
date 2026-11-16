@@ -92,7 +92,7 @@
 
   $('tdPlay').onclick = () => {
     track('daily/card/play', 'Today\'s game card: Play');
-    const b = document.querySelector('.styles button[data-style="daily"]'); if (b) b.click();
+    const b = document.querySelector('button[data-style="daily"]'); if (b) b.click();
   };
   $('tdShare').onclick = () => share($('tdShare'), 'card');
   const ds = $('doneShare');

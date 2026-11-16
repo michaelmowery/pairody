@@ -35,6 +35,7 @@
 .deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
 .deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
 .row-btns{display:flex;gap:6px}
+.daily-pill[aria-pressed="true"]{border-color:var(--led);box-shadow:inset 0 0 0 1px var(--led)}
 .boardbar{gap:10px 14px}
 .boardbar #reset{margin-left:auto}
 .pad.matched .lbl{animation:pop .35s ease-out}
@@ -93,12 +94,11 @@
         <span class="dc-text"><span class="dc-cat" id="dcCat">Sounds</span><span class="dc-name" id="dcName">Animals</span></span>
         <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
       </button>
-      <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button></div>
+      <div class="row-btns"><button class="btn daily-pill" data-style="daily" aria-pressed="false" title="Today's Daily game: one game a day, the same for everyone. Keep your streak going. Tap again to go back to Pairs.">Daily</button><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
     <div class="styles" role="group" aria-label="Game style">
       <button data-style="pairs" aria-pressed="true" title="Find the pairs at your own pace">Pairs</button>
-      <button data-style="daily" aria-pressed="false" title="One game a day, the same for everyone. Keep your streak going.">Daily</button>
       <button data-style="triples" aria-pressed="false" title="Every sound is on three pads: find all three in one move">Triples</button>
       <button data-style="timed" aria-pressed="false" title="Find every pair before the clock runs out">Timed</button>
       <button data-style="duo" aria-pressed="false" title="Two players take turns on one device">2 Players</button>
@@ -139,7 +139,7 @@
     <p>Pick a size: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect game takes one move per pair.</p>
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
     <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own bests, and so does Difficult mode, so a game played sounds-only is never compared with one where you could see the names.</p>
-    <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily</b> is one game a day, the same for everyone playing that board and size; clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on boards with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. <b>2 Players</b> takes turns on one device: find a match and you go again, miss and it's the other player's turn. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
+    <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily</b>, at the top next to Demo, is one game a day, the same for everyone playing that board and size; clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on boards with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. <b>2 Players</b> takes turns on one device: find a match and you go again, miss and it's the other player's turn. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
     <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; the note under the board name explains the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
@@ -1440,13 +1440,16 @@ showSize();
 const SIZELBL={};document.querySelectorAll(".sizes button").forEach(b=>SIZELBL[b.dataset.size]=[b.querySelector("small").textContent,b.title]);
 const TRIPLESLBL={small:["4×3","12 pads, 4 sets of three"],classic:["5×3","15 pads, 5 sets of three"],big:["5×5","25 pads: 8 sets of three and a free center tile"]};
 function showStyle(){
-  document.querySelectorAll(".styles button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.style===style));
+  document.querySelectorAll("[data-style]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.style===style));
   document.querySelectorAll(".sizes button").forEach(b=>{const [l,t]=(style==="triples"?TRIPLESLBL:SIZELBL)[b.dataset.size];b.querySelector("small").textContent=l;b.title=t});
   document.body.dataset.style=style;
 }
-document.querySelectorAll(".styles button").forEach(btn=>btn.onclick=()=>{
-  if(btn.dataset.style===style&&!demo)return;
-  style=btn.dataset.style;try{localStorage.setItem("pairody-style",style)}catch(e){}
+// Daily sits in the top row next to Demo, the other styles in the style row. Tapping Daily
+// again while it's on goes back to Pairs.
+document.querySelectorAll("[data-style]").forEach(btn=>btn.onclick=()=>{
+  let to=btn.dataset.style;
+  if(to===style&&!demo){if(to!=="daily")return;to="pairs"}
+  style=to;try{localStorage.setItem("pairody-style",style)}catch(e){}
   track("style/"+style,"Game style picked: "+STYLES[style].name);
   showStyle();build();
 });
