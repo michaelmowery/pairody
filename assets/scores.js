@@ -9,11 +9,11 @@
   // Deck buttons order (by category, as in index.html). A deck that isn't listed here still shows, named from its id.
   const DECKS = [
     // Sounds
-    ['animals','Animals'],['everyday','Everyday Sounds'],['keypad','Phone Keypad'],['morse','Morse Code'],
+    ['animals','Animals'],['everyday','Everyday Sounds'],['weather','Weather'],['vehicles','Vehicles'],['keypad','Phone Keypad'],['morse','Morse Code'],
     // Music
-    ['notes','Notes'],['melodies','Melodies'],['instruments','Instruments'],['seasonal','Seasonal'],
+    ['notes','Notes'],['melodies','Melodies'],['instruments','Instruments'],['ringtones','Ringtones'],['seasonal','Seasonal'],
     // Words
-    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Word Play'],
+    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Word Play'],['homophones','Homophones'],
     // Learning
     ['brain','Capitals'],['times','Times Tables'],
   ];
