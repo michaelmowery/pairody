@@ -6,11 +6,16 @@
 // After a clear it fires "pairody:bests-cleared" on window so the page can refresh its Best box.
 (function(){
   const PREFIX = 'pairody-best:';
-  // Deck buttons order. A deck that isn't listed here still shows, named from its id.
+  // Deck buttons order (by category, as in index.html). A deck that isn't listed here still shows, named from its id.
   const DECKS = [
-    ['animals','Animals'],['talk','Animal Talk'],['everyday','Everyday Sounds'],['instruments','Instruments'],
-    ['seasonal','Seasonal'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],
-    ['wordplay','Word Play'],['brain','Brain Food'],['melodies','Melodies'],['notes','Notes'],['keypad','Phone Keypad'],['morse','Morse Code'],
+    // Sounds
+    ['animals','Animals'],['everyday','Everyday Sounds'],['keypad','Phone Keypad'],['morse','Morse Code'],
+    // Music
+    ['notes','Notes'],['melodies','Melodies'],['instruments','Instruments'],['seasonal','Seasonal'],
+    // Words
+    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Word Play'],
+    // Learning
+    ['brain','Brain Food'],
   ];
   const SIZES = [['small','Small'],['classic','Classic'],['big','Big']];
   const STYLES = [['pairs','Pairs'],['triples','Triples'],['timed','Timed']];

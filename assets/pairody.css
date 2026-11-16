@@ -271,3 +271,10 @@ dialog.scores .sc-done:empty{display:none}
 .readout .best.tap:hover b,.readout .best.tap:focus-visible b{text-decoration:underline;text-underline-offset:3px}
 .info-scores{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:2px 0 0}
 .sc-nw{white-space:nowrap}
+/* Deck categories: each group is a small label beside a wrapping row of its decks */
+.decks{display:grid;grid-template-columns:4.6rem minmax(0,1fr);gap:8px 6px;align-items:start;flex:1 1 480px;min-width:0}
+.deck-group{display:contents}
+.deck-cat{padding-top:9px;font-family:var(--display);font-weight:600;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.deck-row{display:flex;flex-wrap:wrap;gap:6px}
+.strip:has(.deck-group){align-items:flex-start}
+@media (max-width:520px){.decks{grid-template-columns:minmax(0,1fr);gap:4px}.deck-cat{padding-top:6px}.deck-row{gap:5px}}
