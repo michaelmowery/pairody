@@ -41,6 +41,8 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | `yt/beta-unlocked` | Your music beta password entered |
 | `yt/load/playlist`, `yt/load/links` | Your music songs loaded (the playlist itself is not sent) |
 | `yt/win[/hard]` | Your music board cleared |
+| `scores/open/info`, `scores/open/done`, `scores/open/best`, `scores/open/streak` | best scores screen opened from the info panel, the Well done card's All best scores, or by tapping the Best box (`streak` = the box while it shows the Daily streak or on 2 Players) (added 2026-11-16) |
+| `scores/clear` | best scores cleared after the confirmation step |
 | `info/open` | info panel opened |
 | `notes/open/info`, `notes/open/welcome` | release notes opened from the info panel's What's new, or from All release notes on the New version note (added 2026-11-15) |
 | `feedback` | Send feedback tapped |
