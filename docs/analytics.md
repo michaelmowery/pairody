@@ -24,7 +24,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | page view (`/`, `/youtube.html`) | each page load |
 | `launch/installed-app`, `launch/browser`, `launch/ios-app` | each page load, by how Pairody was opened (`ios-app` = the App Store app; its page views are tagged `/app/...`) |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
-| `deck/<id>` | a deck button tapped (animals, talk, quotes, jokes, wordplay, brain, melodies, notes, morse); `deck/youtube` = the Your music tile (web only) |
+| `deck/<id>` | a deck button tapped (animals, talk, everyday, instruments, seasonal, quotes, jokes, twisters, hello, wordplay, brain, melodies, notes, keypad, morse; the six after talk/before keypad were added 2026-11-16). Seasonal boards are not split by season; the season follows the date (Halloween Oct 1 to Nov 7, Holidays Nov 8 to Jan 6, Spring to May 31, Summer to Sep 30); `deck/youtube` = the Your music tile (web only) |
 | `play/<id>[/small\|/big][/triples\|/timed\|/2p\|/daily][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; the style suffix is left out for Pairs, the original game; `/difficult` = sounds only, no names) |
 | `win/<id>[/small\|/big][/<style>][/difficult]` | board cleared (style suffix as for `play`) |
 | `perfect/<id>[/small\|/big][/<style>]` | board cleared in one move per pair, or per set in Triples (not counted for 2 Players) |
