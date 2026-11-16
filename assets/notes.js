@@ -12,8 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
-    { date: '2026-11-16', title: 'Daily, up top', items: [
-      'The <b>Daily</b> button now sits in the top row next to <b>Demo</b>. Tap it again to go back to Pairs.',
+    { date: '2026-11-16', title: 'Daily Pairody, up top', items: [
+      'The daily game is now called <b>Daily Pairody</b>, and its button sits in the top row next to the board name. Tap it again to go back to Pairs.',
+      '<b>Demo</b> moved down next to <b>New game</b>, right above the pads.',
     ]},
     { date: '2026-11-16', title: 'Rhymes and Opposites', items: [
       '<b>Word Play</b> is now <b>Rhymes</b>: every game is words and their rhymes. Your best scores carry over.',

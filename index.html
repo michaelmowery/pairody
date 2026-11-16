@@ -37,7 +37,7 @@
 .row-btns{display:flex;gap:6px}
 .daily-pill[aria-pressed="true"]{border-color:var(--led);box-shadow:inset 0 0 0 1px var(--led)}
 .boardbar{gap:10px 14px}
-.boardbar #reset{margin-left:auto}
+.boardbar .bb-btns{margin-left:auto}
 .pad.matched .lbl{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
@@ -83,7 +83,7 @@
   <!-- Today's Daily game: filled in by assets/daily.js -->
   <section class="today" id="today" aria-labelledby="tdTitle" hidden>
     <div class="td-cal" aria-hidden="true"><span id="tdMon"></span><b id="tdDay"></b></div>
-    <div class="td-text"><h2 class="td-title" id="tdTitle">Daily game</h2><p class="td-sub" id="tdSub" aria-live="polite"></p></div>
+    <div class="td-text"><h2 class="td-title" id="tdTitle">Daily Pairody</h2><p class="td-sub" id="tdSub" aria-live="polite"></p></div>
     <div class="td-btns"><button class="btn primary" id="tdPlay">Play today's game</button><button class="btn" id="tdShare" hidden>Share</button></div>
   </section>
 
@@ -94,7 +94,7 @@
         <span class="dc-text"><span class="dc-cat" id="dcCat">Sounds</span><span class="dc-name" id="dcName">Animals</span></span>
         <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
       </button>
-      <div class="row-btns"><button class="btn daily-pill" data-style="daily" aria-pressed="false" title="Today's Daily game: one game a day, the same for everyone. Keep your streak going. Tap again to go back to Pairs.">Daily</button><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button></div>
+      <div class="row-btns"><button class="btn daily-pill" data-style="daily" aria-pressed="false" title="Daily Pairody: one game a day, the same for everyone. Keep your streak going. Tap again to go back to Pairs.">Daily Pairody</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
     <div class="styles" role="group" aria-label="Game style">
@@ -119,7 +119,7 @@
       <div class="duo" id="duoBox" hidden><span>Score</span><b><i id="s0"><small>P1</small>0</i> <i id="s1"><small>P2</small>0</i></b></div>
       <div class="best tap" id="bestBox" role="button" tabindex="0" title="Your best on this board and game size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
-    <button class="btn" id="reset">New game</button>
+    <div class="row-btns bb-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button><button class="btn" id="reset">New game</button></div>
     </div>
     <div class="board">
       <div class="grid" id="grid"></div>
@@ -139,7 +139,7 @@
     <p>Pick a size: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect game takes one move per pair.</p>
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
     <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own bests, and so does Difficult mode, so a game played sounds-only is never compared with one where you could see the names.</p>
-    <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily</b>, at the top next to Demo, is one game a day, the same for everyone playing that board and size; clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on boards with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. <b>2 Players</b> takes turns on one device: find a match and you go again, miss and it's the other player's turn. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
+    <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily Pairody</b>, at the top next to the board name, is one game a day, the same for everyone playing that board and size; clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on boards with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. <b>2 Players</b> takes turns on one device: find a match and you go again, miss and it's the other player's turn. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
     <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; the note under the board name explains the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
@@ -975,7 +975,7 @@ const sizeName=()=>size==="classic"?"":" ("+SIZES[size].name+")";
 const sizeTag=()=>size==="classic"?"":"/"+size; // analytics suffix; Classic boards keep their old event names
 // Board styles. "key" goes into the best-score key (null = no best scores: 2 Players and Daily);
 // "tag" is the analytics suffix. Pairs is the original game and keeps the old keys and event names.
-const STYLES={pairs:{name:"Pairs",key:"",tag:""},triples:{name:"Triples",key:"~triples",tag:"/triples"},timed:{name:"Timed",key:"~timed",tag:"/timed"},duo:{name:"2 Players",key:null,tag:"/2p"},daily:{name:"Daily",key:null,tag:"/daily"}};
+const STYLES={pairs:{name:"Pairs",key:"",tag:""},triples:{name:"Triples",key:"~triples",tag:"/triples"},timed:{name:"Timed",key:"~timed",tag:"/timed"},duo:{name:"2 Players",key:null,tag:"/2p"},daily:{name:"Daily Pairody",key:null,tag:"/daily"}};
 let style="pairs";try{const s=localStorage.getItem("pairody-style");if(STYLES[s])style=s}catch(e){}
 const styleTag=()=>STYLES[style].tag;
 const styleName=()=>style==="pairs"?"":" ("+STYLES[style].name+")";
@@ -1003,7 +1003,7 @@ function showBest(){
   const bx=$("bestBox");bx.hidden=style==="duo";$("duoBox").hidden=style!=="duo";
   if(style==="daily"){
     const n=Daily.streak();$("bestLbl").textContent="Streak";$("best").textContent=n+(n===1?" day":" days");
-    bx.title="Days in a row you've cleared a Daily game. Saved on this device. Tap to see all your best scores.";
+    bx.title="Days in a row you've cleared a Daily Pairody. Saved on this device. Tap to see all your best scores.";
   }else{
     $("bestLbl").textContent=(easyUsed?"Best":"Difficult best");
     $("best").textContent=style==="duo"?"—":Best.fmt(Best.get(bestKey(deck)));

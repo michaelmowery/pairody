@@ -46,7 +46,7 @@
       sub = 'Everyone playing ' + DECKNAME[deck] + sizeLabel(size) + ' gets these same pads today. '
         + (n ? 'Clear it to keep your 🔥 ' + n + '-day streak.' : 'Clear it to start a streak.');
     } else {
-      title = 'Daily game';
+      title = 'Daily Pairody';
       sub = 'Same pads for everyone today. ' + (n ? '🔥 ' + days(n) + ': play to keep your streak.' : 'Clear one a day to build a streak.');
     }
     $('tdTitle').textContent = title;
@@ -58,14 +58,14 @@
     card.hidden = false;
   }
 
-  // "Pairody Daily · Nov 16" / "Animals (Big): 14 moves, 1:02" / squares / streak / link
+  // "Daily Pairody · Nov 16" / "Animals (Big): 14 moves, 1:02" / squares / streak / link
   function shareText(r){
     const when = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const sq = (r.log || '').split('').map((c) => c === '1' ? '🟩' : '⬛');
     const rows = []; for (let i = 0; i < sq.length; i += 8) rows.push(sq.slice(i, i + 8).join(''));
     const pairs = SIZES[r.size] ? SIZES[r.size].pairs : 0;
     const extras = [r.moves === pairs ? '⭐ Perfect' : '', r.easy === false ? '🎧 Sounds only' : '', r.streak ? '🔥 ' + days(r.streak) : ''].filter(Boolean);
-    return ['Pairody Daily · ' + when,
+    return ['Daily Pairody · ' + when,
       (DECKNAME[r.deck] || r.deck) + sizeLabel(r.size) + ': ' + r.moves + ' moves, ' + fmt(r.secs)]
       .concat(rows, extras.length ? [extras.join('  ')] : [], ['https://pairody.app']).join('\n');
   }
