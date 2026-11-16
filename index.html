@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="assets/pairody.css">
 <script src="assets/native.js"></script>
 <script src="assets/best.js"></script>
-<script src="assets/plus.js" defer></script>
+<script src="assets/plus.js"></script>
 <script src="assets/update.js"></script>
 <script src="assets/notes.js" defer></script>
 <script src="assets/scores.js" defer></script>
@@ -127,7 +127,7 @@
         <h2 id="doneTitle">Well done!</h2>
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p id="doneInfo"></p>
-        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See pads</button></div>
+        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
     </div>
@@ -1234,7 +1234,7 @@ function showDone(title,big,lbl,info,p1){
 }
 function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
 $("doneNew").onclick=()=>{track("done/new","Well done card: New game");build()};
-$("doneClose").onclick=()=>{track("done/close","Well done card: See pads");hideDone();$("reset").focus({preventScroll:true})};
+$("doneClose").onclick=()=>{track("done/close","Well done card: See game");hideDone();$("reset").focus({preventScroll:true})};
 // Best scores screen (assets/scores.js): from the Well done card, or by tapping the Best box
 const openScores=from=>window.PairodyScores&&PairodyScores.open(from);
 $("doneScores").onclick=()=>openScores("done");
@@ -1295,7 +1295,8 @@ const DECKKINDS={
   sounds:{name:"Sounds",hint:"Real and everyday sounds"},
   music:{name:"Music",hint:"Notes, tunes and instruments"},
   words:{name:"Words",hint:"Spoken pairs that go together"},
-  learning:{name:"Learning",hint:"Practice while you play"}
+  learning:{name:"Learning",hint:"Practice while you play"},
+  yours:{name:"Your Music",hint:"Play with songs from a YouTube playlist"}
 };
 // id: [kind, the two pads in the picture, one line]. Order inside a kind = order in Grouped view.
 const DECKCARD={
@@ -1310,7 +1311,7 @@ const DECKCARD={
   instruments:["music",["🎻","🎻"],"One tune, played on many instruments"],
   ringtones:["music",["📱","📱"],"Match the phone jingles"],
   seasonal:["music",[SEASONS[season].art,SEASONS[season].art],"Changes with the calendar. Now: "+SEASONS[season].name],
-  youtube:["music",["▶","▶"],"Songs from your own YouTube playlist"],
+  youtube:["yours",["▶","▶"],"Songs from your own YouTube playlist"],
   talk:["words",["Cat","🐱"],"Match an animal's name to its call"],
   quotes:["words",["To be…","…or not"],"Match a famous quote's start and end"],
   jokes:["words",["Why?","😂"],"Match each joke to its punchline"],
@@ -1356,11 +1357,20 @@ function buildDeckPicker(){
   const ids=Object.keys(DECKCARD);
   const grouped=document.createElement("div");grouped.className="dp-grouped";
   grouped.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));
-  Object.keys(DECKKINDS).forEach(k=>grouped.appendChild(deckSection("dp-kind",DECKKINDS[k].name,DECKKINDS[k].hint,ids.filter(id=>DECKCARD[id][0]===k),false,"grouped",k)));
+  // Free boards come first (Michael, 2026-11-16): first in each group, and in their own section
+  // in All. Your music counts as free. The iOS app shows no Free/Plus yet, so it keeps one list.
+  const tiers=!document.documentElement.classList.contains("native")&&window.PairodyPlus;
+  const isFree=id=>id==="youtube"||!tiers||PairodyPlus.deckTier(id)==="free";
+  const freeFirst=list=>tiers?list.filter(isFree).concat(list.filter(id=>!isFree(id))):list;
+  Object.keys(DECKKINDS).forEach(k=>grouped.appendChild(deckSection("dp-kind",DECKKINDS[k].name,DECKKINDS[k].hint,freeFirst(ids.filter(id=>DECKCARD[id][0]===k)),false,"grouped",k)));
+  grouped.querySelector('.dp-kind[data-kind="yours"]')?.classList.add("web-only"); // the iOS app has no Your music
   const all=document.createElement("div");all.className="dp-all";
   all.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));
   const az=ids.slice().sort((a,b)=>deckName(a).localeCompare(deckName(b)));
-  all.appendChild(deckSection("dp-az","All boards","A to Z",az,true,"all"));
+  if(tiers){
+    all.appendChild(deckSection("dp-az dp-free","Free","Always included, A to Z",az.filter(isFree),true,"all"));
+    all.appendChild(deckSection("dp-az dp-plus","Plus","Part of Pairody Plus later. Free for everyone for now",az.filter(id=>!isFree(id)),true,"all"));
+  }else all.appendChild(deckSection("dp-az","All boards","A to Z",az,true,"all"));
   body.append(grouped,all);applyDeckView();
 }
 function applyDeckView(){

@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Free boards first, and Your Music on its own', items: [
+      'In <b>Choose a board</b>, the free boards now come first: at the top of each group, and in their own <b>Free</b> section in the All list.',
+      '<b>Your music</b> has its own group, <b>Your Music</b>, at the end of the Grouped list.',
+    ]},
     { date: '2026-11-16', title: 'Today\'s game', items: [
       'A <b>Daily game</b> card now sits at the top: one game a day, the same pads for everyone, with today\'s date and your 🔥 streak. Tap <b>Play today\'s game</b> to jump in.',
       'Once you clear it, the card shows when the next game starts.',
@@ -58,7 +62,7 @@
     { date: '2026-11-16', title: 'Well done!', items: [
       'Clear a game and it lights up with a green ring, then a <b>Well done</b> card shows your time and moves, with a <b>New game</b> button right there.',
       'New bests, perfect games and Daily streaks get called out on the card. In <b>2 Players</b> it names the winner.',
-      'Tap <b>See pads</b> to close the card and look back over what you matched.',
+      'Tap <b>See game</b> to close the card and look back over what you matched.',
     ]},
     { date: '2026-11-16', title: 'Six new boards', items: [
       '<b>Everyday Sounds:</b> a doorbell, a kettle, a ringing phone, a siren and more.',
