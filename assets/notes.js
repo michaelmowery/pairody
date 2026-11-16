@@ -63,9 +63,9 @@
       'Switch between <b>Grouped</b> (Sounds, Music, Words, Learning) and <b>All</b>, one A to Z list. <b>Featured</b> boards sit on top as a good place to start.',
       'Each card shows your best score on that board.',
     ]},
-    { date: '2026-11-16', title: 'Twelve more animals', items: [
-      '<b>12 more real animal recordings:</b> hen, goose, donkey, raven, bear, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
-      'Animals and Animal Talk now pick from 24 animals, so games change much more from one to the next.',
+    { date: '2026-11-16', title: 'Eleven more animals', items: [
+      '<b>11 more real animal recordings:</b> hen, goose, donkey, raven, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
+      'Animals and Animal Talk now pick from 23 animals, so games change much more from one to the next.',
     ]},
     { date: '2026-11-16', title: 'Boards in groups', items: [
       'Boards are now grouped into <b>Sounds</b>, <b>Music</b>, <b>Words</b> and <b>Learning</b>, so it is easier to find the kind of game you are in the mood for.',
