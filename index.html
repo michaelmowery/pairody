@@ -81,23 +81,43 @@
   <div class="chassis">
     <div class="strip">
       <div class="decks" role="group" aria-label="Sound deck">
-        <button data-deck="animals" aria-pressed="true">Animals</button>
-        <button data-deck="talk" aria-pressed="false">Animal Talk</button>
-        <button data-deck="everyday" aria-pressed="false">Everyday Sounds</button>
-        <button data-deck="instruments" aria-pressed="false">Instruments</button>
-        <button data-deck="seasonal" aria-pressed="false">Seasonal</button>
-        <button data-deck="quotes" aria-pressed="false">Quotes</button>
-        <button data-deck="jokes" aria-pressed="false">Jokes</button>
-        <button data-deck="twisters" aria-pressed="false">Tongue Twisters</button>
-        <button data-deck="hello" aria-pressed="false">Say Hello</button>
-        <button data-deck="wordplay" aria-pressed="false">Word Play</button>
-        <button data-deck="brain" aria-pressed="false">Capitals</button>
-        <button data-deck="times" aria-pressed="false">Times Tables</button>
-        <button data-deck="melodies" aria-pressed="false">Melodies</button>
-        <button data-deck="notes" aria-pressed="false">Notes</button>
-        <button data-deck="keypad" aria-pressed="false">Phone Keypad</button>
-        <button data-deck="morse" aria-pressed="false">Morse Code</button>
-        <a class="deck-link web-only" href="youtube.html" title="Play with songs from a YouTube playlist">Your music<span class="beta">Beta</span></a>
+        <div class="deck-group">
+          <span class="deck-cat" aria-hidden="true">Sounds</span>
+          <div class="deck-row" role="group" aria-label="Sounds">
+            <button data-deck="animals" aria-pressed="true">Animals</button>
+            <button data-deck="everyday" aria-pressed="false">Everyday Sounds</button>
+            <button data-deck="keypad" aria-pressed="false">Phone Keypad</button>
+            <button data-deck="morse" aria-pressed="false">Morse Code</button>
+          </div>
+        </div>
+        <div class="deck-group">
+          <span class="deck-cat" aria-hidden="true">Music</span>
+          <div class="deck-row" role="group" aria-label="Music">
+            <button data-deck="notes" aria-pressed="false">Notes</button>
+            <button data-deck="melodies" aria-pressed="false">Melodies</button>
+            <button data-deck="instruments" aria-pressed="false">Instruments</button>
+            <button data-deck="seasonal" aria-pressed="false">Seasonal</button>
+            <a class="deck-link web-only" href="youtube.html" title="Play with songs from a YouTube playlist">Your music<span class="beta">Beta</span></a>
+          </div>
+        </div>
+        <div class="deck-group">
+          <span class="deck-cat" aria-hidden="true">Words</span>
+          <div class="deck-row" role="group" aria-label="Words">
+            <button data-deck="talk" aria-pressed="false">Animal Talk</button>
+            <button data-deck="quotes" aria-pressed="false">Quotes</button>
+            <button data-deck="jokes" aria-pressed="false">Jokes</button>
+            <button data-deck="twisters" aria-pressed="false">Tongue Twisters</button>
+            <button data-deck="hello" aria-pressed="false">Say Hello</button>
+            <button data-deck="wordplay" aria-pressed="false">Word Play</button>
+          </div>
+        </div>
+        <div class="deck-group">
+          <span class="deck-cat" aria-hidden="true">Learning</span>
+          <div class="deck-row" role="group" aria-label="Learning">
+            <button data-deck="brain" aria-pressed="false">Capitals</button>
+            <button data-deck="times" aria-pressed="false">Times Tables</button>
+          </div>
+        </div>
       </div>
       <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button></div>
     </div>

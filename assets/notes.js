@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Decks in groups', items: [
+      'Decks are now grouped into <b>Sounds</b>, <b>Music</b>, <b>Words</b> and <b>Learning</b>, so it is easier to find the kind of board you are in the mood for.',
+    ]},
     { date: '2026-11-16', title: 'Capitals and Times Tables', items: [
       '<b>Brain Food</b> is now <b>Capitals</b>: every board is countries and their capitals. Your best scores carry over.',
       '<b>Times Tables</b> is its own deck now, so you can pick it any time instead of every other board.',
