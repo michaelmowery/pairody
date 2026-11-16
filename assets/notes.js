@@ -58,7 +58,7 @@
     { date: '2026-11-16', title: 'Well done!', items: [
       'Clear a game and it lights up with a green ring, then a <b>Well done</b> card shows your time and moves, with a <b>New game</b> button right there.',
       'New bests, perfect games and Daily streaks get called out on the card. In <b>2 Players</b> it names the winner.',
-      'Tap <b>See pads</b> to close the card and look back over what you matched.',
+      'Tap <b>See game</b> to close the card and look back over what you matched.',
     ]},
     { date: '2026-11-16', title: 'Six new boards', items: [
       '<b>Everyday Sounds:</b> a doorbell, a kettle, a ringing phone, a siren and more.',

@@ -127,7 +127,7 @@
         <h2 id="doneTitle">Well done!</h2>
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p id="doneInfo"></p>
-        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See pads</button></div>
+        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
     </div>
@@ -1234,7 +1234,7 @@ function showDone(title,big,lbl,info,p1){
 }
 function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
 $("doneNew").onclick=()=>{track("done/new","Well done card: New game");build()};
-$("doneClose").onclick=()=>{track("done/close","Well done card: See pads");hideDone();$("reset").focus({preventScroll:true})};
+$("doneClose").onclick=()=>{track("done/close","Well done card: See game");hideDone();$("reset").focus({preventScroll:true})};
 // Best scores screen (assets/scores.js): from the Well done card, or by tapping the Best box
 const openScores=from=>window.PairodyScores&&PairodyScores.open(from);
 $("doneScores").onclick=()=>openScores("done");
