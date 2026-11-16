@@ -9,11 +9,11 @@
   // Deck buttons order (by category, as in index.html). A deck that isn't listed here still shows, named from its id.
   const DECKS = [
     // Sounds
-    ['animals','Animals'],['everyday','Everyday Sounds'],['keypad','Phone Keypad'],['morse','Morse Code'],
+    ['animals','Animals'],['everyday','Everyday Sounds'],['weather','Weather'],['vehicles','Vehicles'],['keypad','Phone Keypad'],['morse','Morse Code'],
     // Music
-    ['notes','Notes'],['melodies','Melodies'],['instruments','Instruments'],['seasonal','Seasonal'],
+    ['notes','Notes'],['melodies','Melodies'],['instruments','Instruments'],['ringtones','Ringtones'],['seasonal','Seasonal'],
     // Words
-    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Word Play'],
+    ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Word Play'],['homophones','Homophones'],
     // Learning
     ['brain','Capitals'],['times','Times Tables'],
   ];
@@ -53,7 +53,7 @@
   function cell(v, row){
     if (!v) return '<td class="sc-none">—</td>';
     const perfect = v.moves === PAIRS[row.style][row.size];
-    return `<td><b>${v.moves}</b>${perfect ? '<span class="sc-star" title="Perfect board" aria-label="perfect">★</span>' : ''}`
+    return `<td><b>${v.moves}</b>${perfect ? '<span class="sc-star" title="Perfect game" aria-label="perfect">★</span>' : ''}`
       + `<span class="sc-time">${fmtTime(v.secs)}</span></td>`;
   }
 
@@ -73,7 +73,7 @@
         rows.push(`<tr><th scope="row">${szName}${st === 'pairs' ? '' : ' · ' + stName}</th>${cell(r.names, r)}${cell(r.difficult, r)}</tr>`);
       }
       html += `<section class="sc-deck"><h3>${esc(names.get(id))}</h3><table class="sc-table">`
-        + '<thead><tr><th scope="col">Board</th><th scope="col">Names</th><th scope="col">Difficult</th></tr></thead>'
+        + '<thead><tr><th scope="col">Game</th><th scope="col">Names</th><th scope="col">Difficult</th></tr></thead>'
         + `<tbody>${rows.join('')}</tbody></table></section>`;
     }
     if (yt.length) {
@@ -81,13 +81,13 @@
       html += `<section class="sc-deck"><h3>Your music</h3><p class="sc-note">Best scores for ${yt.length} ${yt.length === 1 ? 'playlist or song set' : 'playlists and song sets'}. They show on the Your music page when you load those songs again.</p></section>`;
     }
     const summary = count
-      ? `<p class="sc-summary"><b>${count}</b> best ${count === 1 ? 'score' : 'scores'} on ${played.length + (yt.length ? 1 : 0)} ${played.length + (yt.length ? 1 : 0) === 1 ? 'deck' : 'decks'}`
-        + (perfect ? ` · <span class="sc-nw"><b>${perfect}</b> perfect ${perfect === 1 ? 'board' : 'boards'} <span class="sc-star">★</span></span>` : '') + '</p>'
-      : '<div class="sc-empty"><p><b>No best scores yet.</b></p><p>Clear a board and your score shows up here. Each deck keeps a best for every board size and style, with and without Difficult mode.</p></div>';
-    const legend = count ? '<p class="sc-legend">Fewest moves, then fastest time. <b>Names</b> = sound names shown; <b>Difficult</b> = sounds only. ★ = a perfect board, one move per pair.</p>' : '';
+      ? `<p class="sc-summary"><b>${count}</b> best ${count === 1 ? 'score' : 'scores'} on ${played.length + (yt.length ? 1 : 0)} ${played.length + (yt.length ? 1 : 0) === 1 ? 'board' : 'boards'}`
+        + (perfect ? ` · <span class="sc-nw"><b>${perfect}</b> perfect ${perfect === 1 ? 'game' : 'games'} <span class="sc-star">★</span></span>` : '') + '</p>'
+      : '<div class="sc-empty"><p><b>No best scores yet.</b></p><p>Clear a game and your score shows up here. Each board keeps a best for every game size and style, with and without Difficult mode.</p></div>';
+    const legend = count ? '<p class="sc-legend">Fewest moves, then fastest time. <b>Names</b> = sound names shown; <b>Difficult</b> = sounds only. ★ = a perfect game, one move per pair.</p>' : '';
     const rest = count && unplayed.length ? `<p class="sc-unplayed"><b>Not played yet:</b> ${unplayed.map((id) => esc(names.get(id))).join(', ')}.</p>` : '';
     let streak = '';
-    try { if (typeof Daily !== 'undefined' && Daily.streak) { const n = Daily.streak(); if (n) streak = `<p class="sc-streak">Daily streak: <b>${n} ${n === 1 ? 'day' : 'days'}</b>. Daily boards and 2 Players don't set best scores.</p>`; } } catch (e) {}
+    try { if (typeof Daily !== 'undefined' && Daily.streak) { const n = Daily.streak(); if (n) streak = `<p class="sc-streak">Daily streak: <b>${n} ${n === 1 ? 'day' : 'days'}</b>. Daily games and 2 Players don't set best scores.</p>`; } } catch (e) {}
     return { body: summary + legend + html + rest + streak, count };
   }
 

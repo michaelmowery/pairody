@@ -6,18 +6,18 @@
 <p class="info-tag"><span class="web-only">Preview</span><span class="native-only">About</span></p>
 <h2 id="infoTitle"><span class="web-only">You're playing an early preview</span><span class="native-only">About Pairody</span></h2>
 <p class="web-only">Pairody is new and still taking shape. It's free to play while we build it, and things may change, move around, or occasionally break.</p>
-<p class="native-only">Memory match, played by ear. Pairody is free to play, with no ads and no accounts, and new decks arrive with app updates.</p>
+<p class="native-only">Memory match, played by ear. Pairody is free to play, with no ads and no accounts, and new boards arrive with app updates.</p>
 <div class="info-news" hidden>
   <p class="info-news-latest"></p>
   <button type="button" class="btn info-news-btn">What's new</button>
 </div>
 <h3>What's here now</h3>
 <ul>
-  <li><b>Sixteen decks.</b> Animals uses real recordings, and Animal Talk matches each animal’s name to its call. Everyday Sounds and Instruments are sounds to match by ear, and Seasonal changes with the calendar. Quotes, Jokes, Tongue Twisters, Say Hello, Word Play, Capitals and Times Tables read pairs aloud: an opening and its ending, a riddle and its answer, hello and its language, rhymes or opposites, countries and capitals or times tables. Melodies splits old tunes in two. Notes is ear training, and Phone Keypad and Morse Code match keys and letters to their beeps.</li>
+  <li><b>Twenty boards.</b> Animals uses real recordings, and Animal Talk matches each animal’s name to its call. Everyday Sounds, Weather, Vehicles, Instruments and Ringtones are sounds to match by ear, and Seasonal changes with the calendar. Quotes, Jokes, Tongue Twisters, Say Hello, Homophones, Word Play, Capitals and Times Tables read pairs aloud: an opening and its ending, a riddle and its answer, hello and its language, words that sound alike, rhymes or opposites, countries and capitals or times tables. Melodies splits old tunes in two. Notes is ear training, and Phone Keypad and Morse Code match keys and letters to their beeps.</li>
   <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Difficult mode</b> for sounds only.</li>
-  <li><b>Best scores</b> for each deck, saved on this device. No account or sign-up.</li>
-  <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist. It's open to beta testers for now. Find it under Music in the deck picker.</li>
-  <li class="web-only"><b>Free and Plus.</b> Animals, Jokes, every board size, Pairs, Daily and Difficult mode are free. Decks and styles tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
+  <li><b>Best scores</b> for each board, saved on this device. No account or sign-up.</li>
+  <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Music in the board picker.</li>
+  <li class="web-only"><b>Free and Plus.</b> Animals, Jokes, every game size, Pairs, Daily and Difficult mode are free. Boards and styles tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>
@@ -28,14 +28,14 @@
 </ul>
 <div class="info-scores-box" hidden>
 <h3>Best scores</h3>
-<p>Every best score saved on this device, by deck, board size and style. You can clear them there too.</p>
+<p>Every best score saved on this device, by board, game size and style. You can clear them there too.</p>
 <div class="info-scores"><button type="button" class="btn info-scores-btn">See best scores</button></div>
 </div>
 <h3>Privacy</h3>
-<p>To learn which decks and features people use, Pairody sends anonymous counts (like "Animals board cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. <span class="web-only">Your playlists and song links are never sent. </span><a href="privacy.html">Privacy policy</a></p>
+<p>To learn which boards and features people use, Pairody sends anonymous counts (like "Animals game cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. <span class="web-only">Your playlists and song links are never sent. </span><a href="privacy.html">Privacy policy</a></p>
 <label class="toggle info-analytics"><input type="checkbox" name="analytics" checked><span>Anonymous usage counts (saved on this device)</span></label>
 <h3>Feedback</h3>
-<p>Found a bug, or have an idea for a deck? We'd love to hear it.</p>
+<p>Found a bug, or have an idea for a board? We'd love to hear it.</p>
 <div class="info-feedback"><a class="btn info-feedback-btn" href="mailto:mountmtech@gmail.com?subject=Pairody%20feedback">Send feedback</a>
 <span class="info-email">mountmtech@gmail.com</span></div>
 <h3>Preferences</h3>
