@@ -12,6 +12,12 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Four new boards', items: [
+      '<b>Weather:</b> rain, thunder, wind, hail, a blizzard and more.',
+      '<b>Vehicles:</b> a steam train, sirens, a helicopter, a ship\'s horn, a race car and more.',
+      '<b>Ringtones:</b> little phone jingles to match by tune and sound.',
+      '<b>Homophones:</b> words that sound the same but mean different things, like knight and night.',
+    ]},
     { date: '2026-11-16', title: 'Decks are now boards', items: [
       'What used to be called a <b>deck</b> (Animals, Jokes, Capitals and the rest) is now a <b>board</b>. Pick one with <b>Choose a board</b>.',
       'One round is now a <b>game</b>: <b>New game</b>, game sizes, and a <b>Daily</b> game each day. Your best scores and streaks carry over.',

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pairody: memory match, played by ear</title>
-<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, everyday sounds, instruments, famous quotes, jokes, tongue twisters, hello in many languages, old tunes, Morse code and more.">
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, everyday sounds, instruments, weather, vehicles, ringtones, famous quotes, jokes, tongue twisters, homophones, hello in many languages, old tunes, Morse code and more.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Pairody">
@@ -829,10 +829,137 @@ function seasonNow(d=new Date()){
 }
 let season=seasonNow();
 const pickSeasonal=()=>{season=seasonNow();return pickUnique(SEASONS[season].items,e=>e[0])};
+// Weather: rain, thunder, wind and more, all made in the browser. [name, emoji, play(t)]
+const drop=(t,lo,hi,vol)=>voice(t,{type:"sine",f:[[0,rnd(lo,hi)],[.03,rnd(lo,hi)*1.6]],dur:.04,ft:"lowpass",fq:8000,vol,atk:.002});
+const WEATHER=[
+  ["Light rain","🌦️",t=>{nz(t,2.2,{f:4500,q:.4,vol:.1,swell:true});for(let k=0;k<16;k++)drop(t+rnd(0,2),1400,2800,.09)}],
+  ["Downpour","🌧️",t=>{nz(t,2.3,{type:"lowpass",f:6000,vol:.45,swell:true});nz(t,2.3,{f:1100,q:.5,vol:.3,swell:true});for(let k=0;k<30;k++)drop(t+rnd(.2,2),1500,3500,.05)}],
+  ["Thunderclap","⚡",t=>{nz(t,.3,{type:"highpass",f:1500,vol:1,atk:.002});nz(t,.6,{f:2500,q:.3,vol:.9,atk:.002});nz(t+.05,2,{type:"lowpass",f:[[0,900],[2,90]],q:.5,vol:1,atk:.02})}],
+  ["Rolling thunder","⛈️",t=>{nz(t,2.4,{type:"lowpass",f:130,vol:1,swell:true});for(let k=0;k<4;k++)nz(t+k*.5+rnd(0,.15),1.1,{type:"lowpass",f:rnd(160,320),vol:1,atk:.25})}],
+  ["Breeze","🍃",t=>nz(t,2.2,{type:"lowpass",f:[[0,300],[1.1,750],[2.2,350]],q:.6,vol:.4,swell:true})],
+  ["Howling gale","🌬️",t=>{nz(t,2.4,{f:[[0,500],[.8,1400],[1.5,800],[2.4,1600]],q:14,vol:1,swell:true});nz(t,2.4,{type:"lowpass",f:500,vol:.3,swell:true})}],
+  ["Hail","🧊",t=>{nz(t,2,{f:3000,q:.6,vol:.06,swell:true});for(let k=0;k<40;k++){const d=rnd(0,2);nz(t+d,.025,{f:rnd(2500,5000),q:3,vol:rnd(.5,1)});tone(rnd(1800,3200),t+d,.03,"square",.03)}}],
+  ["Puddle drips","💧",t=>[0,.42,.7,1.15,1.5,1.85].forEach(d=>{voice(t+d,{type:"sine",f:[[0,500],[.07,1300]],dur:.09,ft:"lowpass",fq:5000,vol:.4,atk:.003});partials(rnd(1100,1400),t+d+.05,[[1,1,.12]],{vol:.05})})],
+  ["Blizzard","❄️",t=>{nz(t,2.4,{type:"highpass",f:3000,vol:.25,swell:true});nz(t,2.4,{f:[[0,1800],[1.2,2700],[2.4,1500]],q:20,vol:.9,swell:true})}],
+  ["Tornado","🌪️",t=>{nz(t,2.4,{type:"lowpass",f:[[0,200],[1.2,550],[2.4,250]],q:2,vol:1,swell:true});sus(55,t,2.4,{type:"sawtooth",vol:.12,atk:.8,rel:.8,ft:"lowpass",fq:220,vib:.03,rate:3})}],
+  ["Rain on a tin roof","🏠",t=>{nz(t,2.2,{f:2500,q:.5,vol:.08,swell:true});for(let k=0;k<22;k++)partials(rnd(1500,2600),t+rnd(0,2),[[1,1,.18],[2.7,.5,.1]],{vol:.07})}],
+  ["Foghorn","🌫️",t=>sus(110,t,1.7,{type:"sawtooth",vol:.2,atk:.2,rel:.4,ft:"lowpass",fq:500,harm:[[1.5,.4,"sawtooth"]]})],
+  ["Storm warning","📻",t=>[0,.9].forEach(d=>beep(1050,t+d,.7,{vol:.15}))],
+  ["Snow footsteps","☃️",t=>[0,.55,1.1,1.65].forEach(d=>{for(let j=0;j<6;j++)nz(t+d+j*.025,.05,{type:"lowpass",f:rnd(1500,3200),vol:.55})})]
+];
+const pickWeather=()=>pickUnique(WEATHER,e=>e[0]).map(([n,art,play])=>[n,play,art,0,n]);
+
+// Vehicles: trains, sirens, horns and engines, all made in the browser. [name, emoji, play(t)]
+const VEHICLES=[
+  ["Steam train","🚂",t=>{let x=0;for(let k=0;k<12;k++){nz(t+x,.13,{type:"lowpass",f:k%2?900:1400,vol:k%4===0?1:.6});x+=.2-k*.008}}],
+  ["Train whistle","🚆",t=>[[0,.45],[.6,1.1]].forEach(([d,l])=>{sus(520,t+d,l,{vol:.07,atk:.06,rel:.15,harm:[[1.26,1],[1.5,.9]]});nz(t+d,l,{f:1600,q:3,vol:.08,swell:true})})],
+  ["Police car","🚓",t=>{const f=[];for(let k=0;k<=12;k++)f.push([k*.16,k%2?1500:700]);voice(t,{type:"triangle",f,dur:2,ft:"lowpass",fq:4000,vol:.3,atk:.03})}],
+  ["Ambulance","🚑",t=>[0,1,2,3].forEach(k=>sus(k%2?770:960,t+k*.48,.46,{type:"square",vol:.12,atk:.01,rel:.02,ft:"lowpass",fq:2500}))],
+  ["Fire truck","🚒",t=>[[0,.5],[.65,.9]].forEach(([d,l])=>sus(185,t+d,l,{type:"sawtooth",vol:.11,atk:.03,rel:.05,ft:"lowpass",fq:2400,harm:[[1.19,1,"sawtooth"],[1.5,.8,"sawtooth"]]}))],
+  ["Motorcycle","🏍️",t=>{voice(t,{type:"sawtooth",f:[[0,40],[.4,120],[.7,70],[1.2,160],[1.9,60]],dur:1.9,ft:"lowpass",fq:900,q:3,vol:.24,atk:.05});voice(t,{type:"square",f:[[0,20],[.4,60],[.7,35],[1.2,80],[1.9,30]],dur:1.9,ft:"lowpass",fq:400,vol:.16,atk:.05})}],
+  ["Helicopter","🚁",t=>{for(let k=0;k<15;k++)nz(t+k*.13,.1,{type:"lowpass",f:450,vol:1,atk:.008});sus(1700,t,2,{vol:.015,atk:.3,rel:.3})}],
+  ["Jet plane","✈️",t=>{nz(t,2.4,{f:[[0,600],[1.2,3200],[2.4,500]],q:1,vol:.7,swell:true});nz(t,2.4,{type:"lowpass",f:250,vol:.6,swell:true})}],
+  ["Ship's horn","🚢",t=>sus(73,t,1.8,{type:"sawtooth",vol:.25,atk:.2,rel:.4,ft:"lowpass",fq:400,harm:[[2,.4,"sawtooth"]]})],
+  ["Race car","🏎️",t=>{voice(t,{type:"sawtooth",f:[[0,330],[.7,390],[.9,240],[1.6,210]],dur:1.6,ft:"lowpass",fq:2500,vol:.25,atk:.7});voice(t,{type:"square",f:[[0,165],[.7,195],[.9,120],[1.6,105]],dur:1.6,ft:"lowpass",fq:1200,vol:.15,atk:.7})}],
+  ["Truck backing up","🚚",t=>[0,.7,1.4].forEach(d=>beep(1100,t+d,.38,{vol:.15}))],
+  ["Ice cream truck","🍦",t=>mel("C5:.5 E5:.5 G5:.5 E5:.5 F5:.5 D5:.5 B4:.5 G4:.5 C5:2",.22).reduce((x,[f,d])=>{if(f)partials(f*2,t+x,[[1,1,.5],[3,.2,.15]],{vol:.18});return x+d},0)],
+  ["Trolley bell","🚋",t=>[0,.28].forEach(d=>partials(1400,t+d,[[1,1,1],[2.4,.4,.5],[3.8,.2,.3]],{vol:.22}))],
+  ["Car starting","🚗",t=>{for(let k=0;k<8;k++)nz(t+k*.09,.08,{type:"lowpass",f:700,vol:.8});voice(t+.8,{type:"sawtooth",f:[[0,35],[.3,95],[1.2,55]],dur:1.2,ft:"lowpass",fq:700,q:2,vol:.4,atk:.05})}]
+];
+const pickVehicles=()=>pickUnique(VEHICLES,e=>e[0]).map(([n,art,play])=>[n,play,art,0,n]);
+
+// Ringtones: little phone jingles. Both pads of a pair play the same one, twice through
+// like a real phone. All tunes are made up here, except Gran Vals (Tárrega, 1902) and
+// Für Elise (Beethoven), which are public domain. play(hz, t, seconds) per note.
+const RINGINST={
+  marimba:(f,t)=>partials(f,t,[[1,1,.4],[4,.25,.08],[10,.05,.03]],{vol:.3}),
+  beep:(f,t,d)=>beep(f,t,Math.max(.05,d*.8),{vol:.13}),
+  square:(f,t,d)=>beep(f,t,Math.max(.05,d*.8),{type:"square",vol:.12}),
+  box:(f,t)=>partials(f*2,t,[[1,1,1],[3,.2,.3],[5.4,.1,.15]],{vol:.17}),
+  piano:(f,t)=>partials(f,t,[[1,1,1.2],[2.001,.4,.8],[3.003,.2,.5],[4.006,.1,.3]],{vol:.2}),
+  harp:(f,t)=>pluck(f,t,1.2,{damp:.998,bright:.3,vol:.42}),
+  steel:(f,t)=>partials(f,t,[[1,1,.6],[2,.5,.4],[3,.25,.3],[4.2,.15,.2]],{vol:.2}),
+  xylo:(f,t)=>partials(f,t,[[1,1,.3],[3,.3,.1],[6.3,.1,.05]],{vol:.3}),
+  banjo:(f,t)=>pluck(f,t,.5,{damp:.982,bright:1,vol:.4}),
+  synth:(f,t,d)=>sus(f,t,Math.max(.08,d*.9),{type:"sawtooth",vol:.1,atk:.01,rel:.04,ft:"lowpass",fFrom:3000,fq:600,fTime:.15,q:4}),
+  flute:(f,t,d)=>sus(f,t,Math.max(.1,d*.95),{vol:.17,atk:.05,vib:.006,rate:5,harm:[[2,.12],[3,.04]]})
+};
+const ring=(name,art,inst,beat,tune,reps=2)=>{const m=mel(tune,beat),len=m.reduce((s,n)=>s+n[1],0);
+  return[name,t=>{for(let r=0;r<reps;r++){let x=t+r*len;for(const [f,d] of m){if(f)RINGINST[inst](f,x,d);x+=d}}},art,0,name]};
+const RINGTONES=[
+  ring("Marimba","🪘","marimba",.16,"C5 G4 C5 E5 D5 G4 C5:2 r:2"),
+  ring("Classic beeps","📟","beep",.12,"E6 C6 E6 C6 E6 C6 r:4"),
+  ring("Gran Vals","📱","xylo",.15,"E6 D6 F#5:2 G#5:2 C#6 B5 D5:2 E5:2 B5 A5 C#5:2 E5:2 A5:4 r:2",1),
+  ring("Für Elise","🎹","piano",.17,"E6 D#6 E6 D#6 E6 B5 D6 C6 A5:3 r",1),
+  ring("Chiptune","👾","square",.1,"C5 E5 G5 C6 G5 C6:3 r:2"),
+  ring("Music box","🎁","box",.17,"G5 E5 C5 E5 G5:2 r"),
+  ring("Harp glide","✨","harp",.11,"C4 E4 G4 C5 E5 G5 C6:3 r:2"),
+  ring("Steel drum","🏝️","steel",.14,"C5 D5 E5:2 G5 E5:2 C5:3 r:2"),
+  ring("Trill","🔔","beep",.07,"C6 D6 C6 D6 C6 D6 C6 D6 C6 D6 r:6"),
+  ring("Synth bounce","🎛️","synth",.15,"C4 C5 r C4 G4 Bb4 C5:2 r:2"),
+  ring("Xylophone","🥢","xylo",.13,"G5 F5 E5 D5 C5:2 G4:2 C5:3 r"),
+  ring("Banjo","🪕","banjo",.12,"G4 B4 D5 G5 D5 B4 G4:2 r:2"),
+  ring("Flute","🪈","flute",.22,"A5:2 C6 B5 A5:2 E5:3 r",1),
+  ["Sci-fi",t=>[0,.55,1.1].forEach(d=>voice(t+d,{type:"sine",f:[[0,400],[.25,1800],[.45,900]],dur:.45,ft:"lowpass",fq:5000,vol:.25,atk:.02})),"🛸",0,"Sci-fi"]
+];
+const pickRingtones=()=>pickUnique(RINGTONES,e=>e[0]);
+
+// Homophones: two words that sound the same but mean different things. Each pad says its
+// word and what it means, so the twins sound alike at the start and differ after.
+// [word, what it means, its sound-alike, what that means]. No sound is in two pairs.
+const HOMOPHONES=[
+  ["Knight","a soldier in shining armor","Night","the dark time after sunset"],
+  ["Flour","you bake bread with it","Flower","it grows in a garden"],
+  ["Sea","a big body of salty water","See","what you do with your eyes"],
+  ["Sun","the star that lights our day","Son","a boy, to his mom and dad"],
+  ["Bear","a big furry animal","Bare","with nothing on"],
+  ["Pear","a sweet green fruit","Pair","two of something"],
+  ["Mail","letters in your mailbox","Male","a boy or a man"],
+  ["Tail","a dog wags it","Tale","a story"],
+  ["Write","what you do with a pencil","Right","the opposite of left"],
+  ["Hear","what you do with your ears","Here","in this place"],
+  ["Eight","the number after seven","Ate","you did this to your dinner"],
+  ["Hole","a gap you can dig","Whole","all of it"],
+  ["Meat","beef, chicken or pork","Meet","to see someone for the first time"],
+  ["Blue","the color of the sky","Blew","what the wind did"],
+  ["Week","seven days","Weak","not strong"],
+  ["Deer","an animal with antlers","Dear","how you start a letter"],
+  ["Road","cars drive on it","Rode","what you did on a bike"],
+  ["Sail","it catches wind on a boat","Sale","when prices go down"],
+  ["Plane","it flies in the sky","Plain","simple, with nothing added"],
+  ["Rain","water falling from clouds","Reign","the time a king or queen rules"],
+  ["Hare","a fast animal like a rabbit","Hair","it grows on your head"],
+  ["Piece","one part of something","Peace","when there is no fighting"],
+  ["Stair","one step in a staircase","Stare","to look for a long time"],
+  ["Nose","you smell with it","Knows","has learned something"],
+  ["One","the first number","Won","came first in a race"],
+  ["Buy","to pay for something","Bye","what you say when you leave"],
+  ["Toe","you have ten of them","Tow","to pull a car"],
+  ["Bee","it buzzes and makes honey","Be","to exist"],
+  ["Cell","a tiny part of a living thing","Sell","to trade something for money"],
+  ["Berry","a small round fruit","Bury","to hide something in the ground"],
+  ["Dew","drops of water on the morning grass","Due","when something has to be done"],
+  ["Flea","a tiny jumping bug","Flee","to run away"],
+  ["Knot","a tie in a rope","Not","no"],
+  ["Maid","someone who cleans","Made","built or created"],
+  ["Paws","a cat's feet","Pause","to stop for a moment"],
+  ["Steel","a strong metal","Steal","to take what isn't yours"],
+  ["Weight","how heavy something is","Wait","to stay until something happens"],
+  ["Wood","what trees are made of","Would","what you might do"],
+  ["Cereal","a breakfast in a bowl","Serial","one after another"],
+  ["Beet","a red root vegetable","Beat","to win against someone"],
+  ["Horse","an animal you can ride","Hoarse","when your voice is rough"],
+  ["Chews","what a cow does all day","Choose","to pick one"],
+  ["Mussel","a shellfish","Muscle","it makes your body move"],
+  ["Sore","when something hurts","Soar","to fly high"]
+];
+const pickHomophones=()=>pickUnique(HOMOPHONES,h=>h[0]).map(([a,am,b,bm])=>
+  spoken(a+" · "+b,a+". "+am[0].toUpperCase()+am.slice(1)+".",b+". "+bm[0].toUpperCase()+bm.slice(1)+".","👂",0,"“"+a+"” and “"+b+"” sound the same"));
 const DECKS={};
 // Every deck picks a fresh set of pairs on every new board, as many as the board size needs
 const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,times:pickTimes,morse:pickMorse,
-  everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad};
+  everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad,
+  weather:pickWeather,vehicles:pickVehicles,ringtones:pickRingtones,homophones:pickHomophones};
 const BOARDMODE={wordplay:["Rhymes","Opposites"]};
 // Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
 const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
@@ -983,7 +1110,8 @@ function fitGrid(){
 }
 addEventListener("resize",()=>fitGrid());
 const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
-  everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad"};
+  everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad",
+  weather:"Weather",vehicles:"Vehicles",ringtones:"Ringtones",homophones:"Homophones"};
 // How each deck works, shown under the deck chip
 const DECKHELP={
   animals:"Real recordings of 24 animals, from a cat's meow to a humpback whale's moo. Find the two pads that make the same call. Each game picks a different mix, so you won't hear the same ones every time.",
@@ -1001,7 +1129,11 @@ const DECKHELP={
   seasonal:"Changes with the calendar: spooky sounds for Halloween, songs and sleigh bells for the holidays, birds and rain in spring, waves and fireworks in summer. A pair can be one sound, the two halves of a song, or a saying and its ending. Right now: "+SEASONS[season].name+" "+SEASONS[season].art,
   twisters:"One pad says how a tongue twister starts and its twin says how it ends. Match each start to its ending, then try saying them yourself!",
   hello:"One pad says hello in another language and its twin names the language, like Bonjour and French. Your device's own voices do the talking, so how they sound depends on your phone or browser.",
-  keypad:"One pad says a phone key and its twin plays the beep that key makes when you dial. Every key's beep is two tones at once, one for its row and one for its column. The pads show the keys unless Difficult mode is on."
+  keypad:"One pad says a phone key and its twin plays the beep that key makes when you dial. Every key's beep is two tones at once, one for its row and one for its column. The pads show the keys unless Difficult mode is on.",
+  weather:"Rain, thunder, wind, hail and more. Find the two pads that make the same weather. Some are close, like a breeze and a howling gale, so listen carefully.",
+  vehicles:"Trains, sirens, horns and engines: a steam train, a police car, a helicopter, a ship's horn. Find the two pads that make the same sound.",
+  ringtones:"Little phone jingles, each played twice like a real phone ringing. Match the two pads that play the same ringtone. Listen for the tune and the instrument.",
+  homophones:"Two words that sound the same but mean different things, like knight and night. Each pad says its word and what it means, so match the pair that sounds alike."
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
@@ -1155,11 +1287,14 @@ const DECKKINDS={
 const DECKCARD={
   animals:["sounds",["🦁","🦁"],"Real calls from 24 animals"],
   everyday:["sounds",["🔔","🔔"],"Doorbells, kettles, sirens and more"],
+  weather:["sounds",["⛈️","⛈️"],"Rain, thunder, wind and hail"],
+  vehicles:["sounds",["🚂","🚂"],"Trains, sirens, horns and engines"],
   keypad:["sounds",["5","☎️"],"Match each key to its dial tone"],
   morse:["sounds",["S","···"],"Match a letter to its beeps"],
   notes:["music",["C","C"],"Same pitch twice: real ear training"],
   melodies:["music",["Twinkle…","…little star"],"Match the two halves of old tunes"],
   instruments:["music",["🎻","🎻"],"One tune, played on many instruments"],
+  ringtones:["music",["📱","📱"],"Match the phone jingles"],
   seasonal:["music",[SEASONS[season].art,SEASONS[season].art],"Changes with the calendar. Now: "+SEASONS[season].name],
   youtube:["music",["▶","▶"],"Songs from your own YouTube playlist"],
   talk:["words",["Cat","🐱"],"Match an animal's name to its call"],
@@ -1168,12 +1303,13 @@ const DECKCARD={
   twisters:["words",["She sells…","…seashells"],"Finish the tongue twister"],
   hello:["words",["Bonjour","French"],"Hello in many languages"],
   wordplay:["words",["cat","hat"],"Rhymes one game, opposites the next"],
+  homophones:["words",["Knight","Night"],"Words that sound alike"],
   brain:["learning",["France","Paris"],"Match each country to its capital"],
   times:["learning",["7×8","56"],"Match each times table to its answer"]
 };
 const FEATURED=["animals","jokes","brain","melodies"];
 // The deck chip's little icon
-const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
+const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",weather:"⛈️",vehicles:"🚂",ringtones:"📱",homophones:"👂",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
   talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🔤",brain:"🌍",times:"✖️"};
 const deckName=id=>id==="youtube"?"Your music":DECKNAME[id];
 const deckView=()=>{try{return localStorage.getItem("pairody-deckview")==="all"?"all":"grouped"}catch(e){return "grouped"}};
