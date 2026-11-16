@@ -40,6 +40,26 @@
 .pad.playing .rings i:nth-child(2){animation-delay:.3s}
 @keyframes ring{from{transform:scale(.6);opacity:.8}to{transform:scale(2.4);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pad.playing .rings i{animation:none;opacity:.6}.pad.matched .lbl{animation:none}}
+/* Board cleared: a green ring around the board and a "Well done" card over it */
+.board{position:relative;display:grid}
+.grid{border-radius:16px;transition:box-shadow .3s}
+.grid.done{box-shadow:0 0 0 6px var(--chassis),0 0 0 10px var(--ok-bright),0 0 30px 12px var(--ok-soft);animation:doneglow 1.6s ease-out}
+@keyframes doneglow{0%{box-shadow:0 0 0 6px var(--chassis),0 0 0 6px var(--ok-bright),0 0 0 0 var(--ok-soft)}40%{box-shadow:0 0 0 6px var(--chassis),0 0 0 13px var(--ok-bright),0 0 46px 22px var(--ok-soft)}}
+.grid.done.p1{box-shadow:0 0 0 6px var(--chassis),0 0 0 10px var(--led),0 0 30px 12px var(--led-soft);animation:none}
+.donecard{position:absolute;inset:0;display:grid;place-items:center;padding:12px;z-index:5}
+.donecard[hidden]{display:none}
+.donecard .card{background:var(--chassis);color:var(--fg);border:3px solid var(--ok-bright);border-radius:20px;padding:20px 22px 16px;
+  text-align:center;width:min(320px,100%);box-shadow:0 18px 50px rgba(0,0,0,.35);animation:donein .45s cubic-bezier(.2,1.4,.4,1) both}
+.donecard.p1 .card{border-color:var(--led)}
+@keyframes donein{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.donecard h2{font-family:var(--display);font-weight:600;font-size:1.9rem;margin:0;color:var(--ok);line-height:1.1}
+.donecard.p1 h2{color:var(--led)}
+.donecard .big{font-family:var(--display);font-weight:600;font-size:2.6rem;line-height:1;margin:12px 0 2px;font-variant-numeric:tabular-nums}
+.donecard .big small{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:4px}
+.donecard p{margin:6px 0 0;color:var(--muted);font-size:.92rem;line-height:1.35}
+.donecard .btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.donecard .btn{padding:9px 16px}
+@media (prefers-reduced-motion:reduce){.grid.done,.donecard .card{animation:none}}
 </style>
 </head>
 <body>
@@ -96,7 +116,15 @@
       <div class="duo" id="duoBox" hidden><span>Score</span><b><i id="s0"><small>P1</small>0</i> <i id="s1"><small>P2</small>0</i></b></div>
       <div class="best" id="bestBox" title="Your best on this deck and board size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
-    <div class="grid" id="grid"></div>
+    <div class="board">
+      <div class="grid" id="grid"></div>
+      <div class="donecard" id="doneCard" hidden><div class="card" role="dialog" aria-labelledby="doneTitle" aria-describedby="doneInfo">
+        <h2 id="doneTitle">Well done!</h2>
+        <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
+        <p id="doneInfo"></p>
+        <div class="btns"><button class="btn primary" id="doneNew">New board</button><button class="btn" id="doneClose">See board</button></div>
+      </div></div>
+    </div>
     <p class="status" id="status">Tap any pad to hear it.</p>
   </div>
 
@@ -135,6 +163,14 @@ function cutPad(fade=.06){
 function matchChime(){
   if(!ctx)return;const t=ctx.currentTime+.01;
   tone(st(19),t,.18,"sine",.22,master);tone(st(24),t+.08,.35,"sine",.22,master);
+}
+// Little fanfare for a cleared board: a rising arpeggio into a held chord, after the last
+// match chime has rung. Plays straight to master like the chime; the demo plays it softer.
+function finishFanfare(soft){
+  if(!ctx)return;const t=ctx.currentTime+.42,v=soft?.1:.18;
+  [12,16,19].forEach((n,i)=>{tone(st(n),t+i*.11,.22,"triangle",v,master);tone(st(n+12),t+i*.11,.16,"sine",v*.35,master)});
+  [24,28,31].forEach(n=>tone(st(n),t+.36,1.1,"triangle",v*.8,master));
+  tone(st(12),t+.36,1.1,"sine",v*.7,master);
 }
 function tone(freq,t,dur,type="sine",vol=.35,out=bus()){
   const o=ctx.createOscillator(),g=ctx.createGain();
@@ -876,6 +912,7 @@ function build(){
   const L=layout();
   clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;easyUsed=easy();NP=L.pairs;
   over=false;turn=0;score=[0,0];showDuo();
+  hideDone(true);
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
   $("moves").textContent=0;$("pairs").textContent="0/"+NP;
@@ -1014,6 +1051,25 @@ function tap(i,b){
   };
   setTimeout(()=>settle&&settle(),950);
 }
+// "Well done": a cleared board gets a green ring, then a card over it with the time and a
+// New board button. 2 Players shows the winner (coral ring when Player 2 wins). The demo gets
+// the ring only, since its status line already says it's done.
+var doneTimer=null;
+function showDone(title,big,lbl,info,p1){
+  const g=$("grid"),c=$("doneCard");
+  g.classList.remove("done");void g.offsetWidth;g.classList.add("done");g.classList.toggle("p1",!!p1);
+  finishFanfare(title===null);
+  if(title===null)return;
+  $("doneTitle").textContent=title;$("doneLbl").textContent=lbl;$("doneTime").textContent=big;$("doneInfo").textContent=info;
+  c.classList.toggle("p1",!!p1);
+  const thisBoard=board,calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  clearTimeout(doneTimer);
+  doneTimer=setTimeout(()=>{if(thisBoard!==board||demo)return;c.hidden=false;$("doneNew").focus()},calm?250:900);
+}
+function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
+$("doneNew").onclick=()=>{track("done/new","Well done card: New board");build()};
+$("doneClose").onclick=()=>{track("done/close","Well done card: See board");hideDone();$("reset").focus({preventScroll:true})};
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("doneCard").hidden&&!document.querySelector("dialog[open]"))$("doneClose").click()});
 // Board cleared
 function finish(){
   clearInterval(timer);
@@ -1023,22 +1079,26 @@ function finish(){
     // Demo boards never count toward best scores
     track("demo/done/"+deck,"Demo finished: "+DECKNAME[deck]);
     st.textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New board to play.";
-    endDemo();return;
+    endDemo();showDone(null);return;
   }
   const label=DECKNAME[deck]+sizeName()+styleName()+(easyUsed?"":" (Difficult)");
   track("win/"+deck+sizeTag()+styleTag()+(easyUsed?"":"/difficult"),"Board cleared: "+label);
   if(style==="duo"){
     const [a,b]=score;showDuo();
     st.textContent=a===b?"It's a tie, "+a+" to "+b+"! Tap New board for a rematch.":P(a>b?0:1)+" wins, "+Math.max(a,b)+" to "+Math.min(a,b)+"! Tap New board for a rematch.";
+    showDone(a===b?"It's a tie!":P(a>b?0:1)+" wins!",Math.max(a,b)+" – "+Math.min(a,b),"Score",
+      (a===b?"Well played, both of you. ":"")+moves+" moves in "+fmt(secs)+". Rematch?",b>a);
     return;
   }
   if(moves===NP)track("perfect/"+deck+sizeTag()+styleTag(),"Perfect board: "+DECKNAME[deck]+sizeName()+styleName());
-  const perfect=moves===NP?" A perfect board!":" Perfect is "+NP+".";
+  const perfect=moves===NP?" A perfect board!":" Perfect is "+NP+".",diff=easyUsed?"":" in Difficult mode";
   if(style==="daily"){
     const {first,streak,grew}=Daily.record(moves,secs);
     if(grew)track("daily/streak/"+Math.min(streak,30),"Daily streak: "+streak);
     st.textContent=(first?"Today's board cleared in "+moves+" moves, "+fmt(secs)+"."+perfect:"Cleared again in "+moves+" moves. Only your first clear today counts.")
       +" Streak: "+streak+(streak===1?" day.":" days in a row!")+(grew?"":" Come back tomorrow to keep it going.");
+    showDone(moves===NP?"Perfect board!":"Well done!",fmt(secs),"Time",moves+" moves"+diff+". "+(first?"":"Only your first clear today counts. ")
+      +"Streak: "+streak+(streak===1?" day.":" days in a row!")+" New boards tomorrow.");
     showBest();return;
   }
   const {isNew,prev}=Best.record(bestKey(deck),moves,secs);
@@ -1048,6 +1108,9 @@ function finish(){
   if(isNew&&prev)msg="New best for "+DECKNAME[deck]+sizeName()+styleName()+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+").";
   else if(isNew)msg=(style==="timed"?msg+" ":"")+"First "+sz+"board on "+DECKNAME[deck]+(easyUsed?"":" in Difficult mode")+(style==="timed"?". ":": "+moves+" moves, "+fmt(secs)+". ")+"That's your best to beat.";
   st.textContent=msg+perfect;
+  showDone(isNew&&prev?"New best!":moves===NP?"Perfect board!":"Well done!",fmt(secs),"Time",
+    moves+" moves"+(style==="timed"?", with "+fmt(Math.max(0,timeLimit()-secs))+" to spare":"")+diff+"."
+    +(isNew&&prev?" Your old best was "+Best.fmt(prev).replace(" · "," moves, ")+".":isNew?" That's your best to beat.":moves===NP?"":" Perfect is "+NP+"."));
   showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
 }
 const ytLink=document.querySelector(".deck-link");if(ytLink)ytLink.addEventListener("click",()=>track("deck/youtube","Deck picked: Your music"));
