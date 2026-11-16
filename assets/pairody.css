@@ -200,11 +200,11 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
 @media (prefers-reduced-motion:reduce){.pad.open,.pad.miss,.pad.matched,.pad.open .dot,.pad.miss .dot,.pad.matched > *,.easy .pad.miss .np,.grid .pad.matched .lbl,.grid .pad.matched > img{animation:none}}
 /* Board sizes (Small 4 by 3, Classic 4 by 4, Big 5 by 5 with a free center tile) */
 .opts{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
-.sizes{display:flex;gap:6px}
-.sizes button{font-family:var(--display);font-weight:600;font-size:.85rem;background:transparent;color:var(--muted);
+.sizes,.styles{display:flex;gap:6px;flex-wrap:wrap}
+.sizes button,.styles button{font-family:var(--display);font-weight:600;font-size:.85rem;background:transparent;color:var(--muted);
   border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
 .sizes button small{font-weight:500;opacity:.75}
-.sizes button[aria-pressed="true"]{color:var(--fg);border-color:var(--led);box-shadow:inset 0 0 0 1px var(--led)}
+.sizes button[aria-pressed="true"],.styles button[aria-pressed="true"]{color:var(--fg);border-color:var(--led);box-shadow:inset 0 0 0 1px var(--led)}
 .freepad{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line)}
 .freepad img{width:62%;height:auto;opacity:.9}
 .grid[data-size="big"] .pad .dot{width:6px;height:6px;top:7px;right:7px}
@@ -215,6 +215,15 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
   .grid[data-size="big"] .pad .np b{font-size:.6rem}
   .grid[data-size="big"] .pad .np small{display:none}
 }
+/* Board styles: Timed clock running low, 2 Players score and who matched what */
+.readout .low b{color:var(--bad)}
+.readout .duo b{display:flex;gap:10px}
+.readout .duo i{font-style:normal;color:var(--muted);border-bottom:2px solid transparent}
+.readout .duo i.on{color:var(--fg);border-color:var(--led)}
+.readout .duo small{font-size:.7rem;font-weight:500;margin-right:3px;letter-spacing:.04em}
+@media (max-width:440px){.styles{gap:5px}.styles button{padding:5px 8px;font-size:.8rem}}
+.grid .pad.matched[data-by="1"]{background:var(--led-soft);box-shadow:inset 0 0 0 2px var(--led);color:var(--led)}
+.grid .pad.matched[data-by="1"] .dot{background:var(--led)}
 /* iOS app (assets/native.js adds .native to <html>): hide web-only bits, show app-only ones */
 .native-only{display:none}
 .native .native-only{display:revert}
