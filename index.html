@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pairody: memory match, played by ear</title>
-<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, everyday sounds, instruments, weather, vehicles, ringtones, famous quotes, jokes, tongue twisters, homophones, hello in many languages, old tunes, Morse code and more.">
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, everyday sounds, instruments, weather, vehicles, ringtones, famous quotes, jokes, tongue twisters, homophones, hello in many languages, old tunes, Morse code, synonyms, elements, planets, presidents and more.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Pairody">
@@ -522,6 +522,53 @@ const pickBrain=()=>pickUnique(CAPITALS,c=>c[0]).map(([c,city])=>spoken(c+" · "
 // Times Tables: every answer different on a board, so 3 × 4 and 2 × 6 never share one
 const pickTimes=()=>pickUnique(TIMES,([a,b])=>a*b).map(([a,b])=>spoken(a+" × "+b+" = "+a*b,a+" times "+b,String(a*b),"×",1,a+" times "+b+" is "+a*b));
 
+// Synonyms: one pad says a word, its twin a word that means the same. No two pairs share a
+// meaning (so no huge/giant next to big/large, or talk/speak next to shout/yell).
+const SYNONYMS=[["big","large"],["little","small"],["fast","quick"],["happy","glad"],["sad","unhappy"],["smart","clever"],["start","begin"],["end","finish"],["shut","close"],["angry","mad"],["scared","afraid"],["easy","simple"],["tough","difficult"],["rich","wealthy"],["sick","ill"],["quiet","silent"],["loud","noisy"],["jump","leap"],["pick","choose"],["help","assist"],["gift","present"],["kind","nice"],["pretty","beautiful"],["chilly","cold"],["tired","sleepy"],["mistake","error"],["rock","stone"],["road","street"],["talk","speak"],["cry","weep"],["brave","bold"],["strange","odd"],["shy","timid"],["story","tale"],["couch","sofa"],["trash","garbage"],["bunny","rabbit"],["correct","right"],["fix","repair"],["buy","purchase"],["under","below"],["above","over"],["fall","tumble"],["friend","pal"],["filthy","dirty"],["smell","scent"]];
+const pickSynonyms=()=>pickUnique(SYNONYMS,p=>p[0]).map(([a,b])=>spoken(pairName(a,b),a,b,"≈",1,cap(a)+" means the same as "+b));
+
+// Elements: one pad spells a chemical symbol letter by letter, its twin says the element.
+// [symbol, name, how to say the name if the spelling misleads (lead the metal, not to lead)]
+const ELEMENTS=[["H","Hydrogen"],["He","Helium"],["Li","Lithium"],["C","Carbon"],["N","Nitrogen"],["O","Oxygen"],["F","Fluorine"],["Ne","Neon"],["Na","Sodium"],["Mg","Magnesium"],["Al","Aluminum"],["Si","Silicon"],["P","Phosphorus"],["S","Sulfur"],["Cl","Chlorine"],["Ar","Argon"],["K","Potassium"],["Ca","Calcium"],["Ti","Titanium"],["Fe","Iron"],["Co","Cobalt"],["Ni","Nickel"],["Cu","Copper"],["Zn","Zinc"],["Ag","Silver"],["Sn","Tin"],["I","Iodine"],["Pt","Platinum"],["Au","Gold"],["Hg","Mercury"],["Pb","Lead","Led"],["U","Uranium"],["Ra","Radium"],["Rn","Radon"]];
+// "F E" can come out as one word, so each letter is said on its own: "F. E."
+const spell=sym=>[...sym.toUpperCase()].join(". ")+".";
+const pickElements=()=>pickUnique(ELEMENTS,e=>e[0]).map(([sym,name,sayAs])=>
+  spoken(sym+" · "+name,"Symbol "+spell(sym),sayAs||name,"🧪",0,sym+" is the symbol for "+name.toLowerCase()));
+
+// Presidents: one pad says a number, its twin the US president who was that number.
+// One entry per person, so Grover Cleveland and Donald Trump each have both their numbers.
+const PRESIDENTS=[["1st","George Washington"],["2nd","John Adams"],["3rd","Thomas Jefferson"],["4th","James Madison"],["5th","James Monroe"],["6th","John Quincy Adams"],["7th","Andrew Jackson"],["8th","Martin Van Buren"],["9th","William Henry Harrison"],["10th","John Tyler"],["11th","James K. Polk"],["12th","Zachary Taylor"],["13th","Millard Fillmore"],["14th","Franklin Pierce"],["15th","James Buchanan"],["16th","Abraham Lincoln"],["17th","Andrew Johnson"],["18th","Ulysses S. Grant"],["19th","Rutherford B. Hayes"],["20th","James A. Garfield"],["21st","Chester A. Arthur"],["22nd and 24th","Grover Cleveland"],["23rd","Benjamin Harrison"],["25th","William McKinley"],["26th","Theodore Roosevelt"],["27th","William Howard Taft"],["28th","Woodrow Wilson"],["29th","Warren G. Harding"],["30th","Calvin Coolidge"],["31st","Herbert Hoover"],["32nd","Franklin D. Roosevelt"],["33rd","Harry S. Truman"],["34th","Dwight D. Eisenhower"],["35th","John F. Kennedy"],["36th","Lyndon B. Johnson"],["37th","Richard Nixon"],["38th","Gerald Ford"],["39th","Jimmy Carter"],["40th","Ronald Reagan"],["41st","George H. W. Bush"],["42nd","Bill Clinton"],["43rd","George W. Bush"],["44th","Barack Obama"],["45th and 47th","Donald Trump"],["46th","Joe Biden"]];
+const pickPresidents=()=>pickUnique(PRESIDENTS,p=>p[1]).map(([n,who])=>
+  spoken(n+" · "+who,"The "+n+" president",who,"🏛️",0,who+" was the "+n+" president"));
+
+// Planets: one pad gives a clue, its twin names the planet, moon or star. Some have more than
+// one clue; a board never has two clues for the same answer. No clue names another answer.
+// [answer, clue]
+const PLANETS=[
+  ["Mercury","The planet closest to the Sun"],["Mercury","The smallest planet"],
+  ["Venus","The hottest planet"],["Venus","The brightest planet in the night sky"],
+  ["Earth","The planet we live on"],["Earth","The only planet known to have life"],
+  ["Mars","The red planet"],["Mars","The planet where rovers drive around on red dust"],
+  ["Jupiter","The biggest planet"],["Jupiter","The planet with the Great Red Spot, a storm bigger than Earth"],
+  ["Saturn","The planet with the brightest rings"],["Saturn","A planet so light it could float in a giant bathtub"],
+  ["Uranus","The planet that spins on its side"],
+  ["Neptune","The planet farthest from the Sun"],["Neptune","The windiest planet"],
+  ["Pluto","A dwarf planet that used to be called the ninth planet"],
+  ["The Sun","The star at the center of our solar system"],
+  ["The Moon","Astronauts first walked on it in 1969"],
+  ["Titan","The only moon with a thick, hazy sky"],
+  ["Io","The moon with the most volcanoes"],
+  ["Europa","An icy moon that hides an ocean under its ice"],
+  ["Ganymede","The biggest moon in the solar system"],
+  ["Ceres","The biggest thing in the asteroid belt"],
+  ["Halley's Comet","A comet that comes back about every 76 years"],
+  ["The Milky Way","Our home galaxy"],
+  ["The North Star","The star that stays put above the North Pole"],
+  ["Olympus Mons","The tallest volcano in the solar system"]
+];
+const pickPlanets=()=>pickUnique(PLANETS,p=>p[0]).map(([body,clue])=>
+  spoken(body,clue,body,"🪐",0,clue+": "+body));
+
 // Morse Code: one pad says a letter, its twin beeps it in Morse.
 const MORSE={A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",6:"-....",7:"--...",8:"---..",9:"----."};
 const MORSEKEYS=Object.keys(MORSE); // letters A to Z and digits 0 to 9
@@ -976,7 +1023,8 @@ const DECKS={};
 // Every deck picks a fresh set of pairs on every new board, as many as the board size needs
 const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,opposites:pickOpposites,brain:pickBrain,times:pickTimes,morse:pickMorse,
   everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad,
-  weather:pickWeather,vehicles:pickVehicles,ringtones:pickRingtones,homophones:pickHomophones};
+  weather:pickWeather,vehicles:pickVehicles,ringtones:pickRingtones,homophones:pickHomophones,
+  synonyms:pickSynonyms,elements:pickElements,presidents:pickPresidents,planets:pickPlanets};
 const BOARDMODE={}; // id: [first kind, second kind], for a board whose games alternate
 // Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
 const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
@@ -1154,7 +1202,8 @@ function fitGrid(){
 addEventListener("resize",()=>fitGrid());
 const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Rhymes",opposites:"Opposites",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
   everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad",
-  weather:"Weather",vehicles:"Vehicles",ringtones:"Ringtones",homophones:"Homophones"};
+  weather:"Weather",vehicles:"Vehicles",ringtones:"Ringtones",homophones:"Homophones",
+  synonyms:"Synonyms",elements:"Elements",planets:"Planets",presidents:"Presidents"};
 // How each deck works, shown under the deck chip
 const DECKHELP={
   animals:"Real recordings of 24 animals, from a cat's meow to a humpback whale's moo. Find the two pads that make the same call. Each game picks a different mix, so you won't hear the same ones every time.",
@@ -1177,7 +1226,11 @@ const DECKHELP={
   weather:"Rain, thunder, wind, hail and more. Find the two pads that make the same weather. Some are close, like a breeze and a howling gale, so listen carefully.",
   vehicles:"Trains, sirens, horns and engines: a steam train, a police car, a helicopter, a ship's horn. Find the two pads that make the same sound.",
   ringtones:"Little phone jingles, each played twice like a real phone ringing. Match the two pads that play the same ringtone. Listen for the tune and the instrument.",
-  homophones:"Two words that sound the same but mean different things, like knight and night. Each pad says its word and what it means, so match the pair that sounds alike."
+  homophones:"Two words that sound the same but mean different things, like knight and night. Each pad says its word and what it means, so match the pair that sounds alike.",
+  synonyms:"One pad says a word and its twin says a word that means the same, like big and large. Every game picks its words from a bigger set.",
+  elements:"One pad spells a chemical symbol, letter by letter, and its twin names the element, like F E and iron. Some symbols come from old Latin names, so they can be tricky.",
+  planets:"One pad gives a clue and its twin names the planet, moon or star, like the red planet and Mars. Every game picks its clues from a bigger set.",
+  presidents:"One pad says a number and its twin names the US president who was that number, like the 16th president and Abraham Lincoln. Every game picks its presidents from all of them."
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
@@ -1355,12 +1408,16 @@ const DECKCARD={
   opposites:["words",["hot","cold"],"Match each word to its opposite"],
   homophones:["words",["Knight","Night"],"Words that sound alike"],
   brain:["learning",["France","Paris"],"Match each country to its capital"],
-  times:["learning",["7×8","56"],"Match each times table to its answer"]
+  times:["learning",["7×8","56"],"Match each times table to its answer"],
+  synonyms:["learning",["big","large"],"Match words that mean the same"],
+  elements:["learning",["Fe","Iron"],"Match each symbol to its element"],
+  planets:["learning",["Red planet","Mars"],"Planets, moons and stars from clues"],
+  presidents:["learning",["16th","Lincoln"],"Match each president to their number"]
 };
 const FEATURED=["animals","jokes","brain","melodies"];
 // The deck chip's little icon
 const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",weather:"⛈️",vehicles:"🚂",ringtones:"📱",homophones:"👂",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
-  talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🎶",opposites:"⇄",brain:"🌍",times:"✖️"};
+  talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🎶",opposites:"⇄",brain:"🌍",times:"✖️",synonyms:"≈",elements:"🧪",planets:"🪐",presidents:"🏛️"};
 const deckName=id=>id==="youtube"?"Your music":DECKNAME[id];
 const deckView=()=>{try{return localStorage.getItem("pairody-deckview")==="all"?"all":"grouped"}catch(e){return "grouped"}};
 function deckTile(id,showKind,from){

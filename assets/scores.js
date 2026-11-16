@@ -15,7 +15,7 @@
     // Words
     ['talk','Animal Talk'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],['wordplay','Rhymes'],['opposites','Opposites'],['homophones','Homophones'],
     // Learning
-    ['brain','Capitals'],['times','Times Tables'],
+    ['brain','Capitals'],['times','Times Tables'],['synonyms','Synonyms'],['elements','Elements'],['planets','Planets'],['presidents','Presidents'],
   ];
   const SIZES = [['small','Small'],['classic','Classic'],['big','Big']];
   const STYLES = [['pairs','Pairs'],['triples','Triples'],['timed','Timed']];

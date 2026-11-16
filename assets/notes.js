@@ -12,6 +12,12 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Four new Learning boards', items: [
+      '<b>Synonyms</b>: match words that mean the same, like big and large.',
+      '<b>Elements</b>: one pad spells a chemical symbol and its twin names the element, like F E and iron.',
+      '<b>Planets</b>: match a space clue to its planet, moon or star, like the red planet and Mars.',
+      '<b>Presidents</b>: match a number to the US president, like the 16th president and Abraham Lincoln.',
+    ]},
     { date: '2026-11-16', title: '1 or 2 players, any style', items: [
       'Pick <b>1 Player</b> or <b>2 Players</b> next to the styles. Two players now works with <b>Pairs</b>, <b>Triples</b> and <b>Timed</b>: take turns on one device, and a match means you go again.',
       'In Timed, two players share the clock and whoever has more when it runs out wins.',
