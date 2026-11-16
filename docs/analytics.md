@@ -32,6 +32,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | `win/<id>[/small\|/big][/<style>][/difficult]` | board cleared (style suffix as for `play`) |
 | `perfect/<id>[/small\|/big][/<style>]` | board cleared in one move per pair, or per set in Triples (not counted for 2 Players) |
 | `style/<style>` | board style picked (pairs, triples, timed, duo, daily). Styles added 2026-11-16; earlier counts are all Pairs. Note the picker id for 2 Players is `duo` but its play/win suffix is `/2p`. |
+| `players/1`, `players/2` | 1 Player / 2 Players picked (added 2026-11-16). Since then 2 Players is not a style: `style/duo` stops, and 2-player games add `/2p` after the style suffix in play/win/perfect (for example `win/animals/triples/2p`; Pairs shows just `/2p`, as before). |
 | `timed/out/<id>[/small\|/big]` | a Timed board ran out of time |
 | `done/new`, `done/close` | on the Well done card shown after a board is cleared: New board, or See board (closes the card). Added 2026-11-16. |
 | `daily/streak/<n>` | a Daily streak grew to n days (n capped at 30) |

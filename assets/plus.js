@@ -90,6 +90,8 @@
   function tagAll(){
     tagButtons('.decks button[data-deck]', deckTier, 'deck', true);
     tagButtons('.styles button[data-style]', styleTier, 'style');
+    // 2 Players is a Plus feature on any style (tier and tries still use the old style id 'duo')
+    tagButtons('.styles button[data-players="2"]', () => styleTier('duo'), 'players');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tagAll);
   else tagAll();
