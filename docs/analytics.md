@@ -15,14 +15,14 @@ counts** in the info panel (saved in localStorage `pairody.prefs` as `{"analytic
 3. Enter an email and password and finish signing up.
 
 Counting starts as soon as the code is live on pairody.app. To turn analytics off everywhere,
-set `GOATCOUNTER_CODE = ''`. Only `pairody.app` sends counts.
+set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 
 ## What is counted
 
 | Event | When |
 | --- | --- |
 | page view (`/`, `/youtube.html`) | each page load |
-| `launch/installed-app`, `launch/browser` | each page load, by how Pairody was opened |
+| `launch/installed-app`, `launch/browser`, `launch/ios-app` | each page load, by how Pairody was opened (`ios-app` = the App Store app; its page views are tagged `/app/...`) |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
 | `deck/<id>` | a deck button tapped (animals, talk, quotes, jokes, wordplay, brain, melodies, notes, morse) |
 | `play/<id>[/small\|/big][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; `/difficult` = sounds only, no names) |

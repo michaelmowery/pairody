@@ -23,6 +23,10 @@ jobs:
       # 0.<deploy number> shows in the info panel; the service-worker cache name also carries the
       # commit, so every deploy installs a fresh cache and the "New version ready" pill fires.
       # The whole line is rewritten, so a stray hand-edited number can't break it.
+      # The iOS app's files (package.json, capacitor.config.json, scripts/, ios/) live in the repo
+      # but aren't part of the website: drop them so they're neither served nor cached offline.
+      - name: Drop app-only files
+        run: rm -rf ios node_modules app-www scripts package.json package-lock.json capacitor.config.json
       - name: Stamp version
         run: |
           APP_VERSION="0.${{ github.run_number }}"

@@ -18,8 +18,10 @@
   const GOATCOUNTER_CODE = 'pairody';
   const PREFS_KEY = 'pairody.prefs';
 
-  // Only the live site counts; local copies and preview hosts just log to the console.
-  const LIVE = /(^|\.)pairody\.app$/.test(location.hostname);
+  // Only the live site and the iOS app count; local copies and preview hosts just log to the console.
+  // App counts are tagged: page views start with /app, and the launch event is launch/ios-app.
+  const NATIVE = !!window.PairodyNative;
+  const LIVE = NATIVE || /(^|\.)pairody\.app$/.test(location.hostname);
 
   function loadPrefs(){ try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') || {}; } catch(e){ return {}; } }
   function enabled(){ return loadPrefs().analytics !== false; }
@@ -58,8 +60,9 @@
 
   // One page view per load, tagged with how Pairody was opened (installed app or browser tab).
   const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-  send({ p: location.pathname || '/', t: document.title, r: document.referrer });
-  track(standalone ? 'launch/installed-app' : 'launch/browser', standalone ? 'Opened as installed app' : 'Opened in a browser');
+  send({ p: (NATIVE ? '/app' : '') + (location.pathname || '/'), t: document.title, r: NATIVE ? '' : document.referrer });
+  if (NATIVE) track('launch/ios-app', 'Opened the iOS app');
+  else track(standalone ? 'launch/installed-app' : 'launch/browser', standalone ? 'Opened as installed app' : 'Opened in a browser');
 
   // Installed to the home screen (Chrome, Edge and Android; iOS doesn't say, so the launch
   // event above is how iOS installs show up).
