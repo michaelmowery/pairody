@@ -30,7 +30,7 @@
     free: { label: 'Free', hint: 'Always included' },
     plus: { label: 'Plus', hint: 'Part of Pairody Plus. Free for everyone for now' },
   };
-  const FREE_DECKS = new Set(['animals', 'jokes']);
+  const FREE_DECKS = new Set(['animals', 'melodies', 'jokes', 'brain']); // one per group: Sounds, Music, Words, Learning (brain = Capitals)
   const PLUS_STYLES = new Set(['triples', 'timed', 'duo']);
   const LOCKED = false;      // flip on when the purchase exists (with owns() below)
   const TRIAL_PLAYS = 10;    // free tries per Plus deck and per Plus style
