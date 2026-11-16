@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Twelve more animals', items: [
+      '<b>12 more real animal recordings:</b> hen, goose, donkey, raven, bear, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
+      'Animals and Animal Talk now pick from 24 animals, so boards change much more from game to game.',
+    ]},
     { date: '2026-11-16', title: 'Decks in groups', items: [
       'Decks are now grouped into <b>Sounds</b>, <b>Music</b>, <b>Words</b> and <b>Learning</b>, so it is easier to find the kind of board you are in the mood for.',
     ]},
