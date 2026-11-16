@@ -12,6 +12,14 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: '1 or 2 players, any style', items: [
+      'Pick <b>1 Player</b> or <b>2 Players</b> next to the styles. Two players now works with <b>Pairs</b>, <b>Triples</b> and <b>Timed</b>: take turns on one device, and a match means you go again.',
+      'In Timed, two players share the clock and whoever has more when it runs out wins.',
+    ]},
+    { date: '2026-11-16', title: 'Clearer Triples', items: [
+      'In <b>Triples</b> the counter above the pads now says <b>Sets of 3</b>, and when you find two alike it tells you to find the third.',
+      'The Daily Pairody card says how today\'s style plays, like <i>Triples: find all 3 pads that match.</i>',
+    ]},
     { date: '2026-11-16', title: 'Daily Pairody', items: [
       'The daily game is now <b>Daily Pairody</b>: one surprise game a day for everyone. The date picks the board, game size and style, from every board there is.',
       'You play it as dealt. The pickers step aside while it is on, and your own board, size and style come back when you tap <b>Daily Pairody</b> again.',

@@ -218,6 +218,9 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
 .readout .duo i.on{color:var(--fg);border-color:var(--led)}
 .readout .duo small{font-size:.7rem;font-weight:500;margin-right:3px;letter-spacing:.04em}
 @media (max-width:440px){.styles{gap:5px}.styles button{padding:5px 8px;font-size:.8rem}}
+.styles .players{display:flex;gap:6px;padding-left:8px;border-left:1px solid var(--line)}
+@media (max-width:640px){.styles .players{border-left:0;padding-left:0;flex-basis:100%}}
+@media (max-width:440px){.styles .players{gap:5px}}
 .grid .pad.matched[data-by="1"]{background:var(--led-soft);box-shadow:inset 0 0 0 2px var(--led);color:var(--led)}
 .grid .pad.matched[data-by="1"] .dot{background:var(--led)}
 /* iOS app (assets/native.js adds .native to <html>): hide web-only bits, show app-only ones */
