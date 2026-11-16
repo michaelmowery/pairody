@@ -35,6 +35,9 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | `timed/out/<id>[/small\|/big]` | a Timed board ran out of time |
 | `done/new`, `done/close` | on the Well done card shown after a board is cleared: New board, or See board (closes the card). Added 2026-11-16. |
 | `daily/streak/<n>` | a Daily streak grew to n days (n capped at 30) |
+| `daily/card/play` | Play today's game tapped on the Daily game card above the board (added 2026-11-16) |
+| `daily/share/card`, `daily/share/done` | a Daily result shared through the share sheet, from the Daily game card or the Well done card |
+| `daily/copy/card`, `daily/copy/done` | a Daily result copied instead (no share sheet, or sharing failed) |
 | `size/<size>` | board size picked (small, classic, big). Sizes added 2026-11-15; earlier play/win counts are all Classic. |
 | `difficult/on`, `difficult/off` | Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |

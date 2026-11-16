@@ -24,6 +24,7 @@
 <script src="assets/update.js"></script>
 <script src="assets/notes.js" defer></script>
 <script src="assets/scores.js" defer></script>
+<script src="assets/daily.js" defer></script>
 <script src="assets/info.js" defer></script>
 <script src="assets/welcome.js" defer></script>
 <script src="assets/analytics.js" defer></script>
@@ -78,6 +79,13 @@
     </a>
   </header>
 
+  <!-- Today's Daily game: filled in by assets/daily.js -->
+  <section class="today" id="today" aria-labelledby="tdTitle" hidden>
+    <div class="td-cal" aria-hidden="true"><span id="tdMon"></span><b id="tdDay"></b></div>
+    <div class="td-text"><h2 class="td-title" id="tdTitle">Daily game</h2><p class="td-sub" id="tdSub" aria-live="polite"></p></div>
+    <div class="td-btns"><button class="btn primary" id="tdPlay">Play today's game</button><button class="btn" id="tdShare" hidden>Share</button></div>
+  </section>
+
   <div class="chassis">
     <div class="strip">
       <button type="button" class="deck-chip" id="deckChip" aria-haspopup="dialog" aria-controls="deckPick">
@@ -119,7 +127,7 @@
         <h2 id="doneTitle">Well done!</h2>
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p id="doneInfo"></p>
-        <div class="btns"><button class="btn primary" id="doneNew">New board</button><button class="btn" id="doneClose">See board</button></div>
+        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New board</button><button class="btn" id="doneClose">See board</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
     </div>
@@ -855,6 +863,7 @@ const timeLimit=()=>Math.ceil(NP*K()*({animals:4,notes:4,morse:5}[deck]||7)/10)*
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let board=0,deck="animals",cards=[],half=[],open=[],lock=false,settle=null,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
+let mlog=[]; // this board's moves, 1 = match, 0 = miss (the Daily share grid)
 let over=false,turn=0,score=[0,0]; // over: a Timed board ran out; turn/score: 2 Players
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -894,13 +903,16 @@ const Daily={
   // A streak still counts today if the last clear was yesterday
   streak(){const v=Daily.load();return v.last===Daily.day()||v.last===Daily.yesterday()?v.streak||0:0},
   result(d){const v=Daily.load();return v.today&&v.today.date===Daily.day()&&v.today.done[Daily.id(d)]||null},
-  // Returns {first, streak, grew}: first = first clear of this deck and size today
-  record(moves,secs){
+  // Returns {first, streak, grew}: first = first clear of this deck and size today.
+  // Each clear also keeps what the Share button needs: the move log (1 = match, 0 = miss),
+  // deck, size, whether names were shown, and the streak it reached.
+  record(moves,secs,extra){
     const v=Daily.load(),today=Daily.day();
     if(!v.today||v.today.date!==today)v.today={date:today,done:{}};
-    const first=!v.today.done[Daily.id()];if(first)v.today.done[Daily.id()]={moves,secs};
+    const first=!v.today.done[Daily.id()];
     let grew=false;
     if(v.last!==today){v.streak=v.last===Daily.yesterday()?(v.streak||0)+1:1;v.last=today;grew=true}
+    if(first)v.today.done[Daily.id()]=Object.assign({moves,secs,streak:v.streak},extra);
     v.top=Math.max(v.top||0,v.streak);Daily.save(v);return {first,streak:v.streak,grew};
   },
   seed(){let h=2166136261;for(const c of "pairody|"+Daily.day()+"|"+Daily.id()){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0},
@@ -930,7 +942,7 @@ function build(){
   board++; // a move still resolving from the old board is dropped (see tap)
   clipLate={};
   const L=layout();
-  clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;easyUsed=easy();NP=L.pairs;
+  clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;mlog=[];easyUsed=easy();NP=L.pairs;
   over=false;turn=0;score=[0,0];showDuo();
   hideDone(true);
   $("bestBox").classList.remove("new");showBest();
@@ -956,6 +968,7 @@ function build(){
   };
   cards=style==="daily"?Daily.seeded(deal):deal();
   $("status").textContent=msg;
+  dispatchEvent(new Event("pairody:board")); // assets/daily.js refreshes Today's game
   $("time").textContent=fmt(style==="timed"?timeLimit():0);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes). In Triples the
   // third pad is "half 2" and plays the first part again.
@@ -1043,7 +1056,7 @@ function tap(i,b){
     const who=style==="duo"&&!demo?P(turn)+": ":demo?"Demo: ":"";
     if(!easy())$("status").textContent=who+(open.length===1?(k>2?"Now find the other two.":demo?"now it looks for the twin.":"Now find its twin."):"One more to find.");
     return}
-  moves++;$("moves").textContent=moves;lock=true;
+  moves++;$("moves").textContent=moves;lock=true;mlog.push(miss?0:1);
   const grp=open.slice(),pp=grp.map(x=>$("pad"+x));
   const thisBoard=board;let done=false;
   settle=fast=>{
@@ -1085,7 +1098,7 @@ function showDone(title,big,lbl,info,p1){
   c.classList.toggle("p1",!!p1);$("doneScores").hidden=style==="duo";
   const thisBoard=board,calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
   clearTimeout(doneTimer);
-  doneTimer=setTimeout(()=>{if(thisBoard!==board||demo)return;c.hidden=false;$("doneNew").focus()},calm?250:900);
+  doneTimer=setTimeout(()=>{if(thisBoard!==board||demo)return;c.hidden=false;c.querySelector(".btn.primary:not([hidden])").focus()},calm?250:900);
 }
 function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
 $("doneNew").onclick=()=>{track("done/new","Well done card: New board");build()};
@@ -1120,8 +1133,9 @@ function finish(){
   if(moves===NP)track("perfect/"+deck+sizeTag()+styleTag(),"Perfect board: "+DECKNAME[deck]+sizeName()+styleName());
   const perfect=moves===NP?" A perfect board!":" Perfect is "+NP+".",diff=easyUsed?"":" in Difficult mode";
   if(style==="daily"){
-    const {first,streak,grew}=Daily.record(moves,secs);
+    const {first,streak,grew}=Daily.record(moves,secs,{log:mlog.join(""),deck,size,easy:easyUsed});
     if(grew)track("daily/streak/"+Math.min(streak,30),"Daily streak: "+streak);
+    dispatchEvent(new CustomEvent("pairody:daily-cleared",{detail:{first}})); // Share button (assets/daily.js)
     st.textContent=(first?"Today's board cleared in "+moves+" moves, "+fmt(secs)+"."+perfect:"Cleared again in "+moves+" moves. Only your first clear today counts.")
       +" Streak: "+streak+(streak===1?" day.":" days in a row!")+(grew?"":" Come back tomorrow to keep it going.");
     showDone(moves===NP?"Perfect board!":"Well done!",fmt(secs),"Time",moves+" moves"+diff+". "+(first?"":"Only your first clear today counts. ")

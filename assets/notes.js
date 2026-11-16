@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Today\'s game', items: [
+      'A <b>Daily game</b> card now sits at the top: one game a day, the same pads for everyone, with today\'s date and your 🔥 streak. Tap <b>Play today\'s game</b> to jump in.',
+      'Once you clear it, the card shows when the next game starts.',
+      'Tap <b>Share</b> to send your result to friends: one square per move, green for a match, dark for a miss. No spoilers, just your score.',
+    ]},
     { date: '2026-11-16', title: 'A new deck picker', items: [
       'Tap the deck name above the board to open the new <b>deck picker</b>: every deck is a card with a little picture of a matching pair and one line on how it plays.',
       'Switch between <b>Grouped</b> (Sounds, Music, Words, Learning) and <b>All</b>, one A to Z list. <b>Featured</b> decks sit on top as a good place to start.',
