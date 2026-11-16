@@ -326,7 +326,7 @@ dialog.deckpick .dp-sec-head p{margin:0;font-size:.85rem;color:var(--muted)}
 .decks .deck-tile small{position:absolute;top:12px;right:12px;margin:0;padding:1px 7px;border-radius:999px;background:var(--chassis);
   color:var(--ok);font-family:var(--display);font-weight:600;font-size:.72rem;font-variant-numeric:tabular-nums;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .decks .deck-tile small::before{content:"Best ";color:var(--muted);font-weight:500}
-body[data-style="daily"] .decks .deck-tile small::before{content:""}
+body.daily-on .decks .deck-tile small::before{content:""}
 .decks .deck-tile small:empty{display:none}
 @media (prefers-reduced-motion:no-preference){dialog.deckpick[open]{animation:infoin .18s ease-out}}
 /* Today's game: the Daily card above the board (assets/daily.js) */

@@ -5,25 +5,16 @@
 //   - Share builds a Wordle-style result (one square per move: green = match, dark = miss)
 //     and opens the share sheet, or copies it where there is none.
 // The page tells this file about new games ("pairody:board") and Daily clears
-// ("pairody:daily-cleared"). It reads the page's globals: Daily, deck, size, style, DECKNAME, SIZES, fmt.
+// ("pairody:daily-cleared"). It reads the page's globals: Daily, dailyOn, enterDaily, leaveDaily, moves, DECKNAME, SIZES, STYLES, TRIPLES, fmt.
 // Words: in what players see, a "board" is a deck (Animals, Jokes...) and a "game" is one round.
 (function(){
   const $ = (id) => document.getElementById(id);
   const card = $('today'); if (!card || typeof Daily === 'undefined') return;
   const track = (n, t) => window.PairodyAnalytics && window.PairodyAnalytics.track(n, t);
-  const sizeLabel = (s) => s === 'classic' ? '' : ' (' + SIZES[s].name + ')';
   const days = (n) => n + (n === 1 ? ' day' : ' days');
 
-  // Today's clears, newest last: [{moves, secs, log, deck, size, easy, streak}]
-  function clears(){
-    const v = Daily.load();
-    if (!v.today || v.today.date !== Daily.day()) return [];
-    return Object.values(v.today.done || {});
-  }
-  // The result Share sends: this board and size if cleared today, otherwise the latest clear
-  function shareable(){
-    return Daily.result() || clears().slice(-1)[0] || null;
-  }
+  // "Jokes · Big · Triples"
+  const comboLabel = (r) => [DECKNAME[r.deck] || r.deck, SIZES[r.size] ? SIZES[r.size].name : r.size, STYLES[r.style] ? STYLES[r.style].name : 'Pairs'].join(' · ');
   function untilTomorrow(){
     const now = new Date(), next = new Date(now); next.setHours(24, 0, 0, 0);
     const m = Math.ceil((next - now) / 60000), h = Math.floor(m / 60);
@@ -34,20 +25,20 @@
     const now = new Date();
     $('tdMon').textContent = now.toLocaleDateString(undefined, { month: 'short' });
     $('tdDay').textContent = now.getDate();
-    const n = Daily.streak(), done = clears().length > 0, here = Daily.result(), daily = style === 'daily';
+    const n = Daily.streak(), done = !!Daily.result(), daily = dailyOn;
     const flame = n ? '🔥 ' + days(n) + (n > 1 ? ' in a row' : '') + '. ' : '';
     let title, sub;
     if (done) {
       title = '✓ Today\'s game done';
-      sub = (daily && !here
-        ? 'Your streak is safe; this ' + DECKNAME[deck] + ' game is just for fun. ' : '') + flame + 'Next game in ' + untilTomorrow() + '.';
+      sub = flame + 'Next Daily Pairody in ' + untilTomorrow() + '.';
     } else if (daily) {
-      title = 'Today\'s ' + DECKNAME[deck] + ' game';
-      sub = 'Everyone playing ' + DECKNAME[deck] + sizeLabel(size) + ' gets these same pads today. '
+      title = 'Today\'s Daily Pairody';
+      sub = comboLabel(Daily.combo()) + '. Everyone gets these same pads today, played as dealt. '
         + (n ? 'Clear it to keep your 🔥 ' + n + '-day streak.' : 'Clear it to start a streak.');
     } else {
-      title = 'Daily game';
-      sub = 'Same pads for everyone today. ' + (n ? '🔥 ' + days(n) + ': play to keep your streak.' : 'Clear one a day to build a streak.');
+      title = 'Daily Pairody';
+      sub = 'One surprise game a day: the board, size and style are picked for everyone. '
+        + (n ? '🔥 ' + days(n) + ': play to keep your streak.' : 'Clear one a day to build a streak.');
     }
     $('tdTitle').textContent = title;
     $('tdSub').textContent = sub;
@@ -56,17 +47,19 @@
     $('tdPlay').hidden = daily || done;
     $('tdShare').hidden = !done;
     card.hidden = false;
+    const ask = $('dailyAsk');
+    if (ask) { ask.textContent = done ? '✓ You Pairody\'d today' : 'Have you Pairody\'d today?'; ask.classList.toggle('done', done); }
   }
 
-  // "Pairody Daily · Nov 16" / "Animals (Big): 14 moves, 1:02" / squares / streak / link
+  // "Daily Pairody · Nov 16" / "Jokes · Big · Triples" / "14 moves, 1:02" / squares / streak / link
   function shareText(r){
     const when = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const sq = (r.log || '').split('').map((c) => c === '1' ? '🟩' : '⬛');
     const rows = []; for (let i = 0; i < sq.length; i += 8) rows.push(sq.slice(i, i + 8).join(''));
-    const pairs = SIZES[r.size] ? SIZES[r.size].pairs : 0;
+    const pairs = r.style === 'triples' ? (TRIPLES[r.size] || {}).pairs : SIZES[r.size] ? SIZES[r.size].pairs : 0;
     const extras = [r.moves === pairs ? '⭐ Perfect' : '', r.easy === false ? '🎧 Sounds only' : '', r.streak ? '🔥 ' + days(r.streak) : ''].filter(Boolean);
-    return ['Pairody Daily · ' + when,
-      (DECKNAME[r.deck] || r.deck) + sizeLabel(r.size) + ': ' + r.moves + ' moves, ' + fmt(r.secs)]
+    return ['Daily Pairody · ' + when,
+      comboLabel(r), r.moves + ' moves, ' + fmt(r.secs)]
       .concat(rows, extras.length ? [extras.join('  ')] : [], ['https://pairody.app']).join('\n');
   }
   function copied(btn){
@@ -74,7 +67,7 @@
     setTimeout(() => { btn.textContent = was; }, 1800);
   }
   async function share(btn, from){
-    const r = shareable(); if (!r) return;
+    const r = Daily.result(); if (!r) return;
     const text = shareText(r);
     if (navigator.share) {
       try { await navigator.share({ text }); track('daily/share/' + from, 'Daily result shared'); return; }
@@ -92,7 +85,7 @@
 
   $('tdPlay').onclick = () => {
     track('daily/card/play', 'Today\'s game card: Play');
-    const b = document.querySelector('button[data-style="daily"]'); if (b) b.click();
+    if (!dailyOn) enterDaily();
   };
   $('tdShare').onclick = () => share($('tdShare'), 'card');
   const ds = $('doneShare');
@@ -114,7 +107,7 @@
   setInterval(() => {
     if (Daily.day() !== today) {
       today = Daily.day();
-      if (style === 'daily' && !moves && typeof build === 'function') { build(); return; }
+      if (dailyOn && !moves) { leaveDaily(true); enterDaily(); return; }
     }
     render();
   }, 30000);
