@@ -30,7 +30,7 @@
 <h2 id="welcomeTitle">Welcome to Pairody</h2>
 <p id="welcomeUpdate" class="welcome-update" hidden></p>
 <div id="welcomeNews" class="welcome-news" hidden></div>
-<p id="welcomeBody"><span class="web-only">Pairody is in early preview. It's free while we build it, new decks land often, and now and then something may wobble. Thanks for playing!</span><span class="native-only">Memory match, played by ear: pick a deck, tap two pads, and find the pairs. Pairody is free, with no ads and no accounts, and new decks arrive with updates.</span> Tap <b class="welcome-i">i</b> any time to see what's here.</p>
+<p id="welcomeBody"><span class="web-only">Pairody is in early preview. It's free while we build it, new boards land often, and now and then something may wobble. Thanks for playing!</span><span class="native-only">Memory match, played by ear: pick a board, tap two pads, and find the pairs. Pairody is free, with no ads and no accounts, and new boards arrive with updates.</span> Tap <b class="welcome-i">i</b> any time to see what's here.</p>
 <p class="welcome-optout" hidden>Don't need this after every update? Turn it off in <button type="button" class="welcome-prefs">Preferences</button>.</p>
 <form method="dialog" class="welcome-actions"><button type="button" class="btn welcome-demo" hidden>Show demo</button><button class="btn primary welcome-ok">Got it</button></form>`;
 

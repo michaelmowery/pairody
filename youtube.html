@@ -70,7 +70,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
     <div class="row">
       <label class="check"><input type="checkbox" id="hard"> Hard mode: pair clips come from different parts of the song</label>
       <label class="toggle"><input type="checkbox" id="difficult"><span>Difficult mode: clips only, no song titles</span></label>
-      <button class="btn primary" id="go">Deal board</button>
+      <button class="btn primary" id="go">Deal game</button>
     </div>
     <p class="status" id="setupStatus"></p>
   </div>
@@ -84,10 +84,10 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
         <div><span>Time</span><b id="time">0:00</b></div>
         <div class="best" id="bestBox" title="Your best with these songs: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
       </div>
-      <button class="btn" id="again">New board</button>
+      <button class="btn" id="again">New game</button>
     </div>
     <div class="grid" id="grid"></div>
-    <p class="status" id="status">Paste songs above, then deal a board.</p>
+    <p class="status" id="status">Paste songs above, then deal a game.</p>
   </div>
 
   <div class="notes">
@@ -98,7 +98,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
       <li>Each pad shows the song's title and artist while its clip plays, like the now-playing card in YouTube Music. Turn on Difficult mode to hear the clips only.</li>
       <li>On iPhone, if the first pad is silent, tap it again.</li>
       <li>Videos play through YouTube's own player and stay on screen while they play.</li>
-      <li>Your best score is saved on this device for each playlist (or set of song links), with Hard and Difficult mode boards kept separately.</li>
+      <li>Your best score is saved on this device for each playlist (or set of song links), with Hard and Difficult mode games kept separately.</li>
     </ul>
   </div>
   </div>
@@ -282,7 +282,7 @@ function onErr(e){
   const spare=pool.filter(p=>!bad.has(p)&&!songs.some(s=>s.id===p));
   const si=songs.findIndex(s=>s.id===id);
   if(si>=0&&spare.length){songs[si]=newSong(spare[0],$("hard").checked);setStatus("That song can't play outside YouTube, so I swapped in another. Tap again.","err")}
-  else setStatus("That song can't play outside YouTube. Add more songs and deal a new board.","err");
+  else setStatus("That song can't play outside YouTube. Add more songs and deal a new game.","err");
 }
 
 function tap(i){
@@ -315,11 +315,11 @@ function tap(i){
         clearInterval(timer);
         const secs=Math.floor((Date.now()-start)/1000),{isNew,prev}=Best.record(boardKey,moves,secs);
         $("time").textContent=fmt(secs);
-        track("yt/win"+(boardKey.includes(":hard")?"/hard":""),"Your music: board cleared"+(boardKey.includes(":hard")?" (Hard)":""));
-        let msg="Board cleared in "+moves+" moves, "+fmt(secs)+". ";
+        track("yt/win"+(boardKey.includes(":hard")?"/hard":""),"Your music: game cleared"+(boardKey.includes(":hard")?" (Hard)":""));
+        let msg="Game cleared in "+moves+" moves, "+fmt(secs)+". ";
         if(isNew&&prev)msg="New best for these songs! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+"). ";
-        else if(isNew)msg="First board with these songs: "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
-        msg+=moves===PAIRS?"A perfect board!":"Perfect is "+PAIRS+".";
+        else if(isNew)msg="First game with these songs: "+moves+" moves, "+fmt(secs)+". That's your best to beat. ";
+        msg+=moves===PAIRS?"A perfect game!":"Perfect is "+PAIRS+".";
         setStatus(msg,"win");showBest();
         if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
       }

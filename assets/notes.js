@@ -12,40 +12,44 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
-    { date: '2026-11-16', title: 'A new deck picker', items: [
-      'Tap the deck name above the board to open the new <b>deck picker</b>: every deck is a card with a little picture of a matching pair and one line on how it plays.',
-      'Switch between <b>Grouped</b> (Sounds, Music, Words, Learning) and <b>All</b>, one A to Z list. <b>Featured</b> decks sit on top as a good place to start.',
-      'Each card shows your best score on that deck.',
+    { date: '2026-11-16', title: 'Decks are now boards', items: [
+      'What used to be called a <b>deck</b> (Animals, Jokes, Capitals and the rest) is now a <b>board</b>. Pick one with <b>Choose a board</b>.',
+      'One round is now a <b>game</b>: <b>New game</b>, game sizes, and a <b>Daily</b> game each day. Your best scores and streaks carry over.',
+    ]},
+    { date: '2026-11-16', title: 'A new board picker', items: [
+      'Tap the board name at the top to open the new <b>board picker</b>: every board is a card with a little picture of a matching pair and one line on how it plays.',
+      'Switch between <b>Grouped</b> (Sounds, Music, Words, Learning) and <b>All</b>, one A to Z list. <b>Featured</b> boards sit on top as a good place to start.',
+      'Each card shows your best score on that board.',
     ]},
     { date: '2026-11-16', title: 'Twelve more animals', items: [
       '<b>12 more real animal recordings:</b> hen, goose, donkey, raven, bear, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
-      'Animals and Animal Talk now pick from 24 animals, so boards change much more from game to game.',
+      'Animals and Animal Talk now pick from 24 animals, so games change much more from one to the next.',
     ]},
-    { date: '2026-11-16', title: 'Decks in groups', items: [
-      'Decks are now grouped into <b>Sounds</b>, <b>Music</b>, <b>Words</b> and <b>Learning</b>, so it is easier to find the kind of board you are in the mood for.',
+    { date: '2026-11-16', title: 'Boards in groups', items: [
+      'Boards are now grouped into <b>Sounds</b>, <b>Music</b>, <b>Words</b> and <b>Learning</b>, so it is easier to find the kind of game you are in the mood for.',
     ]},
     { date: '2026-11-16', title: 'Capitals and Times Tables', items: [
-      '<b>Brain Food</b> is now <b>Capitals</b>: every board is countries and their capitals. Your best scores carry over.',
-      '<b>Times Tables</b> is its own deck now, so you can pick it any time instead of every other board.',
+      '<b>Brain Food</b> is now <b>Capitals</b>: every game is countries and their capitals. Your best scores carry over.',
+      '<b>Times Tables</b> is its own board now, so you can pick it any time instead of every other game.',
     ]},
-    { date: '2026-11-16', title: 'New board, closer to hand', items: [
-      'The <b>New board</b> button now sits right above the board, next to your moves and time.',
+    { date: '2026-11-16', title: 'New game, closer to hand', items: [
+      'The <b>New game</b> button now sits right above the pads, next to your moves and time.',
     ]},
     { date: '2026-11-16', title: 'Free and Plus labels', items: [
-      'Some decks and board styles now carry a small <span class="tier-tag">Plus</span> tag. They will be part of Pairody Plus, a one-time unlock, later on. Animals, Jokes, Pairs, Daily, every board size and Difficult mode stay free.',
-      'Nothing is locked: every deck and style is still free for everyone today.',
+      'Some boards and game styles now carry a small <span class="tier-tag">Plus</span> tag. They will be part of Pairody Plus, a one-time unlock, later on. Animals, Jokes, Pairs, Daily, every game size and Difficult mode stay free.',
+      'Nothing is locked: every board and style is still free for everyone today.',
     ]},
     { date: '2026-11-16', title: 'Your score card', items: [
-      'See every best score on one card: each deck, board size and style, with and without Difficult mode. Perfect boards get a star.',
-      'Open it by tapping <b>Best</b> above the board, from <b>All best scores</b> on the Well done card, or under <b class="welcome-i">i</b>.',
+      'See every best score on one card: each board, game size and style, with and without Difficult mode. Perfect games get a star.',
+      'Open it by tapping <b>Best</b> above the pads, from <b>All best scores</b> on the Well done card, or under <b class="welcome-i">i</b>.',
       'Want a fresh start? <b>Clear best scores</b> on the card asks first, and keeps your settings and Daily streak.',
     ]},
     { date: '2026-11-16', title: 'Well done!', items: [
-      'Clear a board and it lights up with a green ring, then a <b>Well done</b> card shows your time and moves, with a <b>New board</b> button right there.',
-      'New bests, perfect boards and Daily streaks get called out on the card. In <b>2 Players</b> it names the winner.',
-      'Tap <b>See board</b> to close the card and look back over what you matched.',
+      'Clear a game and it lights up with a green ring, then a <b>Well done</b> card shows your time and moves, with a <b>New game</b> button right there.',
+      'New bests, perfect games and Daily streaks get called out on the card. In <b>2 Players</b> it names the winner.',
+      'Tap <b>See pads</b> to close the card and look back over what you matched.',
     ]},
-    { date: '2026-11-16', title: 'Six new decks', items: [
+    { date: '2026-11-16', title: 'Six new boards', items: [
       '<b>Everyday Sounds:</b> a doorbell, a kettle, a ringing phone, a siren and more.',
       '<b>Instruments:</b> every pad plays the same little tune on a different instrument. Match piano to piano, banjo to banjo.',
       '<b>Seasonal:</b> changes with the calendar. Right now it is the holidays, with carols, sleigh bells and a crackling fire. Halloween, spring and summer each get their own sounds.',
@@ -54,17 +58,17 @@
       '<b>Phone Keypad:</b> match each key to the beep it makes when you dial.',
     ]},
     { date: '2026-11-16', title: 'Four new ways to play', items: [
-      'Pick a <b>style</b> under the deck buttons. <b>Pairs</b> is the game you know.',
-      '<b>Daily:</b> one board a day, the same for everyone playing that deck and size. Clear one every day to build a streak.',
+      'Pick a <b>style</b> under the board buttons. <b>Pairs</b> is the game you know.',
+      '<b>Daily:</b> one game a day, the same for everyone playing that board and size. Clear one every day to build a streak.',
       '<b>Triples:</b> every sound is on three pads, and you find all three in one move.',
-      '<b>Timed:</b> clear the board before the clock runs out.',
+      '<b>Timed:</b> find every pair before the clock runs out.',
       '<b>2 Players:</b> take turns on one phone. Find a match and you go again; the pads you win show in your color.',
     ]},
-    { date: '2026-11-16', title: 'Your music joins the deck list', items: [
-      '<b>Your music</b> moved from the top of the page to the end of the deck buttons, so every way to play is in one list.',
+    { date: '2026-11-16', title: 'Your music joins the board list', items: [
+      '<b>Your music</b> moved from the top of the page to the end of the board buttons, so every way to play is in one list.',
     ]},
     { date: '2026-11-16', title: 'Getting ready for the App Store', items: [
-      'Pairody is on its way to iPhone and iPad as a free app. It plays the same decks, and its pads play even with your phone on silent.',
+      'Pairody is on its way to iPhone and iPad as a free app. It plays the same boards, and its pads play even with your phone on silent.',
       'A <a href="privacy.html">privacy policy</a> is now linked from the Privacy section under <b class="welcome-i">i</b>.',
     ]},
     { date: '2026-11-15', title: 'Snappier taps', items: [
@@ -77,38 +81,38 @@
       'Tapping a new pad cuts off the one before it, so sounds never pile up.',
       '<b>Your music:</b> a matching clip now fades out after about a second instead of playing to the end.',
     ]},
-    { date: '2026-11-15', title: 'More sounds in every deck', items: [
-      'Bigger sets for every deck: about twice as many quotes, jokes, rhymes, opposites, capitals and tunes, numbers in Morse Code, and times tables up to 10.',
-      'Each new board deals fresh pairs, like a shuffled deck: you hear everything in a deck before anything comes back.',
+    { date: '2026-11-15', title: 'More sounds in every board', items: [
+      'Bigger sets for every board: about twice as many quotes, jokes, rhymes, opposites, capitals and tunes, numbers in Morse Code, and times tables up to 10.',
+      'Each new game deals fresh pairs, like a shuffled deck of cards: you hear everything in a board before anything comes back.',
     ]},
-    { date: '2026-11-15', title: 'Board sizes and release notes', items: [
-      '<b>Pick your board size:</b> Small (6 pairs), Classic (8 pairs) or Big (12 pairs, with the Pairody logo in the middle). Best scores are kept for each size.',
-      'The board now shrinks to fit your window on laptops and desktops, so you never have to scroll to reach the bottom row.',
+    { date: '2026-11-15', title: 'Game sizes and release notes', items: [
+      '<b>Pick your game size:</b> Small (6 pairs), Classic (8 pairs) or Big (12 pairs, with the Pairody logo in the middle). Best scores are kept for each size.',
+      'The game now shrinks to fit your window on laptops and desktops, so you never have to scroll to reach the bottom row.',
       'Four more real animal recordings: horse, elephant, wolf and goat.',
       'These release notes. Find them any time under <b class="welcome-i">i</b>.',
     ]},
-    { date: '2026-11-12', title: 'Six new decks and a Demo', items: [
-      '<b>New decks:</b> Quotes, Animal Talk, Jokes, Word Play, Brain Food, Melodies and Morse Code. Each deck shows a short how-to under the deck buttons.',
-      '<b>Demo</b> plays a board of the current deck for you, and the welcome note can start it too.',
-      'Drums, Chords and Rhythms were retired to make room for the new decks.',
+    { date: '2026-11-12', title: 'Six new boards and a Demo', items: [
+      '<b>New boards:</b> Quotes, Animal Talk, Jokes, Word Play, Brain Food, Melodies and Morse Code. Each board shows a short how-to under the board buttons.',
+      '<b>Demo</b> plays a game of the current board for you, and the welcome note can start it too.',
+      'Drums, Chords and Rhythms were retired to make room for the new boards.',
     ]},
     { date: '2026-11-12', title: 'Easier to play, nicer to watch', items: [
       'Sound names now show on each pad while it plays. Turn on <b>Difficult mode</b> for sounds only. Your music has Difficult mode too.',
       'Pads flip over like real cards (off if your device asks for reduced motion).',
       'More real animal recordings: songbird, duck, and a friendlier cat.',
-      'Fixed: tapping New board in the middle of a move, and Your music clips that were slow to start.',
+      'Fixed: tapping New game in the middle of a move, and Your music clips that were slow to start.',
     ]},
     { date: '2026-11-12', title: 'Updates, offline play and feedback', items: [
       'The <b class="welcome-i">i</b> button explains the preview and holds your settings.',
       '<b>Check for updates</b>, and Pairody now works offline once it has loaded.',
       '<b>Send feedback</b> straight from the info panel.',
-      'Anonymous usage counts help us see which decks people enjoy. You can switch them off under Privacy.',
+      'Anonymous usage counts help us see which boards people enjoy. You can switch them off under Privacy.',
     ]},
     { date: '2026-11-11', title: 'Pairody launches', items: [
       'Pairody opens at pairody.app: memory match, played by ear.',
-      'The Animals deck plays real recordings.',
-      '<b>Best scores</b> for each deck, saved on your device.',
-      '<b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist, for beta testers.',
+      'The Animals board plays real recordings.',
+      '<b>Best scores</b> for each board, saved on your device.',
+      '<b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist, for beta testers.',
     ]},
   ];
   const SEEN_KEY = 'pairody.notesSeen';
