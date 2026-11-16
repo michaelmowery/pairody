@@ -24,7 +24,7 @@ set `GOATCOUNTER_CODE = ''`. Only `pairody.app` and the iOS app send counts.
 | page view (`/`, `/youtube.html`) | each page load |
 | `launch/installed-app`, `launch/browser`, `launch/ios-app` | each page load, by how Pairody was opened (`ios-app` = the App Store app; its page views are tagged `/app/...`) |
 | `install` | installed to the home screen (Chrome, Edge, Android) |
-| `deck/<id>` | a deck button tapped (animals, talk, quotes, jokes, wordplay, brain, melodies, notes, morse) |
+| `deck/<id>` | a deck button tapped (animals, talk, quotes, jokes, wordplay, brain, melodies, notes, morse); `deck/youtube` = the Your music tile (web only) |
 | `play/<id>[/small\|/big][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; `/difficult` = sounds only, no names) |
 | `win/<id>[/small\|/big][/difficult]` | board cleared |
 | `perfect/<id>[/small\|/big]` | board cleared in one move per pair (6, 8 or 12) |
