@@ -18,5 +18,17 @@ Each clip was trimmed to one call, mixed to mono, peak-normalized and encoded as
 | Elephant | `animals/elephant.mp3` | [Elephant voice - trumpeting.ogg](https://commons.wikimedia.org/wiki/File:Elephant_voice_-_trumpeting.ogg) | Wikimedia Commons contributor (see source page) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | one trumpet, 1.15 s |
 | Wolf | `animals/wolf.mp3` | [Wolf howls.ogg](https://commons.wikimedia.org/wiki/File:Wolf_howls.ogg) | uploaded by Duk | Public domain | 2.6 s of howling from 0.2 s, faded out |
 | Goat | `animals/goat.mp3` | [Herd of goats bleating.ogg](https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg) | stephan | Public domain | one bleat from 4.35 s, 0.8 s |
+| Hen | `animals/hen.mp3` | [Hen announcing shes lain an egg.ogg](https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg) | alys | Public domain | cackle, 1.5 s from 3.9 s |
+| Goose | `animals/goose.mp3` | [Geese Honking (loud).ogg](https://commons.wikimedia.org/wiki/File:Geese_Honking_(loud).ogg) | U.S. Fish and Wildlife Service | Public domain | honks, 1.2 s from 4.2 s |
+| Donkey | `animals/donkey.mp3` | [157763 felix-blume a-donkey-is-braying-in-his-enclosure-in-south-of-france.wav](https://commons.wikimedia.org/wiki/File:157763_felix-blume_a-donkey-is-braying-in-his-enclosure-in-south-of-france.wav) | felix-blume | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | one bray, 2.2 s from 6.3 s |
+| Raven | `animals/raven.mp3` | [Common Raven Grand Teton National Park.ogg](https://commons.wikimedia.org/wiki/File:Common_Raven_Grand_Teton_National_Park.ogg) | National Park Service | Public domain | calls, 1.3 s from 3.9 s |
+| Bear | `animals/bear.mp3` | [Yellowstone sound library - Grizzly Bears Roar - 001.mp3](https://commons.wikimedia.org/wiki/File:Yellowstone_sound_library_-_Grizzly_Bears_Roar_-_001.mp3) | NPS & MSU Acoustic Atlas / Jennifer Jerrett | Public domain | roar, 1.8 s from 2.2 s |
+| Whale | `animals/whale.mp3` | [Humpback whale moo.ogg](https://commons.wikimedia.org/wiki/File:Humpback_whale_moo.ogg) | National Park Service | Public domain | one moo, 1.8 s from 24.75 s |
+| Peacock | `animals/peacock.mp3` | [Pavo cristatus (call).ogg](https://commons.wikimedia.org/wiki/File:Pavo_cristatus_(call).ogg) | Ke4roh | Public domain | one call, 1 s from 7.3 s |
+| Rattlesnake | `animals/rattlesnake.mp3` | [Rattlesnake.ogg](https://commons.wikimedia.org/wiki/File:Rattlesnake.ogg) | uploaded by Borisblue | Public domain | first 1.2 s of rattling |
+| Dove | `animals/dove.mp3` | [Dove cooing.ogg](https://commons.wikimedia.org/wiki/File:Dove_cooing.ogg) | mary905 | Public domain | one coo, 1.8 s from 3.2 s |
+| Eagle | `animals/eagle.mp3` | [Yellowstone sound library - Bald Eagle - 003.mp3](https://commons.wikimedia.org/wiki/File:Yellowstone_sound_library_-_Bald_Eagle_-_003.mp3) | NPS & MSU Acoustic Atlas / Jennifer Jerrett | Public domain | calls, 1.3 s from 6.4 s, boosted |
+| Bison | `animals/bison.mp3` | [Bison.ogg](https://commons.wikimedia.org/wiki/File:Bison.ogg) | National Park Service | Public domain | bellow, 1.6 s from 0.5 s |
+| Cicada | `animals/cicada.mp3` | [Chorus Cicada singing.ogg](https://commons.wikimedia.org/wiki/File:Chorus_Cicada_singing.ogg) | Siobhan Leachman | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | song, 1.5 s from 8.6 s |
 
 Before adding a sound, check its source page: only CC0 or public-domain files go in this folder.

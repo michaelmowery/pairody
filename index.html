@@ -249,14 +249,14 @@ function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}
   o.connect(fl);fl.connect(g);g.connect(bus());o.start(t);o.stop(t+dur+.05);
 }
 const C4=261.63, st=n=>C4*Math.pow(2,n/12);
-const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",Horse:"🐴",Elephant:"🐘",Wolf:"🐺",Goat:"🐐"};
+const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",Horse:"🐴",Elephant:"🐘",Wolf:"🐺",Goat:"🐐",Hen:"🐔",Goose:"🪿",Donkey:"🫏",Raven:"🐦‍⬛",Bear:"🐻",Whale:"🐋",Peacock:"🦚",Rattlesnake:"🐍",Dove:"🕊️",Eagle:"🦅",Bison:"🦬",Cicada:"🦗"};
 
 // Real recordings for some sounds (public domain / CC0, see sounds/CREDITS.md).
 // Each clip is fetched once and decoded on first use; if it is missing or fails
 // to load, the pad plays the synth version below instead. If it is just slow (over
 // 2.5s on the first tap), the synth fills in for the rest of that board only, and the
 // recording takes over from the next board.
-const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat"};
+const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat",Hen:"hen",Goose:"goose",Donkey:"donkey",Raven:"raven",Bear:"bear",Whale:"whale",Peacock:"peacock",Rattlesnake:"rattlesnake",Dove:"dove",Eagle:"eagle",Bison:"bison",Cicada:"cicada"};
 const clipData={},clipBuf={};
 function loadClips(){
   for(const [name,file] of Object.entries(CLIPS)){
@@ -552,7 +552,19 @@ const ANIMALS=[
   ["Horse",withClip("Horse",t=>voice(t,{f:[[0,700],[.15,1100],[.5,900],[1.1,600]],dur:1.2,ft:"bandpass",fq:1400,q:1.5,vol:.6,atk:.03}))],
   ["Elephant",withClip("Elephant",t=>voice(t,{type:"sawtooth",f:[[0,500],[.12,900],[.9,820]],dur:1,ft:"bandpass",fq:1100,q:2,vol:.65,atk:.05}))],
   ["Wolf",withClip("Wolf",t=>voice(t,{type:"sine",f:[[0,380],[.4,620],[1.4,600],[1.9,420]],dur:2,ft:"lowpass",fq:1400,vol:.45,atk:.2}))],
-  ["Goat",withClip("Goat",t=>voice(t,{f:[[0,520],[.1,560],[.6,480]],dur:.65,ft:"bandpass",fq:1100,q:2,vol:.65,atk:.03}))]
+  ["Goat",withClip("Goat",t=>voice(t,{f:[[0,520],[.1,560],[.6,480]],dur:.65,ft:"bandpass",fq:1100,q:2,vol:.65,atk:.03}))],
+  ["Hen",withClip("Hen",t=>[0,.16,.32,.6].forEach((d,i)=>voice(t+d,{type:"square",f:[[0,i<3?600:700],[.1,i<3?520:900]],dur:i<3?.1:.3,ft:"bandpass",fq:1300,q:3,vol:.45,atk:.01})))],
+  ["Goose",withClip("Goose",t=>[0,.35].forEach(d=>voice(t+d,{type:"square",f:[[0,420],[.08,480],[.25,400]],dur:.26,ft:"bandpass",fq:1000,q:4,vol:.55,atk:.01})))],
+  ["Donkey",withClip("Donkey",t=>[[0,900,.35],[.4,250,.45],[.9,900,.35],[1.3,250,.45]].forEach(([d,hz,l])=>voice(t+d,{f:[[0,hz],[l,hz*.8]],dur:l,ft:"bandpass",fq:1200,q:1.5,vol:.6,atk:.03})))],
+  ["Raven",withClip("Raven",t=>[0,.45].forEach(d=>voice(t+d,{f:[[0,300],[.05,380],[.3,280]],dur:.32,ft:"bandpass",fq:900,q:2,vol:.6,atk:.01})))],
+  ["Bear",withClip("Bear",t=>{voice(t,{f:[[0,110],[.3,150],[1.1,90]],dur:1.2,ft:"lowpass",fq:600,vol:.8,atk:.08});noise(t,1,0,.2,400)})],
+  ["Whale",withClip("Whale",t=>voice(t,{type:"sine",f:[[0,180],[.6,420],[1.4,260],[2,150]],dur:2.1,ft:"lowpass",fq:900,vol:.5,atk:.3}))],
+  ["Peacock",withClip("Peacock",t=>[0,.55].forEach(d=>voice(t+d,{f:[[0,700],[.1,1100],[.4,900]],dur:.45,ft:"bandpass",fq:1600,q:2,vol:.55,atk:.02})))],
+  ["Rattlesnake",withClip("Rattlesnake",t=>{for(let i=0;i<30;i++)noise(t+i*.05,.035,3000,.25)})],
+  ["Dove",withClip("Dove",t=>[[0,.35],[.45,.6],[1.15,.3],[1.5,.3]].forEach(([d,l])=>voice(t+d,{type:"sine",f:[[0,420],[l*.4,470],[l,380]],dur:l,ft:"lowpass",fq:800,vol:.45,atk:.05})))],
+  ["Eagle",withClip("Eagle",t=>[0,.12,.24,.36,.5].forEach((d,i)=>voice(t+d,{type:"sine",f:[[0,2400-i*120],[.08,2000-i*120]],dur:.09,ft:"highpass",fq:900,vol:.3,atk:.005})))],
+  ["Bison",withClip("Bison",t=>voice(t,{f:[[0,90],[.3,120],[1.4,80]],dur:1.5,ft:"lowpass",fq:500,vol:.85,atk:.15}))],
+  ["Cicada",withClip("Cicada",t=>{for(let i=0;i<40;i++)voice(t+i*.035,{type:"square",f:[[0,4200],[.02,4300]],dur:.025,ft:"highpass",fq:3000,vol:.12,atk:.003})})]
 ];
 const NOTENAME=["C","C♯","D","E♭","E","F","F♯","G","A♭","A","B♭","B","High C"];
 const noteEntry=n=>[NOTENAME[n],t=>tone(st(n),t,.8,"triangle",.32),"♪"+NOTENAME[n].replace("High C","C′"),1];
@@ -997,7 +1009,7 @@ const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Joke
   everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad"};
 // How each deck works, shown under the deck buttons
 const DECKHELP={
-  animals:"Real recordings of twelve animals, from a cat's meow to an elephant's trumpet. Find the two pads that make the same call. Each board picks a different mix, so you won't hear the same ones every time.",
+  animals:"Real recordings of 24 animals, from a cat's meow to a humpback whale's moo. Find the two pads that make the same call. Each board picks a different mix, so you won't hear the same ones every time.",
   talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
   quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks its quotes from a bigger set.",
   jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every board picks its jokes from a bigger set.",
