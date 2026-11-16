@@ -15,6 +15,10 @@
     { date: '2026-11-16', title: 'New board, closer to hand', items: [
       'The <b>New board</b> button now sits right above the board, next to your moves and time.',
     ]},
+    { date: '2026-11-16', title: 'Free and Plus labels', items: [
+      'Some decks and board styles now carry a small <span class="tier-tag">Plus</span> tag. They will be part of Pairody Plus, a one-time unlock, later on. Animals, Jokes, Pairs, Daily, every board size and Difficult mode stay free.',
+      'Nothing is locked: every deck and style is still free for everyone today.',
+    ]},
     { date: '2026-11-16', title: 'Your score card', items: [
       'See every best score on one card: each deck, board size and style, with and without Difficult mode. Perfect boards get a star.',
       'Open it by tapping <b>Best</b> above the board, from <b>All best scores</b> on the Well done card, or under <b class="welcome-i">i</b>.',
