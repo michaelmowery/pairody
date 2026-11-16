@@ -17,7 +17,6 @@
   <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Difficult mode</b> for sounds only.</li>
   <li><b>Best scores</b> for each deck, saved on this device. No account or sign-up.</li>
   <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist. It's open to beta testers for now. Find it at the end of the deck buttons.</li>
-  <li class="web-only"><b>Free and Plus.</b> Animals is the free deck. Decks tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now every deck is free for everyone.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>

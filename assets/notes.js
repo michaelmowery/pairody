@@ -12,9 +12,8 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
-    { date: '2026-11-16', title: 'Free and Plus', items: [
-      'Decks now carry a small <span class="tier-tag">Plus</span> tag. Animals stays free; the tagged decks will be part of Pairody Plus, a one-time unlock, later on. Every deck is still free for everyone today.',
-      '<b>Your music</b> moved from the top of the page to the end of the deck buttons.',
+    { date: '2026-11-16', title: 'Your music joins the deck list', items: [
+      '<b>Your music</b> moved from the top of the page to the end of the deck buttons, so every way to play is in one list.',
     ]},
     { date: '2026-11-16', title: 'Getting ready for the App Store', items: [
       'Pairody is on its way to iPhone and iPad as a free app. It plays the same decks, and its pads play even with your phone on silent.',
