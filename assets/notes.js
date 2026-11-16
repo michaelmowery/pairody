@@ -12,6 +12,29 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Two sides for Match up boards', items: [
+      'On boards where a prompt goes with its answer, like <b>Capitals</b>, <b>Jokes</b> and <b>Quotes</b>, prompts now sit on the left and answers on the right.',
+      'Tap one pad on each side, or drag a line from one to the other. Each match is joined by its own colored line.',
+      'Boards where both pads make the same sound, like <b>Animals</b>, keep the classic grid, and so does <b>Triples</b>.',
+    ]},
+    { date: '2026-11-16', title: 'A real 2 Players scoreboard', items: [
+      'In <b>2 Players</b> a big scoreboard sits above the pads: each player\'s matches, and whose turn it is lit up in their color, teal or coral. The board\'s ring changes color with the turn too.',
+      'Tap a name on the scoreboard to type your own. Names are saved on this device.',
+    ]},
+    { date: '2026-11-16', title: 'Four new Learning boards', items: [
+      '<b>Synonyms</b>: match words that mean the same, like big and large.',
+      '<b>Elements</b>: one pad spells a chemical symbol and its twin names the element, like F E and iron.',
+      '<b>Planets</b>: match a space clue to its planet, moon or star, like the red planet and Mars.',
+      '<b>Presidents</b>: match a number to the US president, like the 16th president and Abraham Lincoln.',
+    ]},
+    { date: '2026-11-16', title: '1 or 2 players, any style', items: [
+      'Pick <b>1 Player</b> or <b>2 Players</b> next to the styles. Two players now works with <b>Pairs</b>, <b>Triples</b> and <b>Timed</b>: take turns on one device, and a match means you go again.',
+      'In Timed, two players share the clock and whoever has more when it runs out wins.',
+    ]},
+    { date: '2026-11-16', title: 'Clearer Triples', items: [
+      'In <b>Triples</b> the counter above the pads now says <b>Sets of 3</b>, and when you find two alike it tells you to find the third.',
+      'The Daily Pairody card says how today\'s style plays, like <i>Triples: find all 3 pads that match.</i>',
+    ]},
     { date: '2026-11-16', title: 'Daily Pairody', items: [
       'The daily game is now <b>Daily Pairody</b>: one surprise game a day for everyone. The date picks the board, game size and style, from every board there is.',
       'You play it as dealt. The pickers step aside while it is on, and your own board, size and style come back when you tap <b>Daily Pairody</b> again.',
@@ -49,9 +72,9 @@
       'Switch between <b>Grouped</b> (Sounds, Music, Words, Learning) and <b>All</b>, one A to Z list. <b>Featured</b> boards sit on top as a good place to start.',
       'Each card shows your best score on that board.',
     ]},
-    { date: '2026-11-16', title: 'Twelve more animals', items: [
-      '<b>12 more real animal recordings:</b> hen, goose, donkey, raven, bear, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
-      'Animals and Animal Talk now pick from 24 animals, so games change much more from one to the next.',
+    { date: '2026-11-16', title: 'Eleven more animals', items: [
+      '<b>11 more real animal recordings:</b> hen, goose, donkey, raven, humpback whale, peacock, rattlesnake, dove, eagle, bison and cicada.',
+      'Animals and Animal Talk now pick from 23 animals, so games change much more from one to the next.',
     ]},
     { date: '2026-11-16', title: 'Boards in groups', items: [
       'Boards are now grouped into <b>Sounds</b>, <b>Music</b>, <b>Words</b> and <b>Learning</b>, so it is easier to find the kind of game you are in the mood for.',

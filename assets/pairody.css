@@ -218,6 +218,9 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
 .readout .duo i.on{color:var(--fg);border-color:var(--led)}
 .readout .duo small{font-size:.7rem;font-weight:500;margin-right:3px;letter-spacing:.04em}
 @media (max-width:440px){.styles{gap:5px}.styles button{padding:5px 8px;font-size:.8rem}}
+.styles .players{display:flex;gap:6px;padding-left:8px;border-left:1px solid var(--line)}
+@media (max-width:640px){.styles .players{border-left:0;padding-left:0;flex-basis:100%}}
+@media (max-width:440px){.styles .players{gap:5px}}
 .grid .pad.matched[data-by="1"]{background:var(--led-soft);box-shadow:inset 0 0 0 2px var(--led);color:var(--led)}
 .grid .pad.matched[data-by="1"] .dot{background:var(--led)}
 /* iOS app (assets/native.js adds .native to <html>): hide web-only bits, show app-only ones */
@@ -346,3 +349,22 @@ body.daily-on .decks .deck-tile small::before{content:""}
 .td-btns{display:flex;gap:6px;margin-left:auto}
 .td-btns .btn[hidden]{display:none}
 @media (max-width:480px){.td-btns{flex-basis:100%;margin-left:0;padding-left:58px}}
+/* 2 Players scoreboard above the pads */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+.vs[hidden]{display:none}
+.vs .x{align-self:center;font-family:var(--display);font-weight:600;color:var(--muted);font-size:.85rem;text-transform:uppercase;letter-spacing:.1em}
+.vs .pl{--pc:var(--ok-bright);--ps:var(--ok-soft);display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:8px;padding:8px 12px;border-radius:14px;
+  border:2px solid var(--line);background:var(--chassis);opacity:.7;transition:opacity .2s,border-color .2s,box-shadow .2s}
+.vs .pl.p2{--pc:var(--led);--ps:var(--led-soft)}
+.vs .pl.on{opacity:1;border-color:var(--pc);box-shadow:0 0 0 4px var(--ps);background:linear-gradient(var(--ps),var(--ps)),var(--chassis)}
+.vs .pl input{min-width:0;width:100%;background:transparent;border:0;border-bottom:1px dashed transparent;padding:2px 0;color:var(--fg);font-family:var(--display);font-weight:600;font-size:1rem}
+.vs .pl input:hover,.vs .pl input:focus{border-bottom-color:var(--line);outline:none}
+.vs .pl input::placeholder{color:var(--fg);opacity:1}
+.vs .pl .n{grid-row:span 2;font-family:var(--display);font-weight:600;font-size:2rem;line-height:1;color:var(--pc);font-variant-numeric:tabular-nums}
+.vs .pl .t{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--display);font-weight:600}
+.vs .pl.on .t{color:var(--pc)}
+.vs .pl.pop{animation:turnpop .5s ease-out}
+@keyframes turnpop{0%{transform:scale(1)}35%{transform:scale(1.06)}100%{transform:scale(1)}}
+body[data-turn="0"] .grid{box-shadow:0 0 0 3px var(--chassis),0 0 0 5px var(--ok-bright)}
+body[data-turn="1"] .grid{box-shadow:0 0 0 3px var(--chassis),0 0 0 5px var(--led)}
+@media (prefers-reduced-motion:reduce){.vs .pl.pop{animation:none}}
