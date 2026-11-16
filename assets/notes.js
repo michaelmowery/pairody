@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'A real 2 Players scoreboard', items: [
+      'In <b>2 Players</b> a big scoreboard sits above the pads: each player\'s matches, and whose turn it is lit up in their color, teal or coral. The board\'s ring changes color with the turn too.',
+      'Tap a name on the scoreboard to type your own. Names are saved on this device.',
+    ]},
     { date: '2026-11-16', title: 'Four new Learning boards', items: [
       '<b>Synonyms</b>: match words that mean the same, like big and large.',
       '<b>Elements</b>: one pad spells a chemical symbol and its twin names the element, like F E and iron.',
