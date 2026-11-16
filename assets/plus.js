@@ -14,6 +14,15 @@
 // plays for everyone. When the App Store purchase is added (one-time unlock, through
 // RevenueCat), owns() is the one place that changes.
 //
+// Rules for when Plus locks (Michael, 2026-11-16):
+//   - Demo always runs, on any deck and style, for everyone. Demo boards never use a try.
+//   - Try before you buy: without Plus, each Plus deck and each Plus style can be played
+//     TRIAL_PLAYS times (a board counts once its first pad is tapped). After that its button
+//     says "Get Plus" instead of playing. Counts live on this device (pairody.plusTries), so a
+//     reinstall or cleared site data resets them; that's fine for a small one-time unlock.
+//   - The Plus tag then shows how many tries are left ("Plus · 3 left").
+// None of this runs yet: LOCKED is false, so nothing is counted and nothing is blocked.
+//
 // Tags show on the website only for now; the iOS app hides them (.native .tier-tag in
 // pairody.css) until it can sell Plus.
 (function(){
@@ -23,6 +32,9 @@
   };
   const FREE_DECKS = new Set(['animals', 'jokes']);
   const PLUS_STYLES = new Set(['triples', 'timed', 'duo']);
+  const LOCKED = false;      // flip on when the purchase exists (with owns() below)
+  const TRIAL_PLAYS = 10;    // free tries per Plus deck and per Plus style
+  const TRIES_KEY = 'pairody.plusTries';
   const FEATURES = {
     // 'record-deck': 'plus',   // later: record your own deck
   };
@@ -34,9 +46,23 @@
   // Does this player have the tier? For now: yes, every tier.
   const RANK = { free: 0, plus: 1 };
   function owns(tier){ return RANK[tier] != null; } // later: RANK[tier] <= RANK[entitlement]
-  const canPlay = (deck) => owns(deckTier(deck));
-  const canPlayStyle = (style) => owns(styleTier(style));
   const canUse = (id) => owns(featureTier(id));
+
+  // Free tries (see the rules above). key is "deck:<id>" or "style:<id>".
+  function readTries(){ try { return JSON.parse(localStorage.getItem(TRIES_KEY)) || {}; } catch (e) { return {}; } }
+  function triesLeft(key){ return Math.max(0, TRIAL_PLAYS - (readTries()[key] || 0)); }
+  // Call when a real (non-demo) board's first pad is tapped.
+  function useTry(kind, id){
+    if (!LOCKED) return;
+    const tier = kind === 'deck' ? deckTier(id) : styleTier(id);
+    if (tier === 'free' || owns(tier)) return;
+    const t = readTries(), key = kind + ':' + id;
+    t[key] = (t[key] || 0) + 1;
+    try { localStorage.setItem(TRIES_KEY, JSON.stringify(t)); } catch (e) {}
+  }
+  // Can this deck / style be played right now? (Demo doesn't ask: it always runs.)
+  const canPlay = (deck) => !LOCKED || owns(deckTier(deck)) || triesLeft('deck:' + deck) > 0;
+  const canPlayStyle = (style) => !LOCKED || owns(styleTier(style)) || triesLeft('style:' + style) > 0;
 
   // The little "Plus" pill shown next to a Plus deck, style or feature. Free items get no tag.
   function tierTag(tier){
@@ -65,5 +91,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tagAll);
   else tagAll();
 
-  window.PairodyPlus = { TIERS, FREE_DECKS, PLUS_STYLES, FEATURES, deckTier, styleTier, featureTier, owns, canPlay, canPlayStyle, canUse, tierTag };
+  window.PairodyPlus = { TIERS, FREE_DECKS, PLUS_STYLES, FEATURES, LOCKED, TRIAL_PLAYS, triesLeft, useTry, deckTier, styleTier, featureTier, owns, canPlay, canPlayStyle, canUse, tierTag };
 })();
