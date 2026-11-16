@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="assets/pairody.css">
 <script src="assets/native.js"></script>
 <script src="assets/best.js"></script>
+<script src="assets/plus.js" defer></script>
 <script src="assets/update.js"></script>
 <script src="assets/notes.js" defer></script>
 <script src="assets/info.js" defer></script>
@@ -49,10 +50,6 @@
       <img class="logo logo-light" src="assets/logo-light.svg" alt="Pairody" width="789" height="216">
       <img class="logo logo-dark" src="assets/logo-dark.svg" alt="Pairody" width="789" height="216">
     </a>
-    <nav class="nav web-only" aria-label="Game mode">
-      <a href="./" aria-current="page">Sounds</a>
-      <a href="youtube.html">Your music<span class="beta">Beta</span></a>
-    </nav>
   </header>
 
   <div class="chassis">
@@ -67,6 +64,7 @@
         <button data-deck="melodies" aria-pressed="false">Melodies</button>
         <button data-deck="notes" aria-pressed="false">Notes</button>
         <button data-deck="morse" aria-pressed="false">Morse Code</button>
+        <a class="deck-link web-only" href="youtube.html" title="Play with songs from a YouTube playlist">Your music<span class="beta">Beta</span></a>
       </div>
       <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button><button class="btn" id="reset">New board</button></div>
     </div>
@@ -619,6 +617,7 @@ function tap(i,b){
   };
   setTimeout(()=>settle&&settle(),950);
 }
+const ytLink=document.querySelector(".deck-link");if(ytLink)ytLink.addEventListener("click",()=>track("deck/youtube","Deck picked: Your music"));
 document.querySelectorAll(".decks button").forEach(btn=>btn.onclick=()=>{
   deck=btn.dataset.deck;track("deck/"+deck,"Deck picked: "+DECKNAME[deck]);
   document.querySelectorAll(".decks button").forEach(x=>x.setAttribute("aria-pressed",x===btn));
