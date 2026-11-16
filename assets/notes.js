@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Clearer Triples', items: [
+      'In <b>Triples</b> the counter above the pads now says <b>Sets of 3</b>, and when you find two alike it tells you to find the third.',
+      'The Daily Pairody card says how today\'s style plays, like <i>Triples: find all 3 pads that match.</i>',
+    ]},
     { date: '2026-11-16', title: 'Daily Pairody', items: [
       'The daily game is now <b>Daily Pairody</b>: one surprise game a day for everyone. The date picks the board, game size and style, from every board there is.',
       'You play it as dealt. The pickers step aside while it is on, and your own board, size and style come back when you tap <b>Daily Pairody</b> again.',

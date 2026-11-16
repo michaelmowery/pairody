@@ -13,6 +13,8 @@
   const track = (n, t) => window.PairodyAnalytics && window.PairodyAnalytics.track(n, t);
   const days = (n) => n + (n === 1 ? ' day' : ' days');
 
+  // One plain line on how today's style plays, so a Triples day doesn't surprise anyone
+  const RULE = { pairs: 'Find the 2 pads that match.', triples: 'Find all 3 pads that match.', timed: 'Find every pair before the clock runs out.' };
   // "Jokes · Big · Triples"
   const comboLabel = (r) => [DECKNAME[r.deck] || r.deck, SIZES[r.size] ? SIZES[r.size].name : r.size, STYLES[r.style] ? STYLES[r.style].name : 'Pairs'].join(' · ');
   function untilTomorrow(){
@@ -33,7 +35,8 @@
       sub = flame + 'Next Daily Pairody in ' + untilTomorrow() + '.';
     } else if (daily) {
       title = 'Today\'s Daily Pairody';
-      sub = comboLabel(Daily.combo()) + '. Everyone gets these same pads today, played as dealt. '
+      const c = Daily.combo();
+      sub = comboLabel(c) + '. ' + RULE[c.style] + ' Same pads for everyone today. '
         + (n ? 'Clear it to keep your 🔥 ' + n + '-day streak.' : 'Clear it to start a streak.');
     } else {
       title = 'Daily Pairody';

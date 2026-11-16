@@ -122,7 +122,7 @@ body.daily-on .deck-chip .chev{display:none}
     <div class="row boardbar">
     <div class="readout" aria-live="polite">
       <div><span>Moves</span><b id="moves">0</b></div>
-      <div><span>Pairs</span><b id="pairs">0/8</b></div>
+      <div><span id="pairsLbl">Pairs</span><b id="pairs">0/8</b></div>
       <div id="timeBox"><span id="timeLbl">Time</span><b id="time">0:00</b></div>
       <div class="duo" id="duoBox" hidden><span>Score</span><b><i id="s0"><small>P1</small>0</i> <i id="s1"><small>P2</small>0</i></b></div>
       <div class="best tap" id="bestBox" role="button" tabindex="0" title="Your best on this board and game size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
@@ -1092,8 +1092,10 @@ function build(){
   over=false;turn=0;score=[0,0];showDuo();
   hideDone(true);
   $("bestBox").classList.remove("new");showBest();
-  const dh=$("deckHelp");if(dh.dataset.deck!==deck){dh.dataset.deck=deck;dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]}
+  const dh=$("deckHelp"),dk=deck+"/"+(style==="triples");if(dh.dataset.deck!==dk){dh.dataset.deck=dk;
+    dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]+(style==="triples"?" <b>Triples:</b> every sound is on three pads, so find all three.":"")}
   $("moves").textContent=0;$("pairs").textContent="0/"+NP;
+  $("pairsLbl").textContent=style==="triples"?"Sets of 3":"Pairs";
   $("timeLbl").textContent=style==="timed"?"Time left":"Time";$("timeBox").classList.remove("low");
   $("status").className="status";
   if(canSpeak)speechSynthesis.cancel();
@@ -1206,7 +1208,9 @@ function tap(i,b){
   const k=K(),miss=cards[i]!==cards[open[0]];
   if(!miss&&open.length<k){
     const who=style==="duo"&&!demo?P(turn)+": ":demo?"Demo: ":"";
-    if(!easy())$("status").textContent=who+(open.length===1?(k>2?"Now find the other two.":demo?"now it looks for the twin.":"Now find its twin."):"One more to find.");
+    // In Triples two alike isn't a match yet, so say so even when names are showing
+    if(k>2&&open.length===2)$("status").textContent=who+"Two alike! One more to go: find the third.";
+    else if(!easy())$("status").textContent=who+(open.length===1?(k>2?"Now find the other two.":demo?"now it looks for the twin.":"Now find its twin."):"One more to find.");
     return}
   moves++;$("moves").textContent=moves;lock=true;mlog.push(miss?0:1);
   const grp=open.slice(),pp=grp.map(x=>$("pad"+x));
