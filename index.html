@@ -245,14 +245,14 @@ function voice(t,{type="sawtooth",f,dur,vol=.4,ft="lowpass",fq=1500,q=1,atk=.02}
   o.connect(fl);fl.connect(g);g.connect(bus());o.start(t);o.stop(t+dur+.05);
 }
 const C4=261.63, st=n=>C4*Math.pow(2,n/12);
-const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",Horse:"🐴",Elephant:"🐘",Wolf:"🐺",Goat:"🐐",Hen:"🐔",Goose:"🪿",Donkey:"🫏",Raven:"🐦‍⬛",Bear:"🐻",Whale:"🐋",Peacock:"🦚",Rattlesnake:"🐍",Dove:"🕊️",Eagle:"🦅",Bison:"🦬",Cicada:"🦗"};
+const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"🦆",Frog:"🐸",Rooster:"🐓",Horse:"🐴",Elephant:"🐘",Wolf:"🐺",Goat:"🐐",Hen:"🐔",Goose:"🪿",Donkey:"🫏",Raven:"🐦‍⬛",Whale:"🐋",Peacock:"🦚",Rattlesnake:"🐍",Dove:"🕊️",Eagle:"🦅",Bison:"🦬",Cicada:"🦗"};
 
 // Real recordings for some sounds (public domain / CC0, see sounds/CREDITS.md).
 // Each clip is fetched once and decoded on first use; if it is missing or fails
 // to load, the pad plays the synth version below instead. If it is just slow (over
 // 2.5s on the first tap), the synth fills in for the rest of that board only, and the
 // recording takes over from the next board.
-const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat",Hen:"hen",Goose:"goose",Donkey:"donkey",Raven:"raven",Bear:"bear",Whale:"whale",Peacock:"peacock",Rattlesnake:"rattlesnake",Dove:"dove",Eagle:"eagle",Bison:"bison",Cicada:"cicada"};
+const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat",Hen:"hen",Goose:"goose",Donkey:"donkey",Raven:"raven",Whale:"whale",Peacock:"peacock",Rattlesnake:"rattlesnake",Dove:"dove",Eagle:"eagle",Bison:"bison",Cicada:"cicada"};
 const clipData={},clipBuf={};
 function loadClips(){
   for(const [name,file] of Object.entries(CLIPS)){
@@ -598,7 +598,6 @@ const ANIMALS=[
   ["Goose",withClip("Goose",t=>[0,.35].forEach(d=>voice(t+d,{type:"square",f:[[0,420],[.08,480],[.25,400]],dur:.26,ft:"bandpass",fq:1000,q:4,vol:.55,atk:.01})))],
   ["Donkey",withClip("Donkey",t=>[[0,900,.35],[.4,250,.45],[.9,900,.35],[1.3,250,.45]].forEach(([d,hz,l])=>voice(t+d,{f:[[0,hz],[l,hz*.8]],dur:l,ft:"bandpass",fq:1200,q:1.5,vol:.6,atk:.03})))],
   ["Raven",withClip("Raven",t=>[0,.45].forEach(d=>voice(t+d,{f:[[0,300],[.05,380],[.3,280]],dur:.32,ft:"bandpass",fq:900,q:2,vol:.6,atk:.01})))],
-  ["Bear",withClip("Bear",t=>{voice(t,{f:[[0,110],[.3,150],[1.1,90]],dur:1.2,ft:"lowpass",fq:600,vol:.8,atk:.08});noise(t,1,0,.2,400)})],
   ["Whale",withClip("Whale",t=>voice(t,{type:"sine",f:[[0,180],[.6,420],[1.4,260],[2,150]],dur:2.1,ft:"lowpass",fq:900,vol:.5,atk:.3}))],
   ["Peacock",withClip("Peacock",t=>[0,.55].forEach(d=>voice(t+d,{f:[[0,700],[.1,1100],[.4,900]],dur:.45,ft:"bandpass",fq:1600,q:2,vol:.55,atk:.02})))],
   ["Rattlesnake",withClip("Rattlesnake",t=>{for(let i=0;i<30;i++)noise(t+i*.05,.035,3000,.25)})],
@@ -1206,7 +1205,7 @@ const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Joke
   synonyms:"Synonyms",elements:"Elements",planets:"Planets",presidents:"Presidents"};
 // How each deck works, shown under the deck chip
 const DECKHELP={
-  animals:"Real recordings of 24 animals, from a cat's meow to a humpback whale's moo. Find the two pads that make the same call. Each game picks a different mix, so you won't hear the same ones every time.",
+  animals:"Real recordings of 23 animals, from a cat's meow to a humpback whale's moo. Find the two pads that make the same call. Each game picks a different mix, so you won't hear the same ones every time.",
   talk:"One pad says an animal's name and its twin makes that animal's call. Match each word to the real sound.",
   quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every game picks its quotes from a bigger set.",
   jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every game picks its jokes from a bigger set.",
@@ -1387,7 +1386,7 @@ const DECKKINDS={
 };
 // id: [kind, the two pads in the picture, one line]. Order inside a kind = order in Grouped view.
 const DECKCARD={
-  animals:["sounds",["🦁","🦁"],"Real calls from 24 animals"],
+  animals:["sounds",["🦁","🦁"],"Real calls from 23 animals"],
   everyday:["sounds",["🔔","🔔"],"Doorbells, kettles, sirens and more"],
   weather:["sounds",["⛈️","⛈️"],"Rain, thunder, wind and hail"],
   vehicles:["sounds",["🚂","🚂"],"Trains, sirens, horns and engines"],
