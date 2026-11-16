@@ -1,0 +1,10 @@
+{
+  "appId": "app.pairody",
+  "appName": "Pairody",
+  "webDir": "app-www",
+  "backgroundColor": "#14162B",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#14162B"
+  }
+}

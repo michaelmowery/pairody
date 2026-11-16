@@ -215,3 +215,7 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
   .grid[data-size="big"] .pad .np b{font-size:.6rem}
   .grid[data-size="big"] .pad .np small{display:none}
 }
+/* iOS app (assets/native.js adds .native to <html>): hide web-only bits, show app-only ones */
+.native-only{display:none}
+.native .native-only{display:revert}
+.native .web-only{display:none!important}

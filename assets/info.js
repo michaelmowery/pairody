@@ -3,9 +3,10 @@
 (function(){
   const HTML=`
 <form method="dialog" class="info-x"><button aria-label="Close">×</button></form>
-<p class="info-tag">Preview</p>
-<h2 id="infoTitle">You're playing an early preview</h2>
-<p>Pairody is new and still taking shape. It's free to play while we build it, and things may change, move around, or occasionally break.</p>
+<p class="info-tag"><span class="web-only">Preview</span><span class="native-only">About</span></p>
+<h2 id="infoTitle"><span class="web-only">You're playing an early preview</span><span class="native-only">About Pairody</span></h2>
+<p class="web-only">Pairody is new and still taking shape. It's free to play while we build it, and things may change, move around, or occasionally break.</p>
+<p class="native-only">Memory match, played by ear. Pairody is free to play, with no ads and no accounts, and new decks arrive with app updates.</p>
 <div class="info-news" hidden>
   <p class="info-news-latest"></p>
   <button type="button" class="btn info-news-btn">What's new</button>
@@ -15,16 +16,17 @@
   <li><b>Nine decks.</b> Animals uses real recordings, and Animal Talk matches each animal’s name to its call. Quotes, Jokes, Word Play and Brain Food read pairs aloud: an opening and its ending, a riddle and its answer, rhymes or opposites, countries and capitals or times tables. Melodies splits old tunes in two. Notes is ear training, and Morse Code matches letters to their beeps.</li>
   <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Difficult mode</b> for sounds only.</li>
   <li><b>Best scores</b> for each deck, saved on this device. No account or sign-up.</li>
-  <li><b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist. It's open to beta testers for now.</li>
+  <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a board from a YouTube playlist. It's open to beta testers for now.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>
-  <li>Headphones help. On iPhone, flip off silent mode or you won't hear the pads.</li>
-  <li>No ads and no accounts. Your scores stay on this device. Your music plays through YouTube's own player.</li>
+  <li class="web-only">Headphones help. On iPhone, flip off silent mode or you won't hear the pads.</li>
+  <li class="native-only">Headphones help. Pads play even with your iPhone on silent, so turn the volume down if you're somewhere quiet.</li>
+  <li>No ads and no accounts. Your scores stay on this device.<span class="web-only"> Your music plays through YouTube's own player.</span></li>
   <li>Animal sounds are public domain or CC0 recordings (<a href="https://github.com/michaelmowery/pairody/blob/main/sounds/CREDITS.md" target="_blank" rel="noopener">credits</a>).</li>
 </ul>
 <h3>Privacy</h3>
-<p>To learn which decks and features people use, Pairody sends anonymous counts (like "Animals board cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. Your playlists and song links are never sent.</p>
+<p>To learn which decks and features people use, Pairody sends anonymous counts (like "Animals board cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. <span class="web-only">Your playlists and song links are never sent. </span><a href="privacy.html">Privacy policy</a></p>
 <label class="toggle info-analytics"><input type="checkbox" name="analytics" checked><span>Anonymous usage counts (saved on this device)</span></label>
 <h3>Feedback</h3>
 <p>Found a bug, or have an idea for a deck? We'd love to hear it.</p>
@@ -32,16 +34,17 @@
 <span class="info-email">mountmtech@gmail.com</span></div>
 <h3>Preferences</h3>
 <div class="info-prefs" id="infoPrefs">
-  <label class="toggle"><input type="checkbox" name="updateNote" checked><span>Note after updates: show the preview note when a new version arrives</span></label>
+  <label class="toggle"><input type="checkbox" name="updateNote" checked><span>Note after updates: show what’s new when a new version arrives</span></label>
   <p class="info-prefs-note">Saved on this device.</p>
 </div>
 <h3>Updates</h3>
 <div class="info-update">
-  <button type="button" class="btn info-update-btn">Check for updates</button>
+  <button type="button" class="btn info-update-btn web-only">Check for updates</button>
   <span class="info-version"></span>
 </div>
 <p class="info-update-status" role="status"></p>
-<p class="info-foot">Pairody preview · © 2026 Mount M Technologies, LLC</p>`;
+<p class="native-only">New versions arrive through the App Store.</p>
+<p class="info-foot">Pairody<span class="web-only"> preview</span> · © 2026 Mount M Technologies, LLC</p>`;
   function init(){
     const top=document.querySelector(".top");if(!top)return;
     const btn=document.createElement("button");

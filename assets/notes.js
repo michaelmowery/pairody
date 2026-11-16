@@ -12,6 +12,10 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Getting ready for the App Store', items: [
+      'Pairody is on its way to iPhone and iPad as a free app. It plays the same decks, and its pads play even with your phone on silent.',
+      'A <a href="privacy.html">privacy policy</a> is now linked from the Privacy section under <b class="welcome-i">i</b>.',
+    ]},
     { date: '2026-11-15', title: 'Snappier taps', items: [
       'Tapping a new pad stops whatever is playing right away, including read-aloud words.',
       'No more waiting after a miss: tap the next pad and the last two flip back at once.',

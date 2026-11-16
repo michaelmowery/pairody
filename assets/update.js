@@ -13,7 +13,9 @@
   const version = stamped ? STAMP : 'dev';
   // Only a stamped deploy gets a service worker: an unstamped sw.js would never change,
   // so it could keep players on an old copy forever.
-  const supported = stamped && 'serviceWorker' in navigator && window.isSecureContext;
+  // The iOS app ships its files and updates through the App Store, so it never uses one.
+  const native = !!window.PairodyNative;
+  const supported = stamped && !native && 'serviceWorker' in navigator && window.isSecureContext;
   const RECHECK_MS = 30 * 60 * 1000; // foreground re-check, at most this often
   const INSTALL_TIMEOUT_MS = 25000;
 
@@ -44,7 +46,7 @@
       lastCheck = Date.now();
       reg.update().catch(() => {});
     });
-  } else if (!stamped && 'serviceWorker' in navigator) {
+  } else if (!stamped && !native && 'serviceWorker' in navigator) {
     // Not a stamped deploy (local copy, or the site went back to plain branch hosting):
     // drop any old worker so the browser just loads the live files.
     navigator.serviceWorker.getRegistrations()
@@ -105,5 +107,5 @@
     document.body.appendChild(pill);
   }
 
-  window.PairodyUpdate = { version, supported, check, reload, isReady: () => ready };
+  window.PairodyUpdate = { version, supported, native, check, reload, isReady: () => ready };
 })();
