@@ -10,7 +10,7 @@
   const DECKS = [
     ['animals','Animals'],['talk','Animal Talk'],['everyday','Everyday Sounds'],['instruments','Instruments'],
     ['seasonal','Seasonal'],['quotes','Quotes'],['jokes','Jokes'],['twisters','Tongue Twisters'],['hello','Say Hello'],
-    ['wordplay','Word Play'],['brain','Brain Food'],['melodies','Melodies'],['notes','Notes'],['keypad','Phone Keypad'],['morse','Morse Code'],
+    ['wordplay','Word Play'],['brain','Capitals'],['times','Times Tables'],['melodies','Melodies'],['notes','Notes'],['keypad','Phone Keypad'],['morse','Morse Code'],
   ];
   const SIZES = [['small','Small'],['classic','Classic'],['big','Big']];
   const STYLES = [['pairs','Pairs'],['triples','Triples'],['timed','Timed']];

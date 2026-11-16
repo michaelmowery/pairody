@@ -91,7 +91,8 @@
         <button data-deck="twisters" aria-pressed="false">Tongue Twisters</button>
         <button data-deck="hello" aria-pressed="false">Say Hello</button>
         <button data-deck="wordplay" aria-pressed="false">Word Play</button>
-        <button data-deck="brain" aria-pressed="false">Brain Food</button>
+        <button data-deck="brain" aria-pressed="false">Capitals</button>
+        <button data-deck="times" aria-pressed="false">Times Tables</button>
         <button data-deck="melodies" aria-pressed="false">Melodies</button>
         <button data-deck="notes" aria-pressed="false">Notes</button>
         <button data-deck="keypad" aria-pressed="false">Phone Keypad</button>
@@ -493,7 +494,7 @@ const RHYMES=[["cat","hat"],["dog","frog"],["bee","tree"],["moon","spoon"],["cak
 const OPPOSITES=[["hot","cold"],["up","down"],["big","small"],["fast","slow"],["happy","sad"],["day","night"],["open","closed"],["loud","quiet"],["wet","dry"],["full","empty"],["in","out"],["young","old"],["go","stop"],["on","off"],["push","pull"],["first","last"],["left","right"],["long","short"],["heavy","light"],["thick","thin"],["sweet","sour"],["win","lose"],["give","take"],["rich","poor"],["clean","dirty"],["early","late"],["near","far"],["front","back"],["true","false"],["easy","hard"],["strong","weak"],["sharp","dull"],["asleep","awake"],["question","answer"],["friend","enemy"],["summer","winter"],["north","south"],["east","west"],["remember","forget"],["always","never"],["smooth","rough"],["wide","narrow"],["catch","throw"]];
 const cap=w=>w[0].toUpperCase()+w.slice(1);
 const pairName=(a,b)=>cap(a)+" · "+b;
-let boardMode={wordplay:1,brain:1}; // flips on each new board of that deck
+let boardMode={wordplay:1}; // flips on each new board of that deck
 function pickWordplay(){
   const r=boardMode.wordplay===0;
   return pickUnique(r?RHYMES:OPPOSITES,p=>p[0]).map(([a,b])=>spoken(pairName(a,b),a,b,r?"🎶":"⇄",!r,cap(a)+(r?" rhymes with ":" is the opposite of ")+b));
@@ -502,11 +503,10 @@ function pickWordplay(){
 // Brain Food: each board is all capitals or all times tables (they alternate).
 const CAPITALS=[["France","Paris"],["Japan","Tokyo"],["Italy","Rome"],["Egypt","Cairo"],["Canada","Ottawa"],["Spain","Madrid"],["Kenya","Nairobi"],["Peru","Lima"],["Germany","Berlin"],["Greece","Athens"],["Australia","Canberra"],["Russia","Moscow"],["China","Beijing"],["India","New Delhi"],["Brazil","Brasília"],["Ireland","Dublin"],["Norway","Oslo"],["Thailand","Bangkok"],["Cuba","Havana"],["Argentina","Buenos Aires"],["Sweden","Stockholm"],["Portugal","Lisbon"],["Netherlands","Amsterdam"],["Poland","Warsaw"],["Austria","Vienna"],["Hungary","Budapest"],["Turkey","Ankara"],["South Korea","Seoul"],["Vietnam","Hanoi"],["Indonesia","Jakarta"],["Philippines","Manila"],["Chile","Santiago"],["Colombia","Bogotá"],["Finland","Helsinki"],["Denmark","Copenhagen"],["Belgium","Brussels"],["Switzerland","Bern"],["New Zealand","Wellington"],["Iran","Tehran"],["Ghana","Accra"],["Morocco","Rabat"],["Venezuela","Caracas"],["Czechia","Prague"],["Jamaica","Kingston"],["Ethiopia","Addis Ababa"]];
 const TIMES=[];for(let a=2;a<=10;a++)for(let b=a;b<=10;b++)TIMES.push([a,b]);
-function pickBrain(){
-  if(boardMode.brain===0)return pickUnique(CAPITALS,c=>c[0]).map(([c,city])=>spoken(c+" · "+city,c,city,"🌍",0,"The capital of "+c+" is "+city));
-  // Every answer different on a board, so 3 × 4 and 2 × 6 never share one
-  return pickUnique(TIMES,([a,b])=>a*b).map(([a,b])=>spoken(a+" × "+b+" = "+a*b,a+" times "+b,String(a*b),"×",1,a+" times "+b+" is "+a*b));
-}
+// Capitals (deck id "brain", from when it was Brain Food, so best scores carry over)
+const pickBrain=()=>pickUnique(CAPITALS,c=>c[0]).map(([c,city])=>spoken(c+" · "+city,c,city,"🌍",0,"The capital of "+c+" is "+city));
+// Times Tables: every answer different on a board, so 3 × 4 and 2 × 6 never share one
+const pickTimes=()=>pickUnique(TIMES,([a,b])=>a*b).map(([a,b])=>spoken(a+" × "+b+" = "+a*b,a+" times "+b,String(a*b),"×",1,a+" times "+b+" is "+a*b));
 
 // Morse Code: one pad says a letter, its twin beeps it in Morse.
 const MORSE={A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",6:"-....",7:"--...",8:"---..",9:"----."};
@@ -822,9 +822,9 @@ let season=seasonNow();
 const pickSeasonal=()=>{season=seasonNow();return pickUnique(SEASONS[season].items,e=>e[0])};
 const DECKS={};
 // Every deck picks a fresh set of pairs on every new board, as many as the board size needs
-const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,morse:pickMorse,
+const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,times:pickTimes,morse:pickMorse,
   everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad};
-const BOARDMODE={wordplay:["Rhymes","Opposites"],brain:["Capitals","Times tables"]};
+const BOARDMODE={wordplay:["Rhymes","Opposites"]};
 // Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
 const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
 let size="classic";try{const s=localStorage.getItem("pairody-size");if(SIZES[s])size=s}catch(e){}
@@ -973,7 +973,7 @@ function fitGrid(){
   if(w<g.parentElement.clientWidth)g.style.maxWidth=Math.floor(w)+"px";
 }
 addEventListener("resize",()=>fitGrid());
-const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Brain Food",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
+const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
   everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad"};
 // How each deck works, shown under the deck buttons
 const DECKHELP={
@@ -982,7 +982,8 @@ const DECKHELP={
   quotes:"Each pair is one famous quote, read aloud. One pad says how it starts and its twin says how it ends, so match each opening to its ending. Every board picks its quotes from a bigger set.",
   jokes:"One pad asks a joke or riddle and its twin gives the answer. Match each question to its punchline. Every board picks its jokes from a bigger set.",
   wordplay:"Each board is either Rhymes (cat goes with hat) or Opposites (hot goes with cold), and the next board switches. Match each word to its partner. Every board picks its words from a bigger set.",
-  brain:"Each board is either Capitals (France goes with Paris) or Times tables (seven times eight goes with fifty-six), and the next board switches.",
+  brain:"One pad says a country and its twin says its capital, like France and Paris. Every board picks its countries from a bigger set.",
+  times:"One pad says a times table and its twin says the answer, like seven times eight and fifty-six. No two answers on a board are the same.",
   melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song. Every board picks its tunes from a bigger set.",
   notes:"Notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. A Big board uses all twelve notes from C to B, sharps and flats too. This one is real ear training.",
   morse:"One pad says a letter or number and its twin beeps it in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on.",
