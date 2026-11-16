@@ -32,6 +32,8 @@
 .deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
 .deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
 .row-btns{display:flex;gap:6px}
+.boardbar{gap:10px 14px}
+.boardbar #reset{margin-left:auto}
 .pad.matched .lbl{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
@@ -91,7 +93,7 @@
         <button data-deck="morse" aria-pressed="false">Morse Code</button>
         <a class="deck-link web-only" href="youtube.html" title="Play with songs from a YouTube playlist">Your music<span class="beta">Beta</span></a>
       </div>
-      <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button><button class="btn" id="reset">New board</button></div>
+      <div class="row-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a board of this deck by itself">Demo</button></div>
     </div>
     <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
     <div class="styles" role="group" aria-label="Board style">
@@ -109,12 +111,15 @@
         <button data-size="big" aria-pressed="false" title="25 pads: 12 pairs and a free center tile">Big <small>5×5</small></button>
       </div>
     </div>
+    <div class="row boardbar">
     <div class="readout" aria-live="polite">
       <div><span>Moves</span><b id="moves">0</b></div>
       <div><span>Pairs</span><b id="pairs">0/8</b></div>
       <div id="timeBox"><span id="timeLbl">Time</span><b id="time">0:00</b></div>
       <div class="duo" id="duoBox" hidden><span>Score</span><b><i id="s0"><small>P1</small>0</i> <i id="s1"><small>P2</small>0</i></b></div>
       <div class="best" id="bestBox" title="Your best on this deck and board size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
+    </div>
+    <button class="btn" id="reset">New board</button>
     </div>
     <div class="board">
       <div class="grid" id="grid"></div>

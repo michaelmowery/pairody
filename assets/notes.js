@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'New board, closer to hand', items: [
+      'The <b>New board</b> button now sits right above the board, next to your moves and time.',
+    ]},
     { date: '2026-11-16', title: 'Well done!', items: [
       'Clear a board and it lights up with a green ring, then a <b>Well done</b> card shows your time and moves, with a <b>New board</b> button right there.',
       'New bests, perfect boards and Daily streaks get called out on the card. In <b>2 Players</b> it names the winner.',
