@@ -60,21 +60,27 @@ Xcode (App target → General), `npm run app:sync`, then Archive and upload agai
 - **Marketing URL:** https://pairody.app
 - **Copyright:** 2026 Mount M Technologies, LLC
 - **Keywords (100):** memory,match,concentration,sound,ear,listening,animal sounds,brain,music,morse,kids,pairs
-- **Promotional text:** Nine decks of sounds to match by ear: animal calls, quotes, jokes, old tunes, Morse code and more.
+- **Promotional text:** Fifteen decks of sounds to match by ear: animal calls, everyday sounds, instruments, quotes, tongue twisters, old tunes and more.
 - **Description:**
 
   > Pairody is the classic memory match game, played by ear. Every card is a sound. Flip one,
   > listen, then find its twin.
   >
-  > Nine decks, each a little different:
+  > Fifteen decks, each a little different:
   > • Animals: real recordings, from a cat's meow to an elephant's trumpet
   > • Animal Talk: match each animal's name to its call
+  > • Everyday Sounds: doorbells, kettles, sirens and more
+  > • Instruments: the same tune on piano, guitar, flute and more
+  > • Seasonal: Halloween, holiday, spring and summer sounds that change with the calendar
   > • Quotes: the start of a famous line and its ending
   > • Jokes: a riddle and its punchline
+  > • Tongue Twisters: the start of a twister and its ending
+  > • Say Hello: hello in 20+ languages, matched to the language
   > • Word Play: rhymes and opposites
   > • Brain Food: countries and capitals, times tables
   > • Melodies: the two halves of an old tune
   > • Notes: ear training
+  > • Phone Keypad: keys and their dial tones
   > • Morse Code: letters and their beeps
   >
   > Pick Small, Classic or Big boards. Names show on each pad while it plays, so kids can jump

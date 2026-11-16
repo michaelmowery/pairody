@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pairody: memory match, played by ear</title>
-<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, famous quotes, jokes, old tunes, rhymes, Morse code and more.">
+<meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, everyday sounds, instruments, famous quotes, jokes, tongue twisters, hello in many languages, old tunes, Morse code and more.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14162B" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Pairody">
@@ -56,12 +56,18 @@
       <div class="decks" role="group" aria-label="Sound deck">
         <button data-deck="animals" aria-pressed="true">Animals</button>
         <button data-deck="talk" aria-pressed="false">Animal Talk</button>
+        <button data-deck="everyday" aria-pressed="false">Everyday Sounds</button>
+        <button data-deck="instruments" aria-pressed="false">Instruments</button>
+        <button data-deck="seasonal" aria-pressed="false">Seasonal</button>
         <button data-deck="quotes" aria-pressed="false">Quotes</button>
         <button data-deck="jokes" aria-pressed="false">Jokes</button>
+        <button data-deck="twisters" aria-pressed="false">Tongue Twisters</button>
+        <button data-deck="hello" aria-pressed="false">Say Hello</button>
         <button data-deck="wordplay" aria-pressed="false">Word Play</button>
         <button data-deck="brain" aria-pressed="false">Brain Food</button>
         <button data-deck="melodies" aria-pressed="false">Melodies</button>
         <button data-deck="notes" aria-pressed="false">Notes</button>
+        <button data-deck="keypad" aria-pressed="false">Phone Keypad</button>
         <button data-deck="morse" aria-pressed="false">Morse Code</button>
         <a class="deck-link web-only" href="youtube.html" title="Play with songs from a YouTube playlist">Your music<span class="beta">Beta</span></a>
       </div>
@@ -281,12 +287,21 @@ function pickVoice(){
   enVoice=vs.find(v=>v.default)||vs.find(v=>/en[-_]US/i.test(v.lang))||vs[0]||null;
 }
 if(canSpeak){pickVoice();speechSynthesis.addEventListener&&speechSynthesis.addEventListener("voiceschanged",pickVoice)}
-function say(text){
+// opts: rate and pitch (for a cackle or a "Ho ho ho"), and voice/lang for another language
+function say(text,{rate=.95,pitch=1,voice=enVoice,lang}={}){
   if(!canSpeak){$("status").textContent="“"+text+"” (this browser can't read aloud, so here it is in text)";return}
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
-  if(enVoice)u.voice=enVoice;u.lang=enVoice?enVoice.lang:"en-US";u.rate=.95;
+  if(voice)u.voice=voice;u.lang=voice?voice.lang:(lang||"en-US");u.rate=rate;u.pitch=pitch;
   speechSynthesis.speak(u);
+}
+// Says a word in another language with a voice for it (most phones and browsers have
+// several). If there is none, the English voice reads a spelled-out version instead.
+function sayIn(text,lang,spelled){
+  if(!canSpeak){say(spelled);return}
+  const vs=speechSynthesis.getVoices(),code=lang.toLowerCase();
+  const v=vs.find(v=>v.lang.toLowerCase().replace("_","-")===code)||vs.find(v=>v.lang.toLowerCase().split(/[-_]/)[0]===code.split("-")[0]);
+  if(v)say(text,{voice:v,rate:.9});else say(spelled,{rate:.85});
 }
 // A deck entry is [name, play(t, half), art, artIsText, matchMessage].
 // "half" is 0 for the first pad of a pair and 1 for its twin, so a pair can be two
@@ -471,9 +486,288 @@ const pickAnimals=()=>pickUnique(ANIMALS,a=>a[0]);
 const pickTalk=()=>pickUnique(ANIMALS,a=>a[0]).map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
 // Notes: the C major scale (Small picks 6 of its 8 notes); Big uses all 12 notes from C to B, sharps and flats too
 const pickNotes=()=>NP>8?[0,1,2,3,4,5,6,7,8,9,10,11].map(noteEntry):pickSome([0,2,4,5,7,9,11,12].map(noteEntry));
+// ---- Sound kit for the synth decks (Everyday Sounds, Instruments, Seasonal) ----
+// One shared loop of white noise; nz() filters a slice of it. f is a frequency, or a
+// path [[seconds, hz], ...]. swell fades in and out (waves, wind) instead of a quick hit.
+let noiseBuf=null;
+function nbuf(){
+  if(!noiseBuf){const n=ctx.sampleRate*2;noiseBuf=ctx.createBuffer(1,n,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1}
+  return noiseBuf;
+}
+function nz(t,dur,{type="bandpass",f=1000,q=1,vol=.3,atk=.004,swell=false,out=bus()}={}){
+  const s=ctx.createBufferSource();s.buffer=nbuf();s.loop=true;
+  const fl=ctx.createBiquadFilter();fl.type=type;fl.Q.value=q;
+  if(Array.isArray(f)){fl.frequency.setValueAtTime(f[0][1],t);f.slice(1).forEach(([d,hz])=>fl.frequency.linearRampToValueAtTime(hz,t+d))}else fl.frequency.value=f;
+  const g=ctx.createGain();g.gain.setValueAtTime(0,t);
+  if(swell){g.gain.linearRampToValueAtTime(vol,t+dur*.45);g.gain.linearRampToValueAtTime(0,t+dur)}
+  else{g.gain.linearRampToValueAtTime(vol,t+atk);g.gain.exponentialRampToValueAtTime(.001,t+dur)}
+  s.connect(fl);fl.connect(g);g.connect(out);s.start(t,Math.random()*1.5);s.stop(t+dur+.05);
+}
+// Struck or plucked sounds: sine partials [ratio, level, seconds to fade], like a bell
+function partials(f,t,list,{vol=.25,out=bus()}={}){
+  for(const [r,a,d] of list){
+    const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f*r;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*a,t+.004);g.gain.exponentialRampToValueAtTime(.0005,t+d);
+    o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.05);
+  }
+}
+// Held sounds (flute, organ, horn): steady level for d seconds, optional vibrato, filter
+// (fFrom sweeps it open, like a brass attack) and extra harmonics [ratio, level, wave].
+function sus(f,t,d,{type="sine",vol=.2,atk=.03,rel=.1,vib=0,rate=5.5,ft,fq=2000,q=.7,fFrom,fTime=.06,harm=[]}={}){
+  const g=ctx.createGain(),end=t+d;let dest=g;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+atk);g.gain.setValueAtTime(vol,Math.max(t+atk,end-rel));g.gain.linearRampToValueAtTime(0,end);
+  if(ft){const fl=ctx.createBiquadFilter();fl.type=ft;fl.Q.value=q;
+    if(fFrom){fl.frequency.setValueAtTime(fFrom,t);fl.frequency.exponentialRampToValueAtTime(fq,t+fTime)}else fl.frequency.value=fq;
+    fl.connect(g);dest=fl}
+  g.connect(bus());
+  let lfo=null;if(vib){lfo=ctx.createOscillator();lfo.frequency.value=rate;lfo.start(t);lfo.stop(end+.05)}
+  for(const [r,a,ty] of [[1,1,type],...harm]){
+    const o=ctx.createOscillator(),og=ctx.createGain();o.type=ty||type;o.frequency.value=f*r;og.gain.value=a;
+    if(lfo){const lg=ctx.createGain();lg.gain.value=f*r*vib;lfo.connect(lg);lg.connect(o.frequency)}
+    o.connect(og);og.connect(dest);o.start(t);o.stop(end+.05);
+  }
+}
+// A plain beep with a flat level (alarm clocks, phone keys)
+function beep(f,t,d,{vol=.2,type="sine",out=bus()}={}){
+  const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.006);g.gain.setValueAtTime(vol,t+d-.01);g.gain.linearRampToValueAtTime(0,t+d);
+  o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.02);
+}
+// Plucked strings (guitar, harp, banjo): the Karplus-Strong trick, a burst of noise
+// looped and smoothed until it rings like a string. Each string is worked out once.
+const ksCache=new Map();
+function pluck(f,t,dur,{damp=.996,bright=.6,vol=.5}={}){
+  const key=[Math.round(f),dur,damp,bright].join();let b=ksCache.get(key);
+  if(!b){
+    const sr=ctx.sampleRate,N=Math.max(2,Math.round(sr/f)),len=Math.floor(sr*dur),ring=new Float32Array(N);
+    let y=0;for(let i=0;i<N;i++){y=bright*(Math.random()*2-1)+(1-bright)*y;ring[i]=y}
+    b=ctx.createBuffer(1,len,sr);const out=b.getChannelData(0);let peak=0;
+    for(let i=0;i<len;i++){const j=i%N,v=ring[j];out[i]=v;ring[j]=damp*.5*(v+ring[(j+1)%N]);peak=Math.max(peak,Math.abs(v))}
+    if(peak)for(let i=0;i<len;i++)out[i]/=peak;
+    ksCache.set(key,b);
+  }
+  const s=ctx.createBufferSource(),g=ctx.createGain();s.buffer=b;g.gain.setValueAtTime(vol,t);g.gain.setValueAtTime(vol,t+dur-.05);g.gain.linearRampToValueAtTime(0,t+dur);
+  s.connect(g);g.connect(bus());s.start(t);
+}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const animalCall=n=>ANIMALS.find(a=>a[0]===n)[1];
+
+// Everyday Sounds: things you hear around the house and town, all made in the browser.
+// [name, emoji, play(t)]
+const EVERYDAY=[
+  ["Doorbell","🔔",t=>{partials(st(16),t,[[1,1,1.3],[2,.3,.6],[3,.12,.3]],{vol:.3});partials(st(12),t+.55,[[1,1,1.8],[2,.3,.8],[3,.12,.4]],{vol:.3})}],
+  ["Telephone","☎️",t=>{for(let r=0;r<2;r++)for(let k=0;k<22;k++)tone(k%2?1320:1580,t+r*1.1+k*.036,.07,"triangle",.13)}],
+  ["Alarm clock","⏰",t=>{for(let r=0;r<2;r++)for(let k=0;k<4;k++)beep(2050,t+r*.8+k*.13,.07,{type:"square",vol:.09})}],
+  ["Car horn","🚗",t=>[[0,.22],[.34,.6]].forEach(([d,l])=>sus(370,t+d,l,{type:"sawtooth",vol:.1,atk:.01,rel:.03,ft:"lowpass",fq:2200,harm:[[1.25,1,"sawtooth"]]}))],
+  ["Ticking clock","🕰️",t=>{for(let k=0;k<4;k++){nz(t+k*.5,.04,{f:k%2?2000:3200,q:4,vol:1});tone(k%2?1100:1500,t+k*.5,.04,"square",.1)}}],
+  ["Kettle","🫖",t=>{voice(t,{type:"sine",f:[[0,1500],[.7,2100],[1.9,2250]],dur:1.9,ft:"lowpass",fq:6000,vol:.16,atk:.5});nz(t,1.9,{type:"highpass",f:3500,vol:.05,swell:true})}],
+  ["Door knock","🚪",t=>[0,.18,.36].forEach(d=>{nz(t+d,.1,{type:"lowpass",f:600,vol:1});tone(130,t+d,.12,"sine",.5)})],
+  ["Dripping tap","🚰",t=>[0,.45,.9,1.35].forEach(d=>voice(t+d,{type:"sine",f:[[0,800],[.05,1900]],dur:.07,ft:"lowpass",fq:6000,vol:.45,atk:.003}))],
+  ["Bicycle bell","🚲",t=>[0,.3].forEach(d=>{for(let k=0;k<4;k++)partials(2150,t+d+k*.04,[[1,1,.5],[2.32,.4,.3],[4.1,.15,.15]],{vol:.09})})],
+  ["Siren","🚨",t=>voice(t,{type:"triangle",f:[[0,650],[.5,1300],[1,650],[1.5,1300],[2,650]],dur:2,ft:"lowpass",fq:4000,vol:.3,atk:.05})],
+  ["Camera","📷",t=>{nz(t,.03,{type:"highpass",f:2500,vol:.5});nz(t+.1,.05,{f:1500,q:1,vol:.45})}],
+  ["Cash register","💰",t=>{nz(t,.06,{f:900,vol:.7});nz(t+.07,.05,{f:1200,vol:.6});partials(2600,t+.15,[[1,1,1.1],[2.4,.4,.6],[3.9,.2,.4]],{vol:.2})}],
+  ["Typewriter","⌨️",t=>{[0,.11,.19,.33,.41,.5,.64].forEach(d=>nz(t+d,.03,{f:rnd(2200,3600),q:2,vol:.8}));partials(2400,t+.85,[[1,1,.9],[2.76,.3,.4]],{vol:.2})}],
+  ["Popcorn","🍿",t=>{for(let k=0;k<10;k++)nz(t+rnd(0,1.6),.03,{f:rnd(900,1800),q:1.5,vol:.9})}]
+];
+const pickEveryday=()=>pickUnique(EVERYDAY,e=>e[0]).map(([n,art,play])=>[n,play,art,0,n]);
+
+// Instruments: every pad on a board plays the same little tune, each on a different
+// instrument, so you match by the sound of the instrument alone. play(hz, t, seconds)
+const INSTRUMENTS=[
+  ["Piano","🎹",(f,t)=>{partials(f,t,[[1,1,1.6],[2.001,.45,1.1],[3.003,.25,.7],[4.006,.12,.5],[5.01,.06,.35]],{vol:.22});nz(t,.04,{f:f*4,vol:.05})}],
+  ["Guitar","🎸",(f,t)=>pluck(f,t,1.3,{damp:.996,bright:.65,vol:.5})],
+  ["Harp","🎼",(f,t)=>pluck(f*2,t,1.6,{damp:.9985,bright:.25,vol:.5})],
+  ["Banjo","🪕",(f,t)=>pluck(f*2,t,.6,{damp:.982,bright:1,vol:.45})],
+  ["Flute","🪈",(f,t,d)=>{sus(f*2,t,d,{vol:.2,atk:.08,vib:.006,rate:5,harm:[[2,.12],[3,.04]]});nz(t,d,{f:f*4,q:2,vol:.03,swell:true})}],
+  ["Violin","🎻",(f,t,d)=>sus(f*2,t,d,{type:"sawtooth",vol:.18,atk:.12,vib:.008,rate:6,ft:"lowpass",fq:3000,q:1})],
+  ["Trumpet","🎺",(f,t,d)=>sus(f,t,d,{type:"sawtooth",vol:.15,atk:.03,ft:"lowpass",fFrom:350,fq:2600,fTime:.09,q:2,vib:.003})],
+  ["Clarinet","🎶",(f,t,d)=>sus(f,t,d,{type:"square",vol:.12,atk:.05,ft:"lowpass",fq:1500,q:.7})],
+  ["Organ","⛪",(f,t,d)=>sus(f,t,d,{vol:.1,atk:.02,rel:.05,harm:[[2,.7],[3,.5],[4,.35],[6,.2],[8,.15]]})],
+  ["Xylophone","🥢",(f,t)=>{partials(f*2,t,[[1,1,.35],[3,.3,.1],[6.3,.1,.05]],{vol:.32});nz(t,.02,{type:"highpass",f:3000,vol:.1})}],
+  ["Bells","🛎️",(f,t)=>partials(f*4,t,[[1,1,1.4],[2.76,.35,.7],[5.4,.15,.35]],{vol:.18})],
+  ["Accordion","🪗",(f,t,d)=>sus(f,t,d,{type:"sawtooth",vol:.16,atk:.05,ft:"bandpass",fq:1300,q:.8,vib:.004,rate:6.5,harm:[[1.006,1,"sawtooth"],[2,.4,"square"]]})],
+  ["Tuba","📯",(f,t,d)=>sus(f/2,t,d,{type:"sawtooth",vol:.22,atk:.06,ft:"lowpass",fFrom:200,fq:750,fTime:.1,q:1.5})]
+];
+// One tune per board, picked fresh each time: semitones above C4
+const PHRASES=[[0,4,7],[7,4,0],[0,2,4],[0,7,12],[4,2,0],[0,5,9],[12,7,4]];
+let phrase=PHRASES[0];
+function pickInstruments(){
+  phrase=PHRASES[Math.floor(Math.random()*PHRASES.length)];
+  return pickUnique(INSTRUMENTS,i=>i[0]).map(([n,art,play])=>[n,t=>phrase.forEach((s,i)=>play(st(s),t+i*.36,i===2?.8:.33)),art,0,n]);
+}
+
+// Tongue Twisters: one pad says how a twister starts, its twin how it ends.
+// Old traditional ones. [short name, start, ending]
+const TWISTERS=[
+  ["Peter Piper","Peter Piper picked","a peck of pickled peppers."],
+  ["Seashells","She sells seashells","by the seashore."],
+  ["Woodchuck","How much wood would a woodchuck chuck","if a woodchuck could chuck wood?"],
+  ["Red lorry","Red lorry,","yellow lorry."],
+  ["Betty Botter","Betty Botter bought some butter,","but she said the butter's bitter."],
+  ["Fuzzy Wuzzy","Fuzzy Wuzzy was a bear.","Fuzzy Wuzzy had no hair."],
+  ["Unique New York","Unique New York,","you know you need unique New York."],
+  ["Buggy bumpers","Rubber baby","buggy bumpers."],
+  ["Wristwatch","Irish wristwatch,","Swiss wristwatch."],
+  ["Black bug","A big black bug","bit a big black bear."],
+  ["Sick sheep","The sixth sick sheik's","sixth sheep's sick."],
+  ["Fried fish","Fresh fried fish,","fish fresh fried."],
+  ["Silly Sally","Silly Sally swiftly shooed","seven silly sheep."],
+  ["Thistle sticks","Six thick thistle sticks.","Six thick thistles stick."],
+  ["Kitchen","I saw a kitten eating chicken","in the kitchen."],
+  ["Copper cup","A proper cup of coffee","in a copper coffee cup."],
+  ["Leather","Lesser leather never weathered","wetter weather better."],
+  ["Swan","Swan swam over the sea.","Swim, swan, swim!"],
+  ["Biscuits","A box of biscuits,","a batch of mixed biscuits."],
+  ["Thoroughbreds","Thirty-three thirsty,","thundering thoroughbreds."],
+  ["Clam","How can a clam cram","in a clean cream can?"],
+  ["Brigadiers","Brisk brave brigadiers","brandished broad bright blades."],
+  ["Shellfish","Selfish","shellfish."],
+  ["Anemone","Many an anemone","sees an enemy anemone."],
+  ["Yellow butter","Yellow butter, purple jelly,","red jam, black bread."],
+  ["Tigers","Two tiny tigers","take two taxis to town."],
+  ["Frogs","Five frantic frogs","fled from fifty fierce fishes."],
+  ["Greek grapes","Great Greek grapes,","great Greek grapes."],
+  ["Toy boat","Toy boat,","toy boat, toy boat."],
+  ["Cheap ship","A cheap ship trip","on a cheap ship."]
+];
+const pickTwisters=()=>pickUnique(TWISTERS,x=>x[0]).map(([n,a,b])=>spoken(n,a,b,"👅",0,"“"+a+" "+b+"”"));
+
+// Hello Around the World: one pad says hello in a language, its twin says which language.
+// [language, hello as written, voice language, how it's said (label, and for browsers
+// with no voice for that language), group]. Words that sound alike (Hola and Olá, Hallo
+// and Halo) share a group, so they are never on the same board.
+const HELLOS=[
+  ["Spanish","Hola","es-ES","Oh-la","hola"],
+  ["French","Bonjour","fr-FR","Bon-zhoor"],
+  ["German","Hallo","de-DE","Hallo","hallo"],
+  ["Italian","Ciao","it-IT","Chow","ciao"],
+  ["Portuguese","Olá","pt-BR","Oh-lah","hola"],
+  ["Japanese","こんにちは","ja-JP","Konnichiwa"],
+  ["Mandarin Chinese","你好","zh-CN","Nee how"],
+  ["Korean","안녕하세요","ko-KR","Annyeong haseyo"],
+  ["Russian","Здравствуйте","ru-RU","Zdrastvuyte"],
+  ["Hindi","नमस्ते","hi-IN","Namaste"],
+  ["Arabic","مرحبا","ar-SA","Marhaba","marhaba"],
+  ["Turkish","Merhaba","tr-TR","Merhaba","marhaba"],
+  ["Swedish","Hej","sv-SE","Hey"],
+  ["Greek","Γειά σου","el-GR","Yah-soo"],
+  ["Polish","Cześć","pl-PL","Cheshch"],
+  ["Hebrew","שלום","he-IL","Shalom"],
+  ["Dutch","Hallo","nl-NL","Hallo","hallo"],
+  ["Thai","สวัสดี","th-TH","Sa-wat-dee"],
+  ["Vietnamese","Xin chào","vi-VN","Sin chow","ciao"],
+  ["Indonesian","Halo","id-ID","Hah-lo","hallo"],
+  ["Swahili","Jambo","sw-KE","Jambo"],
+  ["Hawaiian","Aloha","haw-US","Aloha"]
+];
+const pickHello=()=>pickUnique(HELLOS,h=>h[4]||h[0]).map(([lang,word,code,said])=>
+  [lang+" · "+said,(t,half)=>half?say(lang):sayIn(word,code,said),"👋",0,"“"+said+"” is hello in "+lang]);
+
+// Phone Keypad: one pad says a key, its twin plays its touch-tone (two tones at once,
+// one for the key's row and one for its column, the way phones dial).
+const KEYPAD="123456789*0#",DTMF_ROW=[697,770,852,941],DTMF_COL=[1209,1336,1477];
+const KEYWORD={"*":"Star","#":"Pound",0:"Zero",1:"One",2:"Two",3:"Three",4:"Four",5:"Five",6:"Six",7:"Seven",8:"Eight",9:"Nine"};
+const pickKeypad=()=>pickUnique([...KEYPAD]).map(k=>{
+  const i=KEYPAD.indexOf(k),row=DTMF_ROW[Math.floor(i/3)],col=DTMF_COL[i%3];
+  return["Key "+k,(t,half)=>{if(!half){say(KEYWORD[k]);return}beep(row,t,.45,{vol:.16});beep(col,t,.45,{vol:.16})},k,1,"The "+KEYWORD[k].toLowerCase()+" key"];
+});
+
+// Seasonal: the deck changes with the calendar. Each season mixes sounds, tunes split
+// in two, and sayings split in two. Add ?season=<id> to the address to try another.
+const snd=(n,art,play)=>[n,t=>play(t),art,0,n];
+const line=(n,art,a,b)=>spoken(n,a,b,art,0,"“"+a+" "+b+"”");
+const tune=(n,art,beat,a,b,opts)=>{const A=mel(a,beat),B=mel(b,beat);return[n,(t,half)=>playSeq(half?B:A,t,opts),art,0,n]};
+const oldTune=(n,art)=>{const m=MELODIES.find(x=>x[0]===n);return tune(n,art,m[1],m[2],m[3])};
+const FX={
+  thunder:t=>{nz(t,2.2,{type:"lowpass",f:[[0,1200],[2.2,120]],q:.5,vol:1,atk:.02});nz(t+.15,1.9,{type:"lowpass",f:220,vol:1,atk:.3})},
+  fire:t=>{nz(t,2,{type:"lowpass",f:500,vol:.18,swell:true});for(let k=0;k<22;k++)nz(t+rnd(0,1.9),.015,{f:rnd(1200,4000),q:2,vol:rnd(.5,1)})},
+  wind:t=>nz(t,2.2,{f:[[0,350],[1,900],[2.2,450]],q:6,vol:.9,swell:true}),
+  bees:t=>sus(220,t,1.8,{type:"sawtooth",vol:.22,atk:.25,rel:.4,vib:.03,rate:9,ft:"bandpass",fq:800,q:2,harm:[[1.01,.8,"sawtooth"]]})
+};
+const SEASONS={
+  halloween:{name:"Halloween",art:"🎃",items:[
+    snd("Ghost","👻",t=>voice(t,{type:"sine",f:[[0,300],[.3,480],[.5,440],[.7,520],[.9,470],[1.1,540],[1.4,420],[1.9,250]],dur:1.9,ft:"lowpass",fq:1200,vol:.4,atk:.4})),
+    snd("Creaky door","🚪",t=>{voice(t,{f:[[0,45],[.6,75],[1.3,38]],dur:1.3,ft:"bandpass",fq:900,q:12,vol:1,atk:.1});voice(t,{f:[[0,48],[.6,80],[1.3,40]],dur:1.3,ft:"bandpass",fq:1700,q:14,vol:1,atk:.1})}),
+    snd("Thunder","⛈️",FX.thunder),
+    snd("Wolf howl","🐺",animalCall("Wolf")),
+    snd("Owl","🦉",animalCall("Owl")),
+    snd("Black cat","🐈‍⬛",animalCall("Cat")),
+    snd("Witch's cackle","🧙",()=>say("Hee hee hee hee hee!",{pitch:2,rate:1.25})),
+    snd("Bats","🦇",t=>{for(let k=0;k<7;k++)voice(t+k*.11+rnd(0,.04),{type:"sine",f:[[0,5200],[.04,3600]],dur:.05,ft:"highpass",fq:2000,vol:.25,atk:.003})}),
+    snd("Heartbeat","🫀",t=>[0,.8].forEach(b=>[0,.22].forEach((d,i)=>{voice(t+b+d,{type:"sine",f:[[0,90],[.12,50]],dur:.15,ft:"lowpass",fq:400,vol:i?.45:.65,atk:.005});nz(t+b+d,.08,{type:"lowpass",f:250,vol:i?.35:.55})}))),
+    snd("Rattling chains","⛓️",t=>{for(let k=0;k<9;k++){const d=k*.1+rnd(0,.04);partials(rnd(2500,4500),t+d,[[1,1,.12],[1.6,.6,.1],[2.3,.4,.08]],{vol:.12});nz(t+d,.04,{type:"highpass",f:3000,vol:.25})}}),
+    tune("Toccata and Fugue","🎹",.3,"A5:.25 G5:.25 A5:2 r G5:.25 F5:.25 E5:.25 D5:.25 C#5:1 D5:2","A4:.25 G4:.25 A4:2 r E4 F4 C#4 D4:2",{type:"square",vol:.14}),
+    tune("Funeral March","💀",.4,"C3 C3:.75 C3:.25 C3:2","Eb3:.75 D3:.25 D3:.75 C3:.25 C3:.75 B2:.25 C3:2",{type:"square",vol:.2}),
+    oldTune("In the Hall of the Mountain King","👹"),
+    line("Trick or treat","🍬","Trick or","treat!"),
+    line("Toil and trouble","🧪","Double, double toil and trouble;","fire burn and cauldron bubble."),
+    line("The Raven","🐦‍⬛","Once upon a midnight dreary,","while I pondered, weak and weary.")
+  ]},
+  holidays:{name:"Holidays",art:"🎄",items:[
+    oldTune("Jingle Bells","🛷"),oldTune("Deck the Halls","🎄"),oldTune("We Wish You a Merry Christmas","🎁"),
+    oldTune("Silent Night","🌟"),oldTune("Joy to the World","🎶"),oldTune("Auld Lang Syne","🥂"),
+    tune("Christmas Tree","🌲",.3,"C F:.75 F:.25 F:1.5 G A:.75 A:.25 A:1.5 A","A G A Bb:1.5 E G F:2"),
+    tune("Good King Wenceslas","👑",.3,"G G G A G G D:2 E D E F# G:2 G:2","D5 C5 B A B A G:2 E D E F# G:2 G:2"),
+    snd("Sleigh bells","🔔",t=>{for(let k=0;k<14;k++){const d=k*.12+(k%2?.03:0);nz(t+d,.09,{type:"highpass",f:6000,vol:.35});partials(4300,t+d,[[1,1,.1],[1.43,.6,.08]],{vol:.06})}}),
+    snd("Crackling fire","🔥",FX.fire),
+    snd("Church bells","⛪",t=>[0,1].forEach((d,i)=>partials(i?330:392,t+d,[[.5,.6,2.2],[1,1,1.8],[1.2,.5,1.3],[1.5,.4,1.1],[2,.5,.9],[2.6,.2,.5]],{vol:.18}))),
+    snd("Winter wind","🌬️",FX.wind),
+    snd("Ho ho ho","🎅",()=>say("Ho, ho, ho! Merry Christmas!",{pitch:.4,rate:.8})),
+    line("The night before Christmas","🌙","'Twas the night before Christmas,","when all through the house"),
+    line("New Year countdown","🎆","Three, two, one,","Happy New Year!")
+  ]},
+  spring:{name:"Spring",art:"🌷",items:[
+    snd("Songbird","🐦",animalCall("Songbird")),
+    snd("Frog","🐸",animalCall("Frog")),
+    snd("Duck","🦆",animalCall("Duck")),
+    snd("Rain","🌧️",t=>{nz(t,2.2,{f:3000,q:.5,vol:.3,swell:true});for(let k=0;k<22;k++)voice(t+rnd(0,2),{type:"sine",f:[[0,rnd(1500,3000)],[.03,rnd(2500,4500)]],dur:.035,ft:"lowpass",fq:8000,vol:.08,atk:.002})}),
+    snd("Thunder","⛈️",FX.thunder),
+    snd("Bees","🐝",FX.bees),
+    snd("Wind chimes","🎐",t=>{const n=[24,26,28,31,33,36];for(let k=0;k<8;k++)partials(st(n[Math.floor(Math.random()*n.length)]),t+k*.2+rnd(0,.1),[[1,1,1.2],[2.76,.3,.5]],{vol:.1})}),
+    snd("Woodpecker","🪵",t=>[0,1].forEach(b=>{for(let k=0;k<12;k++){nz(t+b+k*.045,.035,{f:1200,q:2,vol:1*(1-k/16)});tone(600,t+b+k*.045,.03,"triangle",.15*(1-k/16))}})),
+    tune("Spring (Vivaldi)","🌸",.3,"E G# G# G# F#:.5 E:.5 B:3","B:.5 A:.5 G# G# G# F#:.5 E:.5 B:3"),
+    tune("Morning Mood","🌅",.28,"G5 E5 D5 C5 D5 E5:2","G5 E5 D5 C5 D5:.5 E5:.5 D5:.5 E5:.5 G5 E5 G5 A5 E5 A5 G5 E5 D5 C5:3"),
+    oldTune("Here Comes the Bride","💐"),
+    line("April showers","🌷","April showers","bring May flowers."),
+    line("Roses are red","🌹","Roses are red,","violets are blue."),
+    line("Like a lion","🦁","March comes in like a lion","and goes out like a lamb."),
+    line("Be my Valentine","💘","Will you be","my Valentine?"),
+    line("Top of the morning","☘️","Top of the morning","to you!")
+  ]},
+  summer:{name:"Summer",art:"☀️",items:[
+    snd("Ocean waves","🌊",t=>nz(t,2.4,{type:"lowpass",f:[[0,300],[1.1,1600],[2.4,400]],vol:.6,swell:true})),
+    snd("Seagulls","🐦",t=>[0,.45,.75].forEach(d=>voice(t+d,{f:[[0,1500],[.08,2400],[.3,1300]],dur:.32,ft:"bandpass",fq:2200,q:4,vol:.45,atk:.02}))),
+    snd("Crickets","🦗",t=>{for(let c=0;c<4;c++)for(let p=0;p<4;p++)tone(4600,t+c*.45+p*.035,.03,"sine",.25)}),
+    snd("Campfire","🔥",FX.fire),
+    snd("Fireworks","🎆",t=>{voice(t,{type:"sine",f:[[0,700],[.7,3000]],dur:.7,ft:"lowpass",fq:6000,vol:.12,atk:.05});nz(t+.75,1.3,{type:"lowpass",f:600,vol:1});for(let k=0;k<12;k++)nz(t+.9+rnd(0,.9),.015,{type:"highpass",f:4000,vol:.4})}),
+    snd("Summer storm","⛈️",FX.thunder),
+    snd("Bees","🐝",FX.bees),
+    snd("Frogs at night","🐸",animalCall("Frog")),
+    tune("Turkey in the Straw","🍦",.2,"D:.5 C:.5 B3 G3:.5 A3:.5 B3:.5 G3:.5 A3 F#3 D3:2","G3 G3:.5 G3:.5 A3:.5 B3:.5 C D C B3 G3:2",{type:"square",vol:.14}),
+    tune("Take Me Out to the Ball Game","⚾",.28,"C5:2 A G E G:3 D:3","C5:2 A G E G:3 r A G# A E F G:2 A F D:3"),
+    tune("The Star-Spangled Banner","🇺🇸",.3,"G:.75 E:.25 C E G C5:2","E5:.75 D5:.25 C5 E F# G:2"),
+    line("Marco Polo","🏊","Marco!","Polo!"),
+    line("Ready, set, go","🏁","Ready, set,","go!"),
+    line("Surf's up","🏄","Surf's","up!"),
+    line("Hip hip hooray","🎉","Hip, hip,","hooray!")
+  ]}
+};
+// Halloween Oct 1 to Nov 7, Holidays Nov 8 to Jan 6, Spring Jan 7 to May 31, Summer Jun 1 to Sep 30
+function seasonNow(d=new Date()){
+  try{const q=new URLSearchParams(location.search).get("season");if(SEASONS[q])return q}catch(e){}
+  const md=(d.getMonth()+1)*100+d.getDate();
+  if(md>=1001&&md<=1107)return"halloween";
+  if(md>=1108||md<=106)return"holidays";
+  if(md<=531)return"spring";
+  return"summer";
+}
+let season=seasonNow();
+const pickSeasonal=()=>{season=seasonNow();return pickUnique(SEASONS[season].items,e=>e[0])};
 const DECKS={};
 // Every deck picks a fresh set of pairs on every new board, as many as the board size needs
-const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,morse:pickMorse};
+const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuotes,jokes:pickJokes,melodies:pickMelodies,wordplay:pickWordplay,brain:pickBrain,morse:pickMorse,
+  everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad};
 const BOARDMODE={wordplay:["Rhymes","Opposites"],brain:["Capitals","Times tables"]};
 // Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
 const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
@@ -514,6 +808,7 @@ function build(){
   if(ctx){stopSeq();cutPad()}
   if(BOARDMODE[deck]){boardMode[deck]^=1;$("status").textContent+=" This board: "+BOARDMODE[deck][boardMode[deck]]+"."}
   if(DECKGEN[deck])DECKS[deck]=DECKGEN[deck]();
+  if(deck==="seasonal")$("status").textContent+=" This season: "+SEASONS[season].name+".";
   cards=shuffle([...Array(NP).keys(),...Array(NP).keys()]);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes)
   const seen=new Set();half=cards.map(id=>seen.has(id)?1:(seen.add(id),0));
@@ -539,7 +834,8 @@ function fitGrid(){
   if(w<g.parentElement.clientWidth)g.style.maxWidth=Math.floor(w)+"px";
 }
 addEventListener("resize",()=>fitGrid());
-const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Brain Food",melodies:"Melodies",notes:"Notes",morse:"Morse Code"};
+const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Word Play",brain:"Brain Food",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
+  everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad"};
 // How each deck works, shown under the deck buttons
 const DECKHELP={
   animals:"Real recordings of twelve animals, from a cat's meow to an elephant's trumpet. Find the two pads that make the same call. Each board picks a different mix, so you won't hear the same ones every time.",
@@ -550,7 +846,13 @@ const DECKHELP={
   brain:"Each board is either Capitals (France goes with Paris) or Times tables (seven times eight goes with fifty-six), and the next board switches.",
   melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song. Every board picks its tunes from a bigger set.",
   notes:"Notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. A Big board uses all twelve notes from C to B, sharps and flats too. This one is real ear training.",
-  morse:"One pad says a letter or number and its twin beeps it in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on."
+  morse:"One pad says a letter or number and its twin beeps it in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Difficult mode is on.",
+  everyday:"Sounds from around the house and town: a doorbell, a kettle, a ringing phone, a siren. Find the two pads that make the same sound.",
+  instruments:"Every pad plays the same little tune, each on a different instrument: piano, guitar, flute, trumpet and more. Match the two that sound alike. Each board picks a new tune.",
+  seasonal:"Changes with the calendar: spooky sounds for Halloween, songs and sleigh bells for the holidays, birds and rain in spring, waves and fireworks in summer. A pair can be one sound, the two halves of a song, or a saying and its ending. Right now: "+SEASONS[season].name+" "+SEASONS[season].art,
+  twisters:"One pad says how a tongue twister starts and its twin says how it ends. Match each start to its ending, then try saying them yourself!",
+  hello:"One pad says hello in another language and its twin names the language, like Bonjour and French. Your device's own voices do the talking, so how they sound depends on your phone or browser.",
+  keypad:"One pad says a phone key and its twin plays the beep that key makes when you dial. Every key's beep is two tones at once, one for its row and one for its column. The pads show the keys unless Difficult mode is on."
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];

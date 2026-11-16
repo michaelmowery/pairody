@@ -12,6 +12,14 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Six new decks', items: [
+      '<b>Everyday Sounds:</b> a doorbell, a kettle, a ringing phone, a siren and more.',
+      '<b>Instruments:</b> every pad plays the same little tune on a different instrument. Match piano to piano, banjo to banjo.',
+      '<b>Seasonal:</b> changes with the calendar. Right now it is the holidays, with carols, sleigh bells and a crackling fire. Halloween, spring and summer each get their own sounds.',
+      '<b>Tongue Twisters:</b> match the start of a twister to its ending.',
+      '<b>Say Hello:</b> hello in more than 20 languages, matched to the language.',
+      '<b>Phone Keypad:</b> match each key to the beep it makes when you dial.',
+    ]},
     { date: '2026-11-16', title: 'Your music joins the deck list', items: [
       '<b>Your music</b> moved from the top of the page to the end of the deck buttons, so every way to play is in one list.',
     ]},
