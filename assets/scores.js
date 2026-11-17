@@ -1,5 +1,5 @@
 // Best scores screen: every best saved on this device (assets/best.js), grouped by deck, with
-// rows for each board size and style and columns for names shown / Difficult (sounds only).
+// a row for each game size and columns for untimed and Timed games.
 // Opens from the info panel, the Well done card and the Best box under the board.
 // "Clear best scores" asks first and removes only the "pairody-best:" keys: settings, the Daily
 // streak, release-note and welcome state are left alone.
@@ -18,9 +18,8 @@
     ['brain','Capitals'],['times','Times Tables'],['synonyms','Synonyms'],['elements','Elements'],['planets','Planets'],['presidents','Presidents'],
   ];
   const SIZES = [['small','Small'],['classic','Classic'],['big','Big']];
-  const STYLES = [['pairs','Pairs'],['triples','Triples'],['timed','Timed']];
-  // Pairs (or sets, in Triples) on each board, for the perfect-board star
-  const PAIRS = { pairs: { small: 6, classic: 8, big: 12 }, timed: { small: 6, classic: 8, big: 12 }, triples: { small: 4, classic: 5, big: 8 } };
+  // Pairs on each board, for the perfect-board star
+  const PAIRS = { small: 6, classic: 8, big: 12 };
   const track = (name, title) => window.PairodyAnalytics && window.PairodyAnalytics.track(name, title);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const fmtTime = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
@@ -32,27 +31,28 @@
   }
   function read(k){ try { const v = JSON.parse(localStorage.getItem(k)); return v && v.moves > 0 ? v : null; } catch (e) { return null; } }
 
-  // Key formats (see bestKey in index.html): <deck>[@small|@big][~triples|~timed][:easy]
-  // ":easy" = names shown (the default); no suffix = Difficult. Your music keys start with "yt:".
+  // Key formats (see bestKey in index.html): <deck>[@small|@big][~timed]:easy. Your music keys
+  // start with "yt:". Bests from Triples and Difficult mode (both removed 2026-11-17: "~triples",
+  // or no ":easy") stay in storage but aren't shown; Clear still removes them.
   function collect(){
     const decks = {}, yt = [];
     for (const k of keys()) {
       const v = read(k); if (!v) continue;
       const key = k.slice(PREFIX.length);
       if (key.startsWith('yt:')) { yt.push(v); continue; }
-      const m = /^([a-z]+)(?:@(small|big))?(?:~(triples|timed))?(:easy)?$/.exec(key);
+      const m = /^([a-z]+)(?:@(small|big))?(~timed)?:easy$/.exec(key);
       if (!m) continue;
-      const [, deck, size = 'classic', style = 'pairs', easy] = m;
+      const [, deck, size = 'classic', timed] = m;
       const d = decks[deck] = decks[deck] || {};
-      const row = d[style + '/' + size] = d[style + '/' + size] || { style, size };
-      row[easy ? 'names' : 'difficult'] = v;
+      const row = d[size] = d[size] || { size };
+      row[timed ? 'timed' : 'untimed'] = v;
     }
     return { decks, yt };
   }
 
   function cell(v, row){
     if (!v) return '<td class="sc-none">—</td>';
-    const perfect = v.moves === PAIRS[row.style][row.size];
+    const perfect = v.moves === PAIRS[row.size];
     return `<td><b>${v.moves}</b>${perfect ? '<span class="sc-star" title="Perfect game" aria-label="perfect">★</span>' : ''}`
       + `<span class="sc-time">${fmtTime(v.secs)}</span></td>`;
   }
@@ -67,13 +67,13 @@
     let html = '';
     for (const id of played) {
       const rows = [];
-      for (const [st, stName] of STYLES) for (const [sz, szName] of SIZES) {
-        const r = decks[id][st + '/' + sz]; if (!r) continue;
-        [r.names, r.difficult].forEach((v) => { if (v) { count++; if (v.moves === PAIRS[st][sz]) perfect++; } });
-        rows.push(`<tr><th scope="row">${szName}${st === 'pairs' ? '' : ' · ' + stName}</th>${cell(r.names, r)}${cell(r.difficult, r)}</tr>`);
+      for (const [sz, szName] of SIZES) {
+        const r = decks[id][sz]; if (!r) continue;
+        [r.untimed, r.timed].forEach((v) => { if (v) { count++; if (v.moves === PAIRS[sz]) perfect++; } });
+        rows.push(`<tr><th scope="row">${szName}</th>${cell(r.untimed, r)}${cell(r.timed, r)}</tr>`);
       }
       html += `<section class="sc-deck"><h3>${esc(names.get(id))}</h3><table class="sc-table">`
-        + '<thead><tr><th scope="col">Game</th><th scope="col">Names</th><th scope="col">Difficult</th></tr></thead>'
+        + '<thead><tr><th scope="col">Game size</th><th scope="col">Best</th><th scope="col">Timed</th></tr></thead>'
         + `<tbody>${rows.join('')}</tbody></table></section>`;
     }
     if (yt.length) {
@@ -83,8 +83,8 @@
     const summary = count
       ? `<p class="sc-summary"><b>${count}</b> best ${count === 1 ? 'score' : 'scores'} on ${played.length + (yt.length ? 1 : 0)} ${played.length + (yt.length ? 1 : 0) === 1 ? 'board' : 'boards'}`
         + (perfect ? ` · <span class="sc-nw"><b>${perfect}</b> perfect ${perfect === 1 ? 'game' : 'games'} <span class="sc-star">★</span></span>` : '') + '</p>'
-      : '<div class="sc-empty"><p><b>No best scores yet.</b></p><p>Clear a game and your score shows up here. Each board keeps a best for every game size and style, with and without Difficult mode.</p></div>';
-    const legend = count ? '<p class="sc-legend">Fewest moves, then fastest time. <b>Names</b> = sound names shown; <b>Difficult</b> = sounds only. ★ = a perfect game, one move per pair.</p>' : '';
+      : '<div class="sc-empty"><p><b>No best scores yet.</b></p><p>Clear a game and your score shows up here. Each board keeps a best for every game size, Timed or not.</p></div>';
+    const legend = count ? '<p class="sc-legend">Fewest moves, then fastest time. <b>Timed</b> = games with the clock on. ★ = a perfect game, one move per pair.</p>' : '';
     const rest = count && unplayed.length ? `<p class="sc-unplayed"><b>Not played yet:</b> ${unplayed.map((id) => esc(names.get(id))).join(', ')}.</p>` : '';
     let streak = '';
     try { if (typeof Daily !== 'undefined' && Daily.streak) { const n = Daily.streak(); if (n) streak = `<p class="sc-streak">Daily streak: <b>${n} ${n === 1 ? 'day' : 'days'}</b>. Daily games and 2 Players don't set best scores.</p>`; } } catch (e) {}

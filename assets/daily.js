@@ -5,7 +5,7 @@
 //   - Share builds a Wordle-style result (one square per move: green = match, dark = miss)
 //     and opens the share sheet, or copies it where there is none.
 // The page tells this file about new games ("pairody:board") and Daily clears
-// ("pairody:daily-cleared"). It reads the page's globals: Daily, dailyOn, enterDaily, leaveDaily, moves, DECKNAME, SIZES, STYLES, TRIPLES, fmt.
+// ("pairody:daily-cleared"). It reads the page's globals: Daily, dailyOn, enterDaily, leaveDaily, moves, DECKNAME, SIZES, fmt.
 // Words: in what players see, a "board" is a deck (Animals, Jokes...) and a "game" is one round.
 (function(){
   const $ = (id) => document.getElementById(id);
@@ -13,10 +13,13 @@
   const track = (n, t) => window.PairodyAnalytics && window.PairodyAnalytics.track(n, t);
   const days = (n) => n + (n === 1 ? ' day' : ' days');
 
-  // One plain line on how today's style plays, so a Triples day doesn't surprise anyone
-  const RULE = { pairs: 'Find the 2 pads that match.', triples: 'Find all 3 pads that match.', timed: 'Find every pair before the clock runs out.' };
-  // "Jokes · Big · Triples"
-  const comboLabel = (r) => [DECKNAME[r.deck] || r.deck, SIZES[r.size] ? SIZES[r.size].name : r.size, STYLES[r.style] ? STYLES[r.style].name : 'Pairs'].join(' · ');
+  // One plain line on how today's game plays, so a Timed day doesn't surprise anyone
+  const RULE = { pairs: 'Find the 2 pads that match.', timed: 'Find every pair before the clock runs out.' };
+  // "Jokes · Big" or "Jokes · Big · Timed". (Triples was removed 2026-11-17; a result saved
+  // earlier that day as Triples still labels and scores as one.)
+  const comboLabel = (r) => [DECKNAME[r.deck] || r.deck, SIZES[r.size] ? SIZES[r.size].name : r.size]
+    .concat(r.style === 'timed' ? ['Timed'] : r.style === 'triples' ? ['Triples'] : []).join(' · ');
+  const OLD_TRIPLES = { small: 4, classic: 5, big: 8 };
   function untilTomorrow(){
     const now = new Date(), next = new Date(now); next.setHours(24, 0, 0, 0);
     const m = Math.ceil((next - now) / 60000), h = Math.floor(m / 60);
@@ -36,11 +39,11 @@
     } else if (daily) {
       title = 'Today\'s Daily Pairody';
       const c = Daily.combo();
-      sub = comboLabel(c) + '. ' + RULE[c.style] + ' Same pads for everyone today. '
+      sub = comboLabel(c) + '. ' + (RULE[c.style] || RULE.pairs) + ' Same pads for everyone today. '
         + (n ? 'Clear it to keep your 🔥 ' + n + '-day streak.' : 'Clear it to start a streak.');
     } else {
       title = 'Daily Pairody';
-      sub = 'One surprise game a day: the board, size and style are picked for everyone. '
+      sub = 'One surprise game a day: the board, size and clock are picked for everyone. '
         + (n ? '🔥 ' + days(n) + ': play to keep your streak.' : 'Clear one a day to build a streak.');
     }
     $('tdTitle').textContent = title;
@@ -54,12 +57,12 @@
     if (ask) { ask.textContent = done ? '✓ You Pairody\'d today' : 'Have you Pairody\'d today?'; ask.classList.toggle('done', done); }
   }
 
-  // "Daily Pairody · Nov 16" / "Jokes · Big · Triples" / "14 moves, 1:02" / squares / streak / link
+  // "Daily Pairody · Nov 16" / "Jokes · Big · Timed" / "14 moves, 1:02" / squares / streak / link
   function shareText(r){
     const when = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const sq = (r.log || '').split('').map((c) => c === '1' ? '🟩' : '⬛');
     const rows = []; for (let i = 0; i < sq.length; i += 8) rows.push(sq.slice(i, i + 8).join(''));
-    const pairs = r.style === 'triples' ? (TRIPLES[r.size] || {}).pairs : SIZES[r.size] ? SIZES[r.size].pairs : 0;
+    const pairs = r.style === 'triples' ? OLD_TRIPLES[r.size] : SIZES[r.size] ? SIZES[r.size].pairs : 0;
     const extras = [r.moves === pairs ? '⭐ Perfect' : '', r.easy === false ? '🎧 Sounds only' : '', r.streak ? '🔥 ' + days(r.streak) : ''].filter(Boolean);
     return ['Daily Pairody · ' + when,
       comboLabel(r), r.moves + ' moves, ' + fmt(r.secs)]

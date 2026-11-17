@@ -4,8 +4,9 @@
 //
 // THE SPLIT LIVES HERE. To move something, edit FREE_DECKS or PLUS_STYLES (or FEATURES).
 //   - Decks: free only if listed in FREE_DECKS. Every other deck is Plus, including any new one.
-//   - Board styles: Plus only if listed in PLUS_STYLES. Other styles are free.
-//   - Board sizes, Difficult mode, Demo and best scores are free.
+//   - Game options: Plus only if listed in PLUS_STYLES (now just the Timed switch).
+//     2 Players is free (Michael, 2026-11-17). Triples and Difficult mode were removed that day.
+//   - Board sizes, 1 or 2 Players, Demo and best scores are free.
 //   - Your music (YouTube) is never Plus: YouTube's terms don't allow charging for access to its
 //     videos. It is web only (the iOS app leaves it out).
 //   - A paid feature that isn't a deck or style goes in FEATURES by id.
@@ -31,7 +32,7 @@
     plus: { label: 'Plus', hint: 'Part of Pairody Plus. Free for everyone for now' },
   };
   const FREE_DECKS = new Set(['animals', 'melodies', 'jokes', 'brain']); // one per group: Sounds, Music, Words, Learning (brain = Capitals)
-  const PLUS_STYLES = new Set(['triples', 'timed', 'duo']);
+  const PLUS_STYLES = new Set(['timed']);
   const LOCKED = false;      // flip on when the purchase exists (with owns() below)
   const TRIAL_PLAYS = 10;    // free tries per Plus deck and per Plus style
   const TRIES_KEY = 'pairody.plusTries';
@@ -89,9 +90,7 @@
   }
   function tagAll(){
     tagButtons('.decks button[data-deck]', deckTier, 'deck', true);
-    tagButtons('.styles button[data-style]', styleTier, 'style');
-    // 2 Players is a Plus feature on any style (tier and tries still use the old style id 'duo')
-    tagButtons('.styles button[data-players="2"]', () => styleTier('duo'), 'players');
+    tagButtons('.toggle[data-style]', styleTier, 'style'); // the Timed switch
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tagAll);
   else tagAll();
