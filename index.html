@@ -1542,7 +1542,8 @@ function tap(i,b){
   if(!miss&&open.length<k){
     const who=duo()&&!demo?P(turn)+": ":demo?"Demo: ":"";
     announce(heardDot+(k>2&&open.length===2?"Two alike! One more to find.":""));
-    if(two)$("status").textContent=who+(demo?"now it looks on the other side.":"Now pick its match on the "+(sideOf(i)?"left.":"right."));
+    // Names the pad you picked (Michael, 2026-11-16), so in Difficult mode you still know what you're matching
+    if(two)$("status").textContent=who+(demo?"now it looks on the other side.":"“"+sideText(DECKS[deck][cards[i]],half[i])+"” picked. Now find its match on the "+(sideOf(i)?"left.":"right."));
     // In Triples two alike isn't a match yet, so say so even when names are showing
     else if(k>2&&open.length===2)$("status").textContent=who+"Two alike! One more to go: find the third.";
     else if(!easy())$("status").textContent=who+(open.length===1?(k>2?"Now find the other two.":demo?"now it looks for the twin.":"Now find its twin."):"One more to find.");

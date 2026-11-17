@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Know what you picked', items: [
+      'On Match up boards the line under the pads now names the pad you just tapped, like <i>“France” picked. Now find its match on the right.</i> It does this in Difficult mode too.',
+    ]},
     { date: '2026-11-17', title: 'Play by ear, with or without seeing the pads', items: [
       'Pairody now works with <b>VoiceOver</b>, <b>TalkBack</b> and other screen readers. Each pad says where it sits and whether it\'s face down, face up or matched, and matches, turns and the clock are read out after the sound finishes, never over it.',
       'On a keyboard, Tab to the pads and move with the arrow keys.',
