@@ -4,9 +4,9 @@
 //
 // THE SPLIT LIVES HERE. To move something, edit FREE_DECKS or PLUS_STYLES (or FEATURES).
 //   - Decks: free only if listed in FREE_DECKS. Every other deck is Plus, including any new one.
-//   - Game options: Plus only if listed in PLUS_STYLES (now just the Timed switch).
-//     2 Players is free (Michael, 2026-11-17). Triples and Difficult mode were removed that day.
-//   - Board sizes, 1 or 2 Players, Demo and best scores are free.
+//   - Game options: Plus only if listed in PLUS_STYLES (empty for now). Timed and 2 Players
+//     are free (Michael, 2026-11-17). Triples and Difficult mode were removed that day.
+//   - Board sizes, Timed, 1 or 2 Players, Demo and best scores are free.
 //   - Your music (YouTube) is never Plus: YouTube's terms don't allow charging for access to its
 //     videos. It is web only (the iOS app leaves it out).
 //   - A paid feature that isn't a deck or style goes in FEATURES by id.
@@ -32,7 +32,7 @@
     plus: { label: 'Plus', hint: 'Part of Pairody Plus. Free for everyone for now' },
   };
   const FREE_DECKS = new Set(['animals', 'melodies', 'jokes', 'brain']); // one per group: Sounds, Music, Words, Learning (brain = Capitals)
-  const PLUS_STYLES = new Set(['timed']);
+  const PLUS_STYLES = new Set([]);
   const LOCKED = false;      // flip on when the purchase exists (with owns() below)
   const TRIAL_PLAYS = 10;    // free tries per Plus deck and per Plus style
   const TRIES_KEY = 'pairody.plusTries';

@@ -17,7 +17,7 @@
   <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Timed</b> for a clock to beat.</li>
   <li><b>Best scores</b> for each board, saved on this device. No account or sign-up.</li>
   <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Your Music in the board picker.</li>
-  <li class="web-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), Your music, every game size, 2 Players and Daily are free. Boards and options tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
+  <li class="web-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), Your music, every game size, Timed, 2 Players and Daily are free. Boards tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>
