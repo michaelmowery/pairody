@@ -130,10 +130,12 @@
     });
     document.body.appendChild(dlg);
   }
-  // Removes only best scores ("pairody-best:" keys). Returns how many were removed.
+  // Removes best scores ("pairody-best:" keys) and past-game lists. Returns how many bests were removed.
+  // Each board's list of past games ("pairody-plays:", for the Well done card's ranking) goes too.
   function clearAll(){
     const ks = keys();
     ks.forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} });
+    try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('pairody-plays:')) localStorage.removeItem(k); } } catch (e) {}
     try { window.dispatchEvent(new CustomEvent('pairody:bests-cleared')); } catch (e) {}
     return ks.length;
   }
