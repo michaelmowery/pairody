@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Clearer Difficult mode switch', items: [
+      'The <b>Difficult mode</b> switch now says what it is set to: <i>Off: names shown</i>, or <i>On: sounds only, no names</i>.',
+    ]},
     { date: '2026-11-16', title: 'Boards grouped by how they play', items: [
       'In the board picker, <b>Grouped</b> now puts <b>Same sound</b> boards first and <b>Match up</b> boards second, each split into Sounds, Music, Words and Learning.',
       'The cards look different too: Same sound cards show two matching pads with an equals sign, and Match up cards show a prompt and its answer joined by a line.',
