@@ -1,5 +1,5 @@
 // Best scores screen: every best saved on this device (assets/best.js), grouped by deck, with
-// a row for each game size and columns for untimed and Timed games.
+// a row for each game size (and labels off) and columns for untimed and Timed games.
 // Opens from the info panel, the Well done card and the Best box under the board.
 // "Clear best scores" asks first and removes only the "pairody-best:" keys: settings, the Daily
 // streak, release-note and welcome state are left alone.
@@ -31,20 +31,20 @@
   }
   function read(k){ try { const v = JSON.parse(localStorage.getItem(k)); return v && v.moves > 0 ? v : null; } catch (e) { return null; } }
 
-  // Key formats (see bestKey in index.html): <deck>[@small|@big][~timed]:easy. Your music keys
-  // start with "yt:". Bests from Triples and Difficult mode (both removed 2026-11-17: "~triples",
-  // or no ":easy") stay in storage but aren't shown; Clear still removes them.
+  // Key formats (see bestKey in index.html): <deck>[@small|@big][~timed][:easy]. ":easy" = labels
+  // on; none = labels off (Difficult mode before 2026-11-17). Your music keys start with "yt:".
+  // Triples bests ("~triples", removed 2026-11-17) stay in storage but aren't shown; Clear removes them.
   function collect(){
     const decks = {}, yt = [];
     for (const k of keys()) {
       const v = read(k); if (!v) continue;
       const key = k.slice(PREFIX.length);
       if (key.startsWith('yt:')) { yt.push(v); continue; }
-      const m = /^([a-z]+)(?:@(small|big))?(~timed)?:easy$/.exec(key);
+      const m = /^([a-z]+)(?:@(small|big))?(~timed)?(:easy)?$/.exec(key);
       if (!m) continue;
-      const [, deck, size = 'classic', timed] = m;
-      const d = decks[deck] = decks[deck] || {};
-      const row = d[size] = d[size] || { size };
+      const [, deck, size = 'classic', timed, easy] = m;
+      const d = decks[deck] = decks[deck] || {}, rk = size + (easy ? '' : '/nolabels');
+      const row = d[rk] = d[rk] || { size, nolabels: !easy };
       row[timed ? 'timed' : 'untimed'] = v;
     }
     return { decks, yt };
@@ -67,10 +67,10 @@
     let html = '';
     for (const id of played) {
       const rows = [];
-      for (const [sz, szName] of SIZES) {
-        const r = decks[id][sz]; if (!r) continue;
+      for (const nl of ['', '/nolabels']) for (const [sz, szName] of SIZES) {
+        const r = decks[id][sz + nl]; if (!r) continue;
         [r.untimed, r.timed].forEach((v) => { if (v) { count++; if (v.moves === PAIRS[sz]) perfect++; } });
-        rows.push(`<tr><th scope="row">${szName}</th>${cell(r.untimed, r)}${cell(r.timed, r)}</tr>`);
+        rows.push(`<tr><th scope="row">${szName}${nl ? ' · no labels' : ''}</th>${cell(r.untimed, r)}${cell(r.timed, r)}</tr>`);
       }
       html += `<section class="sc-deck"><h3>${esc(names.get(id))}</h3><table class="sc-table">`
         + '<thead><tr><th scope="col">Game size</th><th scope="col">Best</th><th scope="col">Timed</th></tr></thead>'
@@ -83,8 +83,8 @@
     const summary = count
       ? `<p class="sc-summary"><b>${count}</b> best ${count === 1 ? 'score' : 'scores'} on ${played.length + (yt.length ? 1 : 0)} ${played.length + (yt.length ? 1 : 0) === 1 ? 'board' : 'boards'}`
         + (perfect ? ` · <span class="sc-nw"><b>${perfect}</b> perfect ${perfect === 1 ? 'game' : 'games'} <span class="sc-star">★</span></span>` : '') + '</p>'
-      : '<div class="sc-empty"><p><b>No best scores yet.</b></p><p>Clear a game and your score shows up here. Each board keeps a best for every game size, Timed or not.</p></div>';
-    const legend = count ? '<p class="sc-legend">Fewest moves, then fastest time. <b>Timed</b> = games with the clock on. ★ = a perfect game, one move per pair.</p>' : '';
+      : '<div class="sc-empty"><p><b>No best scores yet.</b></p><p>Clear a game and your score shows up here. Each board keeps a best for every game size, Timed or not, with labels on or off.</p></div>';
+    const legend = count ? '<p class="sc-legend">Fewest moves, then fastest time. <b>Timed</b> = games with the clock on; <b>no labels</b> = sounds only. ★ = a perfect game, one move per pair.</p>' : '';
     const rest = count && unplayed.length ? `<p class="sc-unplayed"><b>Not played yet:</b> ${unplayed.map((id) => esc(names.get(id))).join(', ')}.</p>` : '';
     let streak = '';
     try { if (typeof Daily !== 'undefined' && Daily.streak) { const n = Daily.streak(); if (n) streak = `<p class="sc-streak">Daily streak: <b>${n} ${n === 1 ? 'day' : 'days'}</b>. Daily games and 2 Players don't set best scores.</p>`; } } catch (e) {}
@@ -130,10 +130,12 @@
     });
     document.body.appendChild(dlg);
   }
-  // Removes only best scores ("pairody-best:" keys). Returns how many were removed.
+  // Removes best scores ("pairody-best:" keys) and past-game lists. Returns how many bests were removed.
+  // Each board's list of past games ("pairody-plays:", for the Well done card's ranking) goes too.
   function clearAll(){
     const ks = keys();
     ks.forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} });
+    try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('pairody-plays:')) localStorage.removeItem(k); } } catch (e) {}
     try { window.dispatchEvent(new CustomEvent('pairody:bests-cleared')); } catch (e) {}
     return ks.length;
   }

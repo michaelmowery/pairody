@@ -14,10 +14,10 @@
 <h3>What's here now</h3>
 <ul>
   <li><b>Twenty-five boards.</b> Animals uses real recordings, and Animal Talk matches each animal’s name to its call. Everyday Sounds, Weather, Vehicles, Instruments and Ringtones are sounds to match by ear, and Seasonal changes with the calendar. Quotes, Jokes, Tongue Twisters, Say Hello, Homophones, Rhymes, Opposites, Synonyms, Capitals, Times Tables, Elements, Planets and Presidents read pairs aloud: an opening and its ending, a riddle and its answer, hello and its language, words that sound alike, rhymes, opposites, words that mean the same, countries and capitals, times tables, chemical symbols, space clues or presidents and their numbers. Melodies splits old tunes in two. Notes is ear training, and Phone Keypad and Morse Code match keys and letters to their beeps.</li>
-  <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Timed</b> for a clock to beat.</li>
+  <li><b>Sound names</b> show on each pad while it plays, so kids and first-timers can jump right in. Turn on <b>Timed</b> for a clock to beat, or turn <b>Labels</b> off for sounds only.</li>
   <li><b>Best scores</b> for each board, saved on this device. No account or sign-up.</li>
   <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Your Music in the board picker.</li>
-  <li class="web-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), Your music, every game size, Timed, 2 Players and Daily are free. Boards tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
+  <li class="web-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), Your music, every game size, Timed, Labels, 2 Players and Daily are free. Boards tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>

@@ -57,17 +57,19 @@ body.daily-on .styles,body.daily-on .opts{display:none}
 body.daily-on .deck-chip{cursor:default}
 body.daily-on .deck-chip .chev{display:none}
 .boardbar{gap:10px 14px}
-/* New game, Demo and the Timed switch share a row under the readout (Michael, 2026-11-16/17).
-   On narrow phones the switch caption shortens to "Timed · On/Off". */
+/* New game, Demo and the Timed and Labels switches share a row under the readout (Michael,
+   2026-11-16/17). On phones the captions shorten to "Timed · On" / "Labels · On", and the two
+   switches get their own line under the buttons when the row is too narrow. */
 .boardbar .bb-btns{flex:1 0 100%;align-items:center;flex-wrap:wrap;gap:8px}
-.boardbar .bb-btns .toggle{margin-left:auto}
+.boardbar .bb-btns .bb-sw{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
 .toggle .dm-more{font-style:normal}
 @media (max-width:520px){.toggle .dm-more{display:none}}
-body.daily-on .bb-btns .toggle{display:none}
+body.daily-on .bb-btns [data-style="timed"]{display:none}
 /* The status line ("“France” picked. Now find its match…") sits right above the pads (Michael,
    2026-11-17). Room for two lines, so the pads don't jump when it wraps. */
 #status{min-height:2.7em;display:flex;align-items:flex-end;margin:-4px 0 0}
-@media (max-width:400px){.boardbar .bb-btns{gap:6px}.boardbar .bb-btns .btn{padding-left:12px;padding-right:12px}.boardbar .bb-btns .toggle{gap:6px}}
+@media (max-width:400px){.boardbar .bb-btns{gap:6px}.boardbar .bb-btns .btn{padding-left:12px;padding-right:12px}.boardbar .bb-btns .toggle{gap:6px}.boardbar .bb-btns .bb-sw{gap:8px 12px}}
+@media (max-width:520px){.boardbar .bb-btns .bb-sw{flex-basis:100%;margin-left:0}}
 .pad.matched .lbl{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
@@ -93,6 +95,8 @@ body.daily-on .bb-btns .toggle{display:none}
 .donecard .big{font-family:var(--display);font-weight:600;font-size:2.6rem;line-height:1;margin:12px 0 2px;font-variant-numeric:tabular-nums}
 .donecard .big small{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:4px}
 .donecard p{margin:6px 0 0;color:var(--muted);font-size:.92rem;line-height:1.35}
+.donecard .rank{font-family:var(--display);font-weight:600;color:var(--fg);font-size:.95rem}
+.donecard .rank[hidden]{display:none}
 .donecard .btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .donecard .btn{padding:9px 16px}
 .donecard .linkish{margin-top:10px;background:none;border:0;padding:4px;color:var(--muted);font:inherit;font-size:.85rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -137,7 +141,7 @@ body.daily-on .bb-btns .toggle{display:none}
 @media (prefers-reduced-motion:reduce){#links .link.draw path{animation:none;stroke-dashoffset:0}#links .link.draw circle:last-of-type{animation:none;opacity:1}#links .link.miss{animation:none}}
 </style>
 </head>
-<body class="easy">
+<body>
 <div class="wrap">
   <header class="top">
     <a href="./" aria-label="Pairody home">
@@ -186,7 +190,8 @@ body.daily-on .bb-btns .toggle{display:none}
       <div class="best tap" id="bestBox" role="button" tabindex="0" title="Your best on this board and game size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
     <div class="row-btns bb-btns"><button class="btn" id="reset">New game</button><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button>
-      <label class="toggle" data-style="timed" title="Find every pair before the clock runs out. Turning it on or off starts a new game."><input type="checkbox" id="timed"><span>Timed · <b class="dm-on">On<i class="dm-more">: beat the clock</i></b><b class="dm-off">Off<i class="dm-more">: no rush</i></b></span></label></div>
+      <span class="bb-sw"><label class="toggle" data-style="timed" title="Find every pair before the clock runs out. Turning it on or off starts a new game."><input type="checkbox" id="timed"><span>Timed · <b class="dm-on">On<i class="dm-more">: beat the clock</i></b><b class="dm-off">Off<i class="dm-more">: no rush</i></b></span></label>
+      <label class="toggle" title="Labels on: each pad shows its name while it plays. Labels off: play by sound only (those games keep their own best scores)."><input type="checkbox" id="labels" checked><span>Labels · <b class="dm-on">On<i class="dm-more">: names shown</i></b><b class="dm-off">Off<i class="dm-more">: sounds only</i></b></span></label></span></div>
     </div>
     <!-- 2 Players scoreboard: whose turn it is and each player's matches. Names are editable and saved on this device. -->
     <div class="vs" id="vs" role="group" aria-label="Scoreboard" hidden>
@@ -201,6 +206,7 @@ body.daily-on .bb-btns .toggle{display:none}
         <h2 id="doneTitle">Well done!</h2>
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p id="doneInfo"></p>
+        <p class="rank" id="doneRank" hidden></p>
         <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
@@ -210,9 +216,9 @@ body.daily-on .bb-btns .toggle{display:none}
   </div>
 
   <details class="notes fold" id="moreHelp" data-key="pairody-morehelp">
-    <summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><h2>More help: sizes, Timed, best scores</h2></summary>
+    <summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><h2>More help: sizes, Timed, Labels, best scores</h2></summary>
     <p>Pick a size: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect game takes one move per pair.</p>
-    <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app.</p>
+    <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn <b>Labels</b> off and you get the sounds only. Those games keep their own best scores.</p>
     <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own bests, and so do Timed games.</p>
     <p>Want a challenge? Turn on <b>Timed</b>, next to New game and Demo, and you get a clock to beat. <b>Daily Pairody</b>, at the top next to the board name, is one surprise game a day: the date picks the board, game size and whether it's Timed, and everyone gets the same pads. You play it as dealt, and your own choices come back when you tap it again. Clear one every day to build a streak. Pick <b>1 Player</b> or <b>2 Players</b> next to the sizes. Two players take turns on one device: find a match and you go again, miss and it's the other player's turn. In a Timed game you share the clock, and whoever has more when it runs out wins. 2 Players and Daily games don't touch your best scores.</p>
     <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
@@ -1209,7 +1215,7 @@ const layout=()=>SIZES[size];
 const timeLimit=()=>Math.ceil(NP*2*({animals:4,notes:4,morse:5}[deck]||7)/10)*10*(Access.get("extraTime")?2:1); // Extra time doubles it (info panel)
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
-let board=0,deck="animals",cards=[],half=[],open=[],lock=false,settle=null,moves=0,pairs=0,start=0,timer=null,demo=null;
+let board=0,deck="animals",cards=[],half=[],open=[],lock=false,settle=null,moves=0,pairs=0,start=0,timer=null,demo=null,labelsUsed=true;
 let mlog=[]; // this board's moves, 1 = match, 0 = miss (the Daily share grid)
 let over=false,turn=0,score=[0,0]; // over: a Timed board ran out; turn/score: 2 Players
 const $=id=>document.getElementById(id);
@@ -1287,20 +1293,20 @@ function focusPad(j){
 }
 
 // Best scores: one per deck, game size and Timed setting.
-// Keys end in ":easy" (names shown), from when Difficult mode (sounds only) had bests without it.
-// Difficult mode was removed on 2026-11-17 (Michael); its old bests are left in storage, unused.
+// Keys end in ":easy" when labels were on (names shown, the default); no ":easy" = Labels off
+// (sounds only). Labels off was called Difficult mode until 2026-11-17, with the same keys.
 // Small and Big boards add "@small" / "@big" after the deck ("animals@big:easy"); Classic keeps the old keys.
 // Timed adds "~timed" after the size ("animals@big~timed:easy"). Old "~triples" bests are unused.
-const bestKey=d=>d+SIZES[size].key+STYLES[style].key+":easy";
+const bestKey=d=>d+SIZES[size].key+STYLES[style].key+(labelsUsed?":easy":"");
 function showBest(){
   const bx=$("bestBox");bx.hidden=duo();$("duoBox").hidden=true; // 2 Players scores show on the big scoreboard (#vs) instead
   if(dailyOn){
     const n=Daily.streak();$("bestLbl").textContent="Streak";$("best").textContent=n+(n===1?" day":" days");
     bx.title="Days in a row you've cleared a Daily Pairody. Saved on this device. Tap to see all your best scores.";
   }else{
-    $("bestLbl").textContent="Best";
+    $("bestLbl").textContent=labelsUsed?"Best":"No-labels best";
     $("best").textContent=duo()?"—":Best.fmt(Best.get(bestKey(deck)));
-    bx.title="Your best on this board and game size, Timed or not: fewest moves, then fastest time. Saved on this device. Tap to see all your best scores.";
+    bx.title="Your best on this board and game size, Timed or not, labels on or off: fewest moves, then fastest time. Saved on this device. Tap to see all your best scores.";
   }
   document.querySelectorAll(".decks button").forEach(btn=>{
     let sm=btn.querySelector("small");if(!sm){sm=document.createElement("small");btn.appendChild(sm)}
@@ -1390,7 +1396,7 @@ function build(){
   board++; // a move still resolving from the old board is dropped (see tap)
   clipLate={};
   const L=layout();
-  clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;mlog=[];NP=L.pairs;
+  clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;mlog=[];labelsUsed=labelsOn();NP=L.pairs;
   over=false;turn=0;score=[0,0];showDuo();hush();timeWarn=0;
   hideDone(true);
   $("bestBox").classList.remove("new");showBest();
@@ -1477,13 +1483,13 @@ const DECKHELP={
   times:"One pad says a times table and its twin says the answer, like seven times eight and fifty-six. No two answers in a game are the same.",
   melodies:"Old tunes everyone knows. One pad plays how a tune starts and its twin plays how it goes on, so match the two halves of each song. Every game picks its tunes from a bigger set.",
   notes:"Notes of the C major scale, from C up to high C. A pair is the same pitch, and neighbors like E and F sound close, so listen carefully. A Big game uses all twelve notes from C to B, sharps and flats too. This one is real ear training.",
-  morse:"One pad says a letter or number and its twin beeps it in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes.",
+  morse:"One pad says a letter or number and its twin beeps it in Morse code. Short beeps are dots, long ones are dashes. The pads show the dots and dashes unless Labels is off.",
   everyday:"Sounds from around the house and town: a doorbell, a kettle, a ringing phone, a siren. Find the two pads that make the same sound.",
   instruments:"Every pad plays the same little tune, each on a different instrument: piano, guitar, flute, trumpet and more. Match the two that sound alike. Each game picks a new tune.",
   seasonal:"Changes with the calendar: spooky sounds for Halloween, songs and sleigh bells for the holidays, birds and rain in spring, waves and fireworks in summer. A pair can be one sound, the two halves of a song, or a saying and its ending. Right now: "+SEASONS[season].name+" "+SEASONS[season].art,
   twisters:"One pad says how a tongue twister starts and its twin says how it ends. Match each start to its ending, then try saying them yourself!",
   hello:"One pad says hello in another language and its twin names the language, like Bonjour and French. Your device's own voices do the talking, so how they sound depends on your phone or browser.",
-  keypad:"One pad says a phone key and its twin plays the beep that key makes when you dial. Every key's beep is two tones at once, one for its row and one for its column. The pads show the keys.",
+  keypad:"One pad says a phone key and its twin plays the beep that key makes when you dial. Every key's beep is two tones at once, one for its row and one for its column. The pads show the keys unless Labels is off.",
   weather:"Rain, thunder, wind, hail and more. Find the two pads that make the same weather. Some are close, like a breeze and a howling gale, so listen carefully.",
   vehicles:"Trains, sirens, horns and engines: a steam train, a police car, a helicopter, a ship's horn. Find the two pads that make the same sound.",
   ringtones:"Little phone jingles, each played twice like a real phone ringing. Match the two pads that play the same ringtone. Listen for the tune and the instrument.",
@@ -1499,11 +1505,11 @@ function playPad(i,b){
   entry[1](ctx.currentTime+.02,half[i]===1?1:0);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=two?sideText(entry,half[i]):entry[0];np.querySelector("small").textContent=two?MATCHUP[deck][half[i]]:DECKNAME[deck]}
-  $("status").textContent=(demo?"Demo: ":"")+"Now playing: "+(two?sideText(entry,half[i]):entry[0])+"."; // two sides: only this pad's half
+  if(labelsOn())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+(two?sideText(entry,half[i]):entry[0])+"."; // two sides: only this pad's half
   b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),Math.max(900,(seqEnd-ctx.currentTime)*1000));
-  // What a sighted player reads on the pad while it plays, for a screen reader.
+  // What a sighted player reads on the pad while it plays, for a screen reader (labels on only).
   // A pad that reads itself aloud (quotes, jokes, words) needs nothing more.
-  return spokeAt===said?(two?sideText(entry,half[i]):entry[0]):"";
+  return labelsOn()&&spokeAt===said?(two?sideText(entry,half[i]):entry[0]):"";
 }
 // The clock: counts up, or down to zero on a Timed board (the demo ignores the limit)
 function tick(){
@@ -1537,7 +1543,7 @@ function tap(i,b){
   // Match up boards: a second pad on the same side just changes which one you picked
   if(two&&open.length===1&&sideOf(i)===sideOf(open[0])){const o=open[0];$("pad"+o).classList.remove("open");open=[];padLabel(o)}
   if(!timer){start=Date.now();timer=setInterval(tick,250);
-    if(!demo)track("play/"+deck+sizeTag()+styleTag(),"Game started: "+DECKNAME[deck]+sizeName()+styleName())}
+    if(!demo)track("play/"+deck+sizeTag()+styleTag()+(labelsOn()?"":"/nolabels"),"Game started: "+DECKNAME[deck]+sizeName()+styleName()+(labelsOn()?"":" (no labels)"))}
   const heard=playPad(i,b);b.classList.add("open");open.push(i);padLabel(i);
   // A move ends after two pads
   const miss=cards[i]!==cards[open[0]];
@@ -1592,7 +1598,7 @@ function tap(i,b){
 // the ring only, since its status line already says it's done.
 var doneTimer=null;
 function showDone(title,big,lbl,info,p1){
-  const g=$("grid"),c=$("doneCard");
+  const g=$("grid"),c=$("doneCard");$("doneRank").hidden=true; // finish() fills it after this for a solo game
   g.classList.remove("done");void g.offsetWidth;g.classList.add("done");g.classList.toggle("p1",!!p1);
   finishFanfare(title===null);
   if(title===null)return;
@@ -1605,7 +1611,7 @@ function showDone(title,big,lbl,info,p1){
 function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
 $("doneNew").onclick=()=>{track("done/new","Well done card: New game");build();focusPad(0)};
 // A screen reader lands on New game and then hears the result (title, time, moves)
-$("doneNew").setAttribute("aria-describedby","doneTitle doneLbl doneTime doneInfo");
+$("doneNew").setAttribute("aria-describedby","doneTitle doneLbl doneTime doneInfo doneRank");
 $("doneClose").onclick=()=>{track("done/close","Well done card: See game");hideDone();$("reset").focus({preventScroll:true})};
 // Best scores screen (assets/scores.js): from the Well done card, or by tapping the Best box
 const openScores=from=>window.PairodyScores&&PairodyScores.open(from);
@@ -1632,7 +1638,7 @@ function finish(){
     st.textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New game to play.";announce(st.textContent,{delay:600});
     endDemo();showDone(null);return;
   }
-  track("win/"+deck+sizeTag()+styleTag(),"Game cleared: "+DECKNAME[deck]+sizeName()+styleName());
+  track("win/"+deck+sizeTag()+styleTag()+(labelsUsed?"":"/nolabels"),"Game cleared: "+DECKNAME[deck]+sizeName()+styleName()+(labelsUsed?"":" (no labels)"));
   if(duo()){
     const [a,b]=score;showDuo();
     st.textContent=a===b?"It's a tie, "+a+" to "+b+"! Tap New game for a rematch.":P(a>b?0:1)+" wins, "+Math.max(a,b)+" to "+Math.min(a,b)+"! Tap New game for a rematch.";
@@ -1641,27 +1647,32 @@ function finish(){
     return;
   }
   if(moves===NP)track("perfect/"+deck+sizeTag()+styleTag(),"Perfect game: "+DECKNAME[deck]+sizeName()+styleName());
-  const perfect=moves===NP?" A perfect game!":" Perfect is "+NP+".";
+  const perfect=moves===NP?" A perfect game!":" Perfect is "+NP+".",nl=labelsUsed?"":" with labels off";
   if(dailyOn){
-    const {first,streak,grew}=Daily.record(moves,secs,{log:mlog.join(""),deck,size,style,easy:true});
+    const {first,streak,grew}=Daily.record(moves,secs,{log:mlog.join(""),deck,size,style,easy:labelsUsed});
     if(grew)track("daily/streak/"+Math.min(streak,30),"Daily streak: "+streak);
     dispatchEvent(new CustomEvent("pairody:daily-cleared",{detail:{first}})); // Share button (assets/daily.js)
     st.textContent=(first?"Today's Daily Pairody cleared in "+moves+" moves, "+fmt(secs)+"."+perfect:"Cleared again in "+moves+" moves. Only your first clear today counts.")
       +" Streak: "+streak+(streak===1?" day.":" days in a row!")+(grew?"":" Come back tomorrow to keep it going.");
-    showDone(moves===NP?"Perfect game!":"Well done!",fmt(secs),"Time",moves+" moves. "+(first?"":"Only your first clear today counts. ")
+    showDone(moves===NP?"Perfect game!":"Well done!",fmt(secs),"Time",moves+" moves"+nl+". "+(first?"":"Only your first clear today counts. ")
       +"Streak: "+streak+(streak===1?" day.":" days in a row!")+" New games tomorrow.");
     showBest();return;
   }
-  const {isNew,prev}=Best.record(bestKey(deck),moves,secs);
+  const {rank,of}=Best.play(bestKey(deck),moves,secs),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
   const sz=(size==="classic"?"":SIZES[size].name+" ")+(style==="timed"?"Timed ":"");
   let msg="Game cleared in "+moves+" moves, "+fmt(secs)+".";
   if(style==="timed")msg="Beat the clock with "+fmt(Math.max(0,timeLimit()-secs))+" to spare: "+moves+" moves.";
   if(isNew&&prev)msg="New best for "+DECKNAME[deck]+sizeName()+styleName()+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+").";
-  else if(isNew)msg=(style==="timed"?msg+" ":"")+"First "+sz+"game on "+DECKNAME[deck]+(style==="timed"?". ":": "+moves+" moves, "+fmt(secs)+". ")+"That's your best to beat.";
+  else if(isNew)msg=(style==="timed"?msg+" ":"")+"First "+sz+"game on "+DECKNAME[deck]+nl+(style==="timed"?". ":": "+moves+" moves, "+fmt(secs)+". ")+"That's your best to beat.";
   st.textContent=msg+perfect;
   showDone(isNew&&prev?"New best!":moves===NP?"Perfect game!":"Well done!",fmt(secs),"Time",
-    moves+" moves"+(style==="timed"?", with "+fmt(Math.max(0,timeLimit()-secs))+" to spare":"")+"."
+    moves+" moves"+(style==="timed"?", with "+fmt(Math.max(0,timeLimit()-secs))+" to spare":"")+nl+"."
     +(isNew&&prev?" Your old best was "+Best.fmt(prev).replace(" · "," moves, ")+".":isNew?" That's your best to beat.":moves===NP?"":" Perfect is "+NP+"."));
+  // How this game ranks among every game on this board, size, Timed and Labels setting (Michael, 2026-11-17)
+  if(of>1){const ord=n=>n+(n%100>10&&n%100<14?"th":["th","st","nd","rd"][n%10]||"th");
+    const setup=[SIZES[size].name,style==="timed"?"Timed":"",labelsUsed?"":"labels off"].filter(Boolean).join(", ");
+    $("doneRank").textContent=(rank===1?"Your best":ord(rank)+" best")+" of "+of+" games ("+setup+").";
+    $("doneRank").hidden=false}
   showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
 }
 // ---- Deck picker: a chip shows the deck you're on; tapping it opens a panel of deck cards ----
@@ -1824,9 +1835,22 @@ $("deckPick").addEventListener("click",e=>{
   if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.currentTarget.close();
 });
 buildDeckPicker();showDeckChip();
-// Sound names always show while a pad plays (Difficult mode, sounds only, was removed on
-// 2026-11-17). body.easy stays on for the shared CSS (youtube.html uses it too).
-try{localStorage.removeItem("pairody-difficult")}catch(e){}
+// Labels switch (Michael, 2026-11-17; it was Difficult mode, the other way round, until then).
+// On (default): each pad shows its name while it plays (body.easy, shared CSS with youtube.html).
+// Off: sounds only. The "“Cat” picked" line still names the pad you tapped, as it did before.
+// A game counts as labels-on if labels were on at any point; switching them off counts only
+// before the first tap. Saved as "pairody-labels" ("0" = off). It doesn't start a new game.
+// Daily Pairody leaves it to the player; a labels-off clear says so on the shared result.
+function labelsOn(){return $("labels").checked}
+function applyLabels(){
+  if(labelsOn()&&!labelsUsed){labelsUsed=true;showBest()}
+  else if(!labelsOn()&&labelsUsed&&((!timer&&open.length===0)||pairs===NP)){labelsUsed=false;showBest()}
+  document.body.classList.toggle("easy",labelsOn());try{localStorage.setItem("pairody-labels",labelsOn()?"1":"0")}catch(e){}}
+try{let v=localStorage.getItem("pairody-labels");const d=localStorage.getItem("pairody-difficult"); // old Difficult setting carries over
+  if(v===null&&d!==null){v=d==="1"?"0":"1";localStorage.removeItem("pairody-difficult")}
+  $("labels").checked=v!=="0"}catch(e){}
+$("labels").onchange=()=>{applyLabels();track("labels/"+(labelsOn()?"on":"off"),"Labels "+(labelsOn()?"on":"off"))};
+document.body.classList.toggle("easy",labelsOn());labelsUsed=labelsOn();
 $("reset").onclick=build;
 // Board size: a new size starts a new board, like picking a deck
 function showSize(){document.querySelectorAll(".sizes button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.size===size))}

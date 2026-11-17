@@ -9,6 +9,20 @@ const Best={
     if(isNew){try{localStorage.setItem("pairody-best:"+key,JSON.stringify({moves,secs,at:Date.now()}))}catch(e){}}
     return {isNew,prev};
   },
+  // Every cleared game for a key, so the Well done card can say how this one ranks ("2nd best
+  // of 10 games"). localStorage "pairody-plays:<key>" = [[moves,secs],...], newest last, the
+  // last 200 kept. Started 2026-11-17: a best from before then is counted as one earlier game.
+  // Call before record() so the old best can seed the list. Returns {rank, of}; ties share a rank.
+  play(key,moves,secs){
+    const k="pairody-plays:"+key;let h=[];
+    try{h=JSON.parse(localStorage.getItem(k))||[]}catch(e){}
+    if(!Array.isArray(h))h=[];
+    if(!h.length){const b=Best.get(key);if(b)h.push([b.moves,b.secs])}
+    const rank=1+h.filter(([m,s])=>m<moves||(m===moves&&s<secs)).length;
+    h.push([moves,secs]);if(h.length>200)h=h.slice(-200);
+    try{localStorage.setItem(k,JSON.stringify(h))}catch(e){}
+    return {rank,of:h.length};
+  },
   fmt(b){return b?b.moves+" · "+Math.floor(b.secs/60)+":"+String(b.secs%60).padStart(2,"0"):"—"},
   // Short, stable key for a list of strings (for boards built from loose song links)
   hash(list){let h=5381;for(const ch of list.join(","))h=((h<<5)+h+ch.charCodeAt(0))|0;return (h>>>0).toString(36)}

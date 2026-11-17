@@ -12,7 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
-    { date: '2026-11-17', title: 'Easier to close Well done, and Timed is free', items: [
+    { date: '2026-11-17', title: 'See how your game ranks', items: [
+      'The <b>Well done</b> card now says how this game ranks against your earlier ones on the same board and setup, like <i>2nd best of 10 games (Classic)</i>. Games are counted on this device from today.',
+    ]},
+    { date: '2026-11-17', title: 'Labels switch, and Timed is free', items: [
+      'New <b>Labels</b> switch next to Timed. Labels on shows each pad\'s name while it plays; turn it off to play by sound only. Sounds-only games keep their own best scores, and a Daily Pairody cleared that way says <i>🎧 Sounds only</i> when you share it.',
       'Tap anywhere outside the <b>Well done</b> card to close it and see your game.',
       '<b>Timed</b> games are free for everyone, like 2 Players.',
     ]},
