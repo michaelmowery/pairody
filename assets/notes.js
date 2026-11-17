@@ -18,8 +18,12 @@
       'New in the <b>i</b> panel: <b>Audio cues</b> place each pad\'s sound left to right where it sits and add a low blip on a miss, and <b>Extra time</b> doubles the clock on Timed games.',
       'Some text colors are a little darker so they\'re easier to read.',
     ]},
+    { date: '2026-11-16', title: 'Clearer Difficult mode switch', items: [
+      'The <b>Difficult mode</b> switch now says what it is set to: <i>Off: names shown</i>, or <i>On: sounds only, no names</i>.',
+    ]},
     { date: '2026-11-16', title: 'Boards grouped by how they play', items: [
       'In the board picker, <b>Grouped</b> now puts <b>Same sound</b> boards first and <b>Match up</b> boards second, each split into Sounds, Music, Words and Learning.',
+      'The cards look different too: Same sound cards show two matching pads with an equals sign, and Match up cards show a prompt and its answer joined by a line.',
     ]},
     { date: '2026-11-16', title: 'Tidier help, and no Triples on Match up boards', items: [
       '<b>How to play</b> under the board name now folds away. Tap it to read how the board you picked plays. The longer help under the game folds away too, and each stays open once you open it.',
