@@ -65,7 +65,7 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
 | `demo/done/<id>` | Demo finished the board |
 | `demo/stop/<id>` | Demo stopped early (Stop demo, New board or picking a deck) |
-| `welcome/demo` | Show demo tapped on the Early preview note (then `demo/start/<id>` follows) |
+| `welcome/demo` | Show demo tapped on the welcome note (then `demo/start/<id>` follows) |
 | `yt/beta-unlocked` | Your music beta password entered |
 | `yt/load/playlist`, `yt/load/links` | Your music songs loaded (the playlist itself is not sent) |
 | `yt/win[/hard]` | Your music board cleared |

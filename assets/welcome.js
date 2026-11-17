@@ -1,4 +1,4 @@
-// "Early preview" welcome note, ported from Noodlit (www/src/welcome.js) so both apps behave alike.
+// Welcome note, ported from Noodlit (www/src/welcome.js) so both apps behave alike.
 // Shown on the first visit, and again the first time Pairody opens on a new version (the version
 // is stamped at deploy, see assets/update.js) unless "Note after updates" is turned off in the
 // info panel's Preferences. The update version adds a "new version" line and a pointer to that
@@ -26,11 +26,10 @@
   function remember(){ write(KEY, '1'); write(VERSION_KEY, version()); }
 
   const HTML = `
-<p class="info-tag"><span class="web-only">Early preview</span><span class="native-only">Free to play</span></p>
 <h2 id="welcomeTitle">Welcome to Pairody</h2>
 <p id="welcomeUpdate" class="welcome-update" hidden></p>
 <div id="welcomeNews" class="welcome-news" hidden></div>
-<p id="welcomeBody"><span class="web-only">Pairody is in early preview. It's free while we build it, new boards land often, and now and then something may wobble. Thanks for playing!</span><span class="native-only">Memory match, played by ear: pick a board, tap two pads, and find the pairs. Pairody is free, with no ads and no accounts, and new boards arrive with updates.</span> Tap <b class="welcome-i">i</b> any time to see what's here.</p>
+<p id="welcomeBody">Memory match, played by ear: pick a board, tap two pads, and find the pairs. Pairody is free, with no ads and no accounts, and new boards arrive with updates. Tap <b class="welcome-i">i</b> any time to see what's here.</p>
 <p class="welcome-optout" hidden>Don't need this after every update? Turn it off in <button type="button" class="welcome-prefs">Preferences</button>.</p>
 <form method="dialog" class="welcome-actions"><button type="button" class="btn welcome-demo" hidden>Show demo</button><button class="btn primary welcome-ok">Got it</button></form>`;
 
@@ -76,7 +75,7 @@
       dlg.querySelector('.welcome-optout').hidden = false;
       dlg.setAttribute('aria-describedby', 'welcomeUpdate welcomeBody');
       // What's new since this device last saw the release notes (assets/notes.js), in place of the
-      // generic preview blurb. A deploy with no new note just shows the blurb as before.
+      // welcome blurb. A deploy with no new note just shows the blurb as before.
       const N = window.PairodyNotes, fresh = N ? N.unseen() : [];
       if (fresh.length) {
         const items = fresh.flatMap((n) => n.items).slice(0, 5);
@@ -104,7 +103,7 @@
       showDemo.hidden = false;
       showDemo.addEventListener('click', () => {
         dlg.close();
-        window.PairodyAnalytics?.track('welcome/demo', 'Show demo tapped on the preview note');
+        window.PairodyAnalytics?.track('welcome/demo', 'Show demo tapped on the welcome note');
         if (demoBtn.getAttribute('aria-pressed') !== 'true') demoBtn.click();
       });
     }
