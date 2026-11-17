@@ -345,20 +345,38 @@ const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"�
 // 2.5s on the first tap), the synth fills in for the rest of that board only, and the
 // recording takes over from the next board.
 const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat",Hen:"hen",Goose:"goose",Donkey:"donkey",Raven:"raven",Whale:"whale",Peacock:"peacock",Rattlesnake:"rattlesnake",Dove:"dove",Bison:"bison",Cicada:"cicada"};
-const clipData={},clipBuf={};
+const clipData={},clipBuf={},clipTry={};
+// fetch first; if that fails (some app web views), try XMLHttpRequest before giving up
+function clipBytes(url){
+  return fetch(url).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>{if(!b||!b.byteLength)throw 0;return b})
+    .catch(()=>new Promise(ok=>{
+      try{const x=new XMLHttpRequest();x.open("GET",url);x.responseType="arraybuffer";
+        x.onload=()=>ok((x.status===200||x.status===0)&&x.response&&x.response.byteLength?x.response:null);
+        x.onerror=x.ontimeout=()=>ok(null);x.send()}catch(e){ok(null)}
+    }));
+}
 function loadClips(){
   for(const [name,file] of Object.entries(CLIPS)){
     if(clipData[name])continue;
-    clipData[name]=fetch("sounds/animals/"+file+".mp3").then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).catch(()=>null);
+    clipData[name]=clipBytes("sounds/animals/"+file+".mp3");
   }
 }
 const clipReady={};
 let clipLate={}; // clips that were too slow on this board (cleared by build)
 function decodeClip(name){
+  if(!clipData[name])loadClips();
   if(clipReady[name]||!clipData[name])return;
+  // decode a copy (WebKit detaches the buffer it's given)
   clipReady[name]=clipData[name]
-    .then(ab=>ab&&new Promise((ok,bad)=>ctx.decodeAudioData(ab,ok,bad)))
-    .then(b=>{clipBuf[name]=b||false},()=>{clipBuf[name]=false});
+    .then(ab=>ab&&new Promise((ok,bad)=>{const p=ctx.decodeAudioData(ab.slice(0),ok,bad);if(p&&p.catch)p.catch(bad)}))
+    .then(b=>{if(b)clipBuf[name]=b;else clipFail(name)},()=>clipFail(name));
+}
+// A clip that failed to load or decode gets one fresh try on a later tap; the synth plays meanwhile
+function clipFail(name){
+  clipBuf[name]=false;
+  if(clipTry[name])return;
+  clipTry[name]=1;
+  setTimeout(()=>{delete clipData[name];delete clipReady[name];delete clipBuf[name]},1000);
 }
 function withClip(name,synth){
   const play=t=>{

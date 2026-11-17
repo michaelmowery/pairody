@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Animal recordings load more reliably', items: [
+      'If an animal recording fails to load, Pairody now tries another way and retries it, so you hear the real animal instead of the stand-in sound.',
+    ]},
     { date: '2026-11-17', title: 'A proper welcome', items: [
       'Pairody is out of preview. The first-visit note now simply says welcome, and the <b class="welcome-i">i</b> panel is now <b>About Pairody</b>.',
     ]},
