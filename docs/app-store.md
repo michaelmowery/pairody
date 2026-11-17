@@ -9,11 +9,12 @@ before; nothing here changes pairody.app.
 | Path | What it is |
 | --- | --- |
 | `package.json` | Capacitor packages and the `app:*` scripts. Its `version` is the app version shown in the info panel. |
-| `capacitor.config.json` | App id `app.pairody`, name, web folder (`app-www`). |
+| `capacitor.config.json` | App id `com.mountmtech.pairody`, name, web folder (`app-www`). |
 | `scripts/build-app.sh` | Builds `app-www/`: the game files only, no `youtube.html` (Your music beta), no `sw.js`, version stamped from `package.json`. |
 | `ios/` | The Xcode project (Swift Package Manager, no CocoaPods). Icon, navy splash, silent-switch audio and the export-compliance flag are already set. |
 | `assets/native.js` | Detects the app and adds `class="native"` to `<html>`. `.web-only` / `.native-only` in the HTML pick what shows where. |
 | `privacy.html` | Privacy policy, served at https://pairody.app/privacy.html (needed for the App Store listing). |
+| `support.html` | Support page, served at https://pairody.app/support.html (the listing's Support URL). |
 
 The deploy workflow drops `ios/`, `scripts/`, `package*.json` and `capacitor.config.json` before
 publishing, so they are never served or cached offline.
@@ -40,7 +41,7 @@ How the app differs from the website:
 ## Ship a build
 
 1. In [App Store Connect](https://appstoreconnect.apple.com): **Apps → + → New App**. Platform iOS,
-   name **Pairody**, language English (U.S.), bundle ID **app.pairody** (register it first under
+   name **Pairody**, language English (U.S.), bundle ID **com.mountmtech.pairody** (register it first under
    Certificates, Identifiers & Profiles if it isn't listed), SKU `pairody-ios`.
 2. In Xcode: set the run destination to **Any iOS Device (arm64)**, then **Product → Archive**.
 3. In the Organizer: **Distribute App → App Store Connect → Upload**.
@@ -58,38 +59,26 @@ Xcode (App target → General), `npm run app:sync`, then Archive and upload agai
 - **Price:** Free. No in-app purchases.
 - **Age rating:** 4+ (answer "None" to every content question)
 - **Privacy policy URL:** https://pairody.app/privacy.html
-- **Support URL:** https://pairody.app
+- **Support URL:** https://pairody.app/support.html
 - **Marketing URL:** https://pairody.app
 - **Copyright:** 2026 Mount M Technologies, LLC
 - **Keywords (100):** memory,match,concentration,sound,ear,listening,animal sounds,brain,music,morse,kids,pairs
-- **Promotional text:** Twenty-one decks of sounds to match by ear: animal calls, everyday sounds, instruments, quotes, tongue twisters, old tunes and more.
+- **Promotional text:** 25 boards of sounds to match by ear: animal calls, jokes, capitals, old tunes, Morse code and more.
 - **Description:**
 
   > Pairody is the classic memory match game, played by ear. Every card is a sound. Flip one,
-  > listen, then find its twin.
+  > listen, then find the pad that goes with it.
   >
-  > Twenty-one decks, each a little different:
-  > • Animals: real recordings, from a cat's meow to an elephant's trumpet
-  > • Animal Talk: match each animal's name to its call
-  > • Everyday Sounds: doorbells, kettles, sirens and more
-  > • Instruments: the same tune on piano, guitar, flute and more
-  > • Seasonal: Halloween, holiday, spring and summer sounds that change with the calendar
-  > • Quotes: the start of a famous line and its ending
-  > • Jokes: a riddle and its punchline
-  > • Tongue Twisters: the start of a twister and its ending
-  > • Say Hello: hello in 20+ languages, matched to the language
-  > • Rhymes: a word and its rhyme
-  > • Opposites: a word and its opposite
-  > • Capitals: countries and their capitals
-  > • Times Tables: a sum and its answer
-  > • Melodies: the two halves of an old tune
-  > • Notes: ear training
-  > • Phone Keypad: keys and their dial tones
-  > • Morse Code: letters and their beeps
+  > 25 boards in four groups:
+  > • Sounds: real animal recordings, everyday sounds, weather, vehicles, ringtones
+  > • Music: notes, melodies, instruments, Morse code, phone keypad tones
+  > • Words: quotes, jokes, rhymes, opposites, homophones, tongue twisters, hello in many languages
+  > • Learning: capitals, times tables, elements, planets, presidents
   >
-  > Pick Small, Classic or Big boards. Names show on each pad while it plays, so kids can jump
-  > right in; turn on Timed for a clock to beat. Your best score for every deck and size is
-  > saved on your device, and Demo shows you how it's done.
+  > Some boards match the same sound twice; others match two halves, like a riddle and its
+  > punchline or a country and its capital. Pick Small, Classic or Big. Names show on each pad
+  > while it plays, so kids can jump right in; turn on Difficult mode for sounds only. Your best
+  > score for every board and size is saved on your device, and Watch a demo shows how it's done.
   >
   > Free, with no ads and no accounts.
 
