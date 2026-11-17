@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'A proper welcome', items: [
+      'Pairody is out of preview. The first-visit note now simply says welcome, and the <b class="welcome-i">i</b> panel is now <b>About Pairody</b>.',
+    ]},
     { date: '2026-11-17', title: 'Demo moved to How to play', items: [
       'The Demo button now lives in <b>How to play</b> as <b>Watch a demo</b>, so New game has the top row to itself.',
     ]},

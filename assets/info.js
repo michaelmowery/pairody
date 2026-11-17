@@ -1,12 +1,11 @@
 // Pairody "i" button: adds an info button to the header that opens a short
-// "this is a preview" panel. Shared by every page so the copy lives in one place.
+// "About Pairody" panel. Shared by every page so the copy lives in one place.
 (function(){
   const HTML=`
 <form method="dialog" class="info-x"><button aria-label="Close">×</button></form>
-<p class="info-tag"><span class="web-only">Preview</span><span class="native-only">About</span></p>
-<h2 id="infoTitle"><span class="web-only">You're playing an early preview</span><span class="native-only">About Pairody</span></h2>
-<p class="web-only">Pairody is new and still taking shape. It's free to play while we build it, and things may change, move around, or occasionally break.</p>
-<p class="native-only">Memory match, played by ear. Pairody is free to play, with no ads and no accounts, and new boards arrive with app updates.</p>
+<p class="info-tag">About</p>
+<h2 id="infoTitle">About Pairody</h2>
+<p>Memory match, played by ear. Pairody is free to play, with no ads and no accounts, and new boards arrive <span class="web-only">often</span><span class="native-only">with app updates</span>.</p>
 <div class="info-news" hidden>
   <p class="info-news-latest"></p>
   <button type="button" class="btn info-news-btn">What's new</button>
@@ -58,12 +57,12 @@
 </div>
 <p class="info-update-status" role="status"></p>
 <p class="native-only">New versions arrive through the App Store.</p>
-<p class="info-foot">Pairody<span class="web-only"> preview</span> · © 2026 Mount M Technologies, LLC</p>`;
+<p class="info-foot">Pairody · © 2026 Mount M Technologies, LLC</p>`;
   function init(){
     const top=document.querySelector(".top");if(!top)return;
     const btn=document.createElement("button");
-    btn.className="info-btn";btn.type="button";btn.setAttribute("aria-label","About this preview");
-    btn.setAttribute("aria-haspopup","dialog");btn.title="About this preview";btn.textContent="i";
+    btn.className="info-btn";btn.type="button";btn.setAttribute("aria-label","About Pairody");
+    btn.setAttribute("aria-haspopup","dialog");btn.title="About Pairody";btn.textContent="i";
     const dlg=document.createElement("dialog");
     dlg.className="info";dlg.setAttribute("aria-labelledby","infoTitle");dlg.innerHTML=HTML;
     // Group the nav and the button so the header keeps logo-left, controls-right
