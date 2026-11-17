@@ -1606,6 +1606,11 @@ function deckTile(id,showKind,from){
   else{t.type="button";t.dataset.deck=id;t.setAttribute("aria-pressed",id===deck);t.onclick=()=>pickDeck(id,from)}
   const thumb=document.createElement("span");thumb.className="dt-thumb";thumb.setAttribute("aria-hidden","true");
   pair.forEach(x=>{const p=document.createElement("i");p.textContent=x;if(!/\p{Extended_Pictographic}/u.test(x)&&x.length>3)p.className="w";thumb.appendChild(p)});
+  // Same sound: two level pads with "=" between. Match up: the pads sit at different heights,
+  // joined by a line like the one a match draws on a two-sided board.
+  if(!yt){const pk=playKind(id);thumb.classList.add(pk);
+    if(pk==="match")thumb.insertAdjacentHTML("beforeend",'<svg class="dt-link" viewBox="0 0 100 62.5" preserveAspectRatio="none"><path d="M42 31.9 C50 31.9 50 42.1 58 42.1"/></svg><b class="dt-dot l"></b><b class="dt-dot r"></b>');
+    else thumb.insertAdjacentHTML("beforeend",'<b class="dt-eq">=</b>')}
   t.appendChild(thumb);
   // Which kind of game: "Same sound" (both pads alike, classic grid) or "Match up" (a prompt
   // and its answer, played on two sides). Same list as the two-sided layout (MATCHUP).
