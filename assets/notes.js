@@ -12,8 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
-    { date: '2026-11-17', title: 'Easier to close Well done', items: [
+    { date: '2026-11-17', title: 'Easier to close Well done, and Timed is free', items: [
       'Tap anywhere outside the <b>Well done</b> card to close it and see your game.',
+      '<b>Timed</b> games are free for everyone, like 2 Players.',
     ]},
     { date: '2026-11-17', title: 'Simpler choices', items: [
       'Fewer switches: <b>Triples</b> and <b>Difficult mode</b> are gone. Pads always show their sound\'s name while it plays.',
