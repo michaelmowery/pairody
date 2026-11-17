@@ -237,7 +237,7 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
     <summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><h2>More help: sizes, Timed, Labels, best scores</h2></summary>
     <p>Pick a size: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect game takes one move per pair.</p>
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn <b>Labels</b> off and you get the sounds only. Those games keep their own best scores.</p>
-    <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own bests, and so do Timed games.</p>
+    <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own best, and Timed games count toward it too.</p>
     <p>Want a challenge? Turn on <b>Timed</b>, next to New game and Demo, and you get a clock to beat. <b>Daily Pairody</b>, at the top next to the board name, is one surprise game a day: the date picks the board, game size and whether it's Timed, and everyone gets the same pads. You play it as dealt, and your own choices come back when you tap it again. Clear one every day to build a streak. Pick <b>1 Player</b> or <b>2 Players</b> next to the sizes. Two players take turns on one device: find a match and you go again, miss and it's the other player's turn. In a Timed game you share the clock, and whoever has more when it runs out wins. 2 Players and Daily games don't touch your best scores.</p>
     <p>Tap the board name at the top to see every board as a card, grouped first by how they play (Same sound or Match up), then into Sounds, Music, Words and Learning, with the free boards first. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
@@ -1306,12 +1306,14 @@ function focusPad(j){
   const b=$("pad"+j);if(b){b.tabIndex=0;b.focus()}
 }
 
-// Best scores: one per deck, game size and Timed setting.
+// Best scores: one per deck, game size and Labels setting.
 // Keys end in ":easy" when labels were on (names shown, the default); no ":easy" = Labels off
 // (sounds only). Labels off was called Difficult mode until 2026-11-17, with the same keys.
 // Small and Big boards add "@small" / "@big" after the deck ("animals@big:easy"); Classic keeps the old keys.
-// Timed adds "~timed" after the size ("animals@big~timed:easy"). Old "~triples" bests are unused.
-const bestKey=d=>d+SIZES[size].key+STYLES[style].key+(labelsUsed?":easy":"");
+// Timed games share the one best per board, size and labels setting (Michael, 2026-11-17: the
+// clock doesn't change how fast you play). Old "~timed" bests were merged in by assets/best.js.
+// Old "~triples" bests are unused.
+const bestKey=d=>d+SIZES[size].key+(labelsUsed?":easy":"");
 function showBest(){
   const bx=$("bestBox");bx.hidden=duo();$("duoBox").hidden=true; // 2 Players scores show on the big scoreboard (#vs) instead
   if(dailyOn){
@@ -1320,7 +1322,7 @@ function showBest(){
   }else{
     $("bestLbl").textContent=labelsUsed?"Best":"No-labels best";
     $("best").textContent=duo()?"—":Best.fmt(Best.get(bestKey(deck)));
-    bx.title="Your best on this board and game size, Timed or not, labels on or off: fewest moves, then fastest time. Saved on this device. Tap to see all your best scores.";
+    bx.title="Your best on this board and game size, with labels on or off (Timed games count too): fewest moves, then fastest time. Saved on this device. Tap to see all your best scores.";
   }
   document.querySelectorAll(".decks button").forEach(btn=>{
     let sm=btn.querySelector("small");if(!sm){sm=document.createElement("small");btn.appendChild(sm)}
@@ -1685,17 +1687,17 @@ function finish(){
     showBest();return;
   }
   const {rank,of}=Best.play(bestKey(deck),moves,secs),{isNew,prev}=Best.record(bestKey(deck),moves,secs);
-  const sz=(size==="classic"?"":SIZES[size].name+" ")+(style==="timed"?"Timed ":"");
+  const sz=size==="classic"?"":SIZES[size].name+" ";
   let msg="Game cleared in "+moves+" moves, "+fmt(secs)+".";
   if(style==="timed")msg="Beat the clock with "+fmt(Math.max(0,timeLimit()-secs))+" to spare: "+moves+" moves.";
-  if(isNew&&prev)msg="New best for "+DECKNAME[deck]+sizeName()+styleName()+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+").";
+  if(isNew&&prev)msg="New best for "+DECKNAME[deck]+sizeName()+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+").";
   else if(isNew)msg=(style==="timed"?msg+" ":"")+"First "+sz+"game on "+DECKNAME[deck]+nl+(style==="timed"?". ":": "+moves+" moves, "+fmt(secs)+". ")+"That's your best to beat.";
   st.textContent=msg+perfect;
   const dc=doneCopy({rank,of,isNew,prev,moves,secs,spare:style==="timed"?Math.max(0,timeLimit()-secs):null});
   showDone(dc.title,fmt(secs),"Time",dc.info);
   // How this game ranks among every game on this board, size, Timed and Labels setting (Michael, 2026-11-17)
   if(of>1){const ord=rankWord;
-    const setup=[SIZES[size].name,style==="timed"?"Timed":"",labelsUsed?"":"labels off"].filter(Boolean).join(", ");
+    const setup=[SIZES[size].name,labelsUsed?"":"labels off"].filter(Boolean).join(", ");
     $("doneRank").textContent=(rank===1?"Your best":ord(rank)+" best")+" of "+of+" games ("+setup+").";
     $("doneRank").hidden=false}
   showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}

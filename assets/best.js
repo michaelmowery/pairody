@@ -28,5 +28,25 @@ const Best={
   hash(list){let h=5381;for(const ch of list.join(","))h=((h<<5)+h+ch.charCodeAt(0))|0;return (h>>>0).toString(36)}
 };
 
+// Timed games used to keep their own bests ("<key>~timed" before the labels part). Since
+// 2026-11-17 they share the untimed best (Michael: the clock doesn't change how fast you play),
+// so fold any old "~timed" best and game history into the plain key once, keeping the better best.
+try{
+  const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.includes("~timed"))ks.push(k)}
+  for(const k of ks){
+    const to=k.replace("~timed","");
+    if(k.startsWith("pairody-best:")){
+      const key=k.slice(13),b=Best.get(key);if(b)Best.record(to.slice(13),b.moves,b.secs);
+    }else if(k.startsWith("pairody-plays:")){
+      const rd=x=>{try{const v=JSON.parse(localStorage.getItem(x));return Array.isArray(v)?v:[]}catch(e){return []}};
+      let h=rd(to);
+      // An untimed history that hasn't started yet is seeded from its old best first, as play() would
+      if(!h.length){const b=Best.get(to.slice(14));if(b)h.push([b.moves,b.secs])}
+      h=h.concat(rd(k)).slice(-200);localStorage.setItem(to,JSON.stringify(h));
+    }else continue;
+    localStorage.removeItem(k);
+  }
+}catch(e){}
+
 // Clear bests left over from decks that were removed (Drums, Chords, Rhythms, Nov 2026).
 try{["drums","chords","rhythm"].forEach(d=>["",":easy"].forEach(e=>localStorage.removeItem("pairody-best:"+d+e)))}catch(e){}
