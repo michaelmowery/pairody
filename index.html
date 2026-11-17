@@ -214,7 +214,7 @@ body.daily-on .deck-chip .chev{display:none}
       <h2 id="deckPickTitle">Choose a board</h2>
       <div class="dp-view" role="radiogroup" aria-label="Show boards">
         <button type="button" role="radio" data-view="all" aria-label="All boards, A to Z" title="All boards, A to Z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14M5 12h14M5 17.5h14"/></svg><span>All</span></button>
-        <button type="button" role="radio" data-view="grouped" aria-label="Grouped by kind" title="Grouped by kind"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Grouped</span></button>
+        <button type="button" role="radio" data-view="grouped" aria-label="Grouped by how they play, then topic" title="Grouped by how they play, then topic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Grouped</span></button>
       </div>
       <form method="dialog" class="dp-x"><button aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
     </div>
@@ -1636,7 +1636,19 @@ function buildDeckPicker(){
   const tiers=!document.documentElement.classList.contains("native")&&window.PairodyPlus;
   const isFree=id=>id==="youtube"||!tiers||PairodyPlus.deckTier(id)==="free";
   const freeFirst=list=>tiers?list.filter(isFree).concat(list.filter(id=>!isFree(id))):list;
-  Object.keys(DECKKINDS).forEach(k=>grouped.appendChild(deckSection("dp-kind",DECKKINDS[k].name,DECKKINDS[k].hint,freeFirst(ids.filter(id=>DECKCARD[id][0]===k)),false,"grouped",k)));
+  // Grouped (Michael, 2026-11-16): first by how a board plays (Same sound, then Match up), then by
+  // topic inside each. Your music has no play kind, so it keeps its own group at the end.
+  const BANDS={same:"Find two pads that sound alike",match:"Match a prompt to its answer, on two sides"};
+  Object.keys(BANDS).forEach(pk=>{
+    const band=document.createElement("div");band.className="dp-band "+pk;
+    band.innerHTML="<h3><b aria-hidden=\"true\">"+(pk==="match"?"⇄":"=")+"</b> "+PLAYKIND[pk]+"</h3><p>"+BANDS[pk]+"</p>";
+    grouped.appendChild(band);
+    Object.keys(DECKKINDS).filter(k=>k!=="yours").forEach(k=>{
+      const list=freeFirst(ids.filter(id=>DECKCARD[id][0]===k&&id!=="youtube"&&playKind(id)===pk));
+      if(list.length)grouped.appendChild(deckSection("dp-kind",DECKKINDS[k].name,DECKKINDS[k].hint,list,false,"grouped",k));
+    });
+  });
+  grouped.appendChild(deckSection("dp-kind",DECKKINDS.yours.name,DECKKINDS.yours.hint,["youtube"],false,"grouped","yours"));
   grouped.querySelector('.dp-kind[data-kind="yours"]')?.classList.add("web-only"); // the iOS app has no Your music
   const all=document.createElement("div");all.className="dp-all";
   all.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));

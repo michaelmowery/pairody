@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Boards grouped by how they play', items: [
+      'In the board picker, <b>Grouped</b> now puts <b>Same sound</b> boards first and <b>Match up</b> boards second, each split into Sounds, Music, Words and Learning.',
+    ]},
     { date: '2026-11-16', title: 'Tidier help, and no Triples on Match up boards', items: [
       '<b>How to play</b> under the board name now folds away. Tap it to read how the board you picked plays. The longer help under the game folds away too, and each stays open once you open it.',
       'Match up boards, where a prompt goes with its answer, no longer offer <b>Triples</b>. If Triples was your pick, those boards play Pairs and Triples comes back on Same sound boards.',
