@@ -78,7 +78,7 @@ textarea{width:100%;min-height:84px;resize:vertical;font:14px/1.4 var(--body);co
   <div class="chassis">
     <div class="player"><div id="yt"></div></div>
     <div class="row" id="gamebar" hidden>
-      <div class="readout" aria-live="polite">
+      <div class="readout">
         <div><span>Moves</span><b id="moves">0</b></div>
         <div><span>Pairs</span><b id="pairs">0/8</b></div>
         <div><span>Time</span><b id="time">0:00</b></div>
@@ -208,7 +208,7 @@ function deal(){
   const g=$("grid");g.innerHTML="";
   cards.forEach((card,i)=>{
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
-    b.setAttribute("aria-label","Pad "+(i+1)+", hidden clip");
+    b.setAttribute("aria-label",place(i)+", face down");
     b.innerHTML='<span class="dot"></span><span class="np" aria-hidden="true"><b></b><small></small></span>';b.onclick=()=>tap(i);g.appendChild(b);
   });
 }
@@ -218,6 +218,8 @@ function newSong(id,hard){
   return {id,frac:[a,b]};
 }
 function setStatus(t,cls=""){const s=$("status");s.textContent=t;s.className="status "+cls}
+// Screen readers: where a pad sits on the 4 by 4 board
+const place=i=>"Row "+(Math.floor(i/4)+1)+", column "+(i%4+1);
 
 // Play a clip: start muted at 0 to learn duration, then seek and unmute
 function playPad(i){
@@ -293,7 +295,7 @@ function tap(i){
   if(lock){if(!settle||open.includes(i))return;settle(true);if(b.classList.contains("matched"))return}
   if(open.length===1&&open[0]===i){playPad(i);return}
   if(!timer){start=Date.now();timer=setInterval(()=>$("time").textContent=fmt(Math.floor((Date.now()-start)/1000)),500)}
-  playPad(i);b.classList.add("open");open.push(i);
+  playPad(i);b.classList.add("open");open.push(i);b.setAttribute("aria-label",place(i)+", face up");
   if(open.length<2){if(!easy())setStatus("Now find the other clip from that song.");return}
   moves++;$("moves").textContent=moves;lock=true;
   const [a,c]=open;
@@ -309,7 +311,7 @@ function tap(i){
       [pa,pc].forEach(p=>{p.classList.remove("open");p.classList.add("matched");
         p.innerHTML="";const img=new Image();img.alt="";img.src="https://i.ytimg.com/vi/"+song.id+"/mqdefault.jpg";p.appendChild(img);
         const cap=document.createElement("span");cap.className="cap";cap.textContent=title;p.appendChild(cap);
-        p.setAttribute("aria-label",title+", matched")});
+        p.setAttribute("aria-label",place(+p.id.slice(3))+": "+title+", matched");p.setAttribute("aria-disabled","true")});
       pairs++;$("pairs").textContent=pairs+"/"+PAIRS;setStatus("Match: "+title+".");
       if(pairs===PAIRS){
         clearInterval(timer);
@@ -325,7 +327,7 @@ function tap(i){
       }
     }else{
       [pa,pc].forEach(p=>p.classList.add("miss"));setStatus("Different songs. Remember where they were.");
-      const back=()=>[pa,pc].forEach(p=>p.classList.remove("miss","open"));
+      const back=()=>[pa,pc].forEach(p=>{p.classList.remove("miss","open");p.setAttribute("aria-label",place(+p.id.slice(3))+", face down")});
       if(fast){back();stopClip()}else setTimeout(back,450);
     }
     open=[];lock=false;

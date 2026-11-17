@@ -12,6 +12,12 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Play by ear, with or without seeing the pads', items: [
+      'Pairody now works with <b>VoiceOver</b>, <b>TalkBack</b> and other screen readers. Each pad says where it sits and whether it\'s face down, face up or matched, and matches, turns and the clock are read out after the sound finishes, never over it.',
+      'On a keyboard, Tab to the pads and move with the arrow keys.',
+      'New in the <b>i</b> panel: <b>Audio cues</b> place each pad\'s sound left to right where it sits and add a low blip on a miss, and <b>Extra time</b> doubles the clock on Timed games.',
+      'Some text colors are a little darker so they\'re easier to read.',
+    ]},
     { date: '2026-11-16', title: 'Boards grouped by how they play', items: [
       'In the board picker, <b>Grouped</b> now puts <b>Same sound</b> boards first and <b>Match up</b> boards second, each split into Sounds, Music, Words and Learning.',
     ]},

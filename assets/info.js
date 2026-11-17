@@ -38,6 +38,14 @@
 <p>Found a bug, or have an idea for a board? We'd love to hear it.</p>
 <div class="info-feedback"><a class="btn info-feedback-btn" href="mailto:mountmtech@gmail.com?subject=Pairody%20feedback">Send feedback</a>
 <span class="info-email">mountmtech@gmail.com</span></div>
+<div class="info-access" hidden>
+<h3>Accessibility</h3>
+<p>Pairody works with VoiceOver, TalkBack and other screen readers: each pad says where it sits and whether it's matched, and matches and turns are read out after the sound finishes. On a keyboard, Tab to the pads and use the arrow keys.</p>
+<div class="info-prefs">
+  <label class="toggle"><input type="checkbox" name="cues"><span>Audio cues: a low blip on a miss, and each pad's sound placed left to right where the pad sits (best with headphones)</span></label>
+  <label class="toggle"><input type="checkbox" name="extraTime"><span>Extra time: twice the clock on Timed games</span></label>
+</div>
+</div>
 <h3>Preferences</h3>
 <div class="info-prefs" id="infoPrefs">
   <label class="toggle"><input type="checkbox" name="updateNote" checked><span>Note after updates: show what’s new when a new version arrives</span></label>
@@ -67,7 +75,17 @@
     // Tap outside the panel to close it
     dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
     setupUpdates(dlg);btn.addEventListener("click",()=>{resetUpdateUi(dlg);setFeedbackLink(dlg)});
-    setFeedbackLink(dlg);setupNews(dlg);setupScores(dlg);
+    setFeedbackLink(dlg);setupNews(dlg);setupScores(dlg);setupAccess(dlg);
+  }
+  // Accessibility switches, on pages that have them (index.html sets window.PairodyAccess)
+  function setupAccess(dlg){
+    const A=window.PairodyAccess,box=dlg.querySelector(".info-access");
+    if(!A)return;
+    box.querySelectorAll("input").forEach((inp)=>{
+      inp.checked=A.get(inp.name);
+      inp.addEventListener("change",()=>A.set(inp.name,inp.checked));
+    });
+    box.hidden=false;
   }
   // "See best scores": the score card (assets/scores.js), on pages that load it
   function setupScores(dlg){

@@ -40,7 +40,7 @@ details.fold > summary .chev{width:16px;height:16px;fill:none;stroke:var(--led);
 details.fold[open] > summary .chev{transform:rotate(90deg)}
 details.fold > summary h2{margin:0}
 details.fold[open] > summary{margin-bottom:6px}
-details.fold > summary:focus-visible{outline:2px solid var(--led);outline-offset:3px;border-radius:6px}
+details.fold > summary:focus-visible{outline:2px solid var(--led-ink);outline-offset:3px;border-radius:6px}
 @media (prefers-reduced-motion:reduce){details.fold > summary .chev{transition:none}}
 .deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
 .deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
@@ -78,7 +78,7 @@ body.daily-on .deck-chip .chev{display:none}
 .donecard.p1 .card{border-color:var(--led)}
 @keyframes donein{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 .donecard h2{font-family:var(--display);font-weight:600;font-size:1.9rem;margin:0;color:var(--ok);line-height:1.1}
-.donecard.p1 h2{color:var(--led)}
+.donecard.p1 h2{color:var(--led-ink)}
 .donecard .big{font-family:var(--display);font-weight:600;font-size:2.6rem;line-height:1;margin:12px 0 2px;font-variant-numeric:tabular-nums}
 .donecard .big small{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:4px}
 .donecard p{margin:6px 0 0;color:var(--muted);font-size:.92rem;line-height:1.35}
@@ -152,7 +152,7 @@ body.daily-on .deck-chip .chev{display:none}
       <div class="daily-wrap"><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board, size and style for everyone. Tap again to go back to your own game.">Daily Pairody</button><small class="daily-ask" id="dailyAsk">Have you Pairody'd today?</small></div>
     </div>
     <details class="fold boardhelp" id="boardHelp" data-key="pairody-help"><summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span id="boardHelpSum">How to play</span></summary>
-      <p class="deckhelp" id="deckHelp" aria-live="polite"></p></details>
+      <p class="deckhelp" id="deckHelp"></p></details>
     <div class="styles" role="group" aria-label="Game style">
       <button data-style="pairs" aria-pressed="true" title="Find the pairs at your own pace">Pairs</button>
       <button data-style="triples" aria-pressed="false" title="Every sound is on three pads: find all three in one move">Triples</button>
@@ -171,7 +171,7 @@ body.daily-on .deck-chip .chev{display:none}
       </div>
     </div>
     <div class="row boardbar">
-    <div class="readout" aria-live="polite">
+    <div class="readout">
       <div><span>Moves</span><b id="moves">0</b></div>
       <div><span id="pairsLbl">Pairs</span><b id="pairs">0/8</b></div>
       <div id="timeBox"><span id="timeLbl">Time</span><b id="time">0:00</b></div>
@@ -181,13 +181,13 @@ body.daily-on .deck-chip .chev{display:none}
     <div class="row-btns bb-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button><button class="btn" id="reset">New game</button></div>
     </div>
     <!-- 2 Players scoreboard: whose turn it is and each player's matches. Names are editable and saved on this device. -->
-    <div class="vs" id="vs" hidden>
+    <div class="vs" id="vs" role="group" aria-label="Scoreboard" hidden>
       <div class="pl p1" id="pl0"><input id="pn0" maxlength="14" aria-label="Player 1 name" placeholder="Player 1" autocomplete="off" spellcheck="false"><b class="n" id="pc0">0</b><span class="t" id="pt0"></span></div>
       <span class="x" aria-hidden="true">vs</span>
       <div class="pl p2" id="pl1"><input id="pn1" maxlength="14" aria-label="Player 2 name" placeholder="Player 2" autocomplete="off" spellcheck="false"><b class="n" id="pc1">0</b><span class="t" id="pt1"></span></div>
     </div>
     <div class="board">
-      <div class="grid" id="grid"></div>
+      <div class="grid" id="grid" role="group" aria-label="Pads"></div>
       <div class="donecard" id="doneCard" hidden><div class="card" role="dialog" aria-labelledby="doneTitle" aria-describedby="doneInfo">
         <h2 id="doneTitle">Well done!</h2>
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
@@ -197,6 +197,8 @@ body.daily-on .deck-chip .chev{display:none}
       </div></div>
     </div>
     <p class="status" id="status">Tap any pad to hear it.</p>
+    <!-- Screen readers: short spoken updates (matches, turns, time), held back until a pad's own sound has finished -->
+    <div class="sr-only" id="sr" aria-live="polite" aria-atomic="true"></div>
   </div>
 
   <details class="notes fold" id="moreHelp" data-key="pairody-morehelp">
@@ -207,6 +209,7 @@ body.daily-on .deck-chip .chev{display:none}
     <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily Pairody</b>, at the top next to the board name, is one surprise game a day: the date picks the board, game size and style, and everyone gets the same pads. You play it as dealt, with names shown, and your own choices come back when you tap it again. Clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on boards with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. Next to the styles, pick <b>1 Player</b> or <b>2 Players</b>. Two players works with every style and takes turns on one device: find a match and you go again, miss and it's the other player's turn. In Timed you share the clock, and whoever has more when it runs out wins. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
     <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
+    <p>Playing with a screen reader or a keyboard? Each pad says where it sits (row and column, or which side on Match up boards) and whether it's face down, face up or matched, and matches, turns and the clock are read out once the sound has finished. On a keyboard, Tab to the pads and move around with the arrow keys. Tap <b>i</b> for <b>Audio cues</b>, which place each pad's sound left to right where it sits, and <b>Extra time</b> for Timed games.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </details>
   <dialog class="info deckpick" id="deckPick" aria-labelledby="deckPickTitle">
@@ -235,7 +238,10 @@ function audio(){
 // it off at once. The match chime plays straight to master so it is never cut.
 let padOut=null;
 function bus(){return padOut||master}
-function newPadBus(){cutPad(.02);if(canSpeak)speechSynthesis.cancel();padOut=ctx.createGain();padOut.connect(master);return padOut}
+// pan: -1 (left) to 1 (right), for audio cues (see padPan)
+function newPadBus(pan=0){cutPad(.02);if(canSpeak)speechSynthesis.cancel();padOut=ctx.createGain();
+  if(pan&&ctx.createStereoPanner){const p=ctx.createStereoPanner();p.pan.value=pan;padOut.connect(p);p.connect(master)}else padOut.connect(master);
+  return padOut}
 // Fade the current pad sound out over about `fade` seconds, and stop any reading aloud
 function cutPad(fade=.06){
   if(padOut){const g=padOut;g.gain.setTargetAtTime(0,ctx.currentTime,fade/3);setTimeout(()=>g.disconnect(),fade*1000+300);padOut=null}
@@ -327,7 +333,7 @@ function withClip(name,synth){
     const b=!clipLate[name]&&clipBuf[name];
     if(!b){synth(t);return}
     const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;
-    s.buffer=b;s.connect(g);g.connect(bus());s.start(t);
+    s.buffer=b;s.connect(g);g.connect(bus());s.start(t);soundUntil=Date.now()+(t-ctx.currentTime+b.duration)*1000;
   };
   // If the clip is still loading on the very first tap, wait for it (briefly)
   // so a pad never plays the synth once and the recording the next time on one board.
@@ -416,7 +422,8 @@ function pickVoice(){
 if(canSpeak){pickVoice();speechSynthesis.addEventListener&&speechSynthesis.addEventListener("voiceschanged",pickVoice)}
 // opts: rate and pitch (for a cackle or a "Ho ho ho"), and voice/lang for another language
 function say(text,{rate=.95,pitch=1,voice=enVoice,lang}={}){
-  if(!canSpeak){$("status").textContent="“"+text+"” (this browser can't read aloud, so here it is in text)";return}
+  spokeAt++; // lets playPad tell that this pad read itself aloud (see announce)
+  if(!canSpeak){$("status").textContent="“"+text+"” (this browser can't read aloud, so here it is in text)";announce(text,{wait:false});return}
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   if(voice)u.voice=voice;u.lang=voice?voice.lang:(lang||"en-US");u.rate=rate;u.pitch=pitch;
@@ -1193,7 +1200,7 @@ const K=()=>style==="triples"?3:2; // pads per sound
 const TRIPLES={small:{cols:4,rows:3,pairs:4},classic:{cols:5,rows:3,pairs:5},big:{cols:5,rows:5,pairs:8,free:12}};
 const layout=()=>style==="triples"?TRIPLES[size]:SIZES[size];
 // Timed: seconds on the clock. Short sounds get about 4 seconds a pad, spoken and musical decks more.
-const timeLimit=()=>Math.ceil(NP*K()*({animals:4,notes:4,morse:5}[deck]||7)/10)*10;
+const timeLimit=()=>Math.ceil(NP*K()*({animals:4,notes:4,morse:5}[deck]||7)/10)*10*(Access.get("extraTime")?2:1); // Extra time doubles it (info panel)
 
 const track=(n,t)=>window.PairodyAnalytics&&PairodyAnalytics.track(n,t);
 let board=0,deck="animals",cards=[],half=[],open=[],lock=false,settle=null,moves=0,pairs=0,start=0,timer=null,easyUsed=false,demo=null;
@@ -1202,6 +1209,76 @@ let over=false,turn=0,score=[0,0]; // over: a Timed board ran out; turn/score: 2
 const $=id=>document.getElementById(id);
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+
+// ---- Playing without seeing the pads (screen readers, keyboard, audio cues) ----
+// Settings live in localStorage "pairody.prefs" (shared with assets/welcome.js and analytics.js):
+//   cues: true = audio cues (a soft low blip on a miss, and each pad's sound placed left to right
+//         where the pad sits, so you can hear where it is; best with headphones)
+//   extraTime: true = Timed games get twice the clock
+// The info panel shows switches for both (assets/info.js reads window.PairodyAccess).
+const Access={
+  load(){try{return JSON.parse(localStorage.getItem("pairody.prefs"))||{}}catch(e){return {}}},
+  get(k){return !!Access.load()[k]},
+  set(k,v){const all=Access.load();all[k]=!!v;try{localStorage.setItem("pairody.prefs",JSON.stringify(all))}catch(e){}
+    track("access/"+k+"/"+(v?"on":"off"),(k==="cues"?"Audio cues":"Extra time")+(v?" on":" off"));if(k==="extraTime"&&!timer&&style==="timed")$("time").textContent=fmt(timeLimit())}
+};
+window.PairodyAccess=Access;
+// Announcements for screen readers go to the hidden live region #sr. They wait until the pad's
+// own sound (a recording, a tune, or the browser reading a quote aloud) has finished, so the
+// screen reader never talks over what you're trying to hear. A new tap drops anything still waiting.
+let srTimer=0,srGen=0,soundUntil=0,spokeAt=0;
+function announce(text,{wait=true,delay=0}={}){
+  if(!text)return;clearTimeout(srTimer);const gen=++srGen,until=Date.now()+delay+7000;
+  const go=()=>{if(gen!==srGen)return;const el=$("sr");el.textContent="";srTimer=setTimeout(()=>{if(gen===srGen)el.textContent=text},60)};
+  const busy=()=>(canSpeak&&(speechSynthesis.speaking||speechSynthesis.pending))||(ctx&&ctx.currentTime<seqEnd)||Date.now()<soundUntil;
+  const check=()=>{if(gen!==srGen)return;if(wait&&busy()&&Date.now()<until)srTimer=setTimeout(check,120);else go()};
+  srTimer=setTimeout(check,delay);
+}
+function hush(){srGen++;clearTimeout(srTimer)}
+// A pad's spoken name: where it sits, then what's on it. "Row 2, column 3, face down",
+// "Row 1, column 1: Cat, matched". Match up boards name the side instead: "Question 3, face down".
+function padPlace(i){
+  if(two)return MATCHUP[deck][sideOf(i)]+" "+(i%NP+1);
+  const L=layout(),v=L.free!==undefined&&i>=L.free?i+1:i; // Big boards skip the free center tile
+  return "Row "+(Math.floor(v/L.cols)+1)+", column "+(v%L.cols+1);
+}
+function padLabel(i){
+  const b=$("pad"+i);if(!b)return;
+  if(b.classList.contains("matched")){
+    const e=DECKS[deck][cards[i]],by=duo()&&b.dataset.by!==undefined?", by "+P(+b.dataset.by):"";
+    b.setAttribute("aria-label",padPlace(i)+": "+(two?sideText(e,half[i]):e[0])+", matched"+by);b.setAttribute("aria-disabled","true");return}
+  b.removeAttribute("aria-disabled");
+  b.setAttribute("aria-label",padPlace(i)+(b.classList.contains("open")?", face up":", face down"));
+}
+// Audio cues: pan each pad's sound by its column (or side), and a low blip on a miss
+function padPan(i){
+  if(!Access.get("cues"))return 0;
+  if(two)return sideOf(i)?.6:-.6;
+  const L=layout(),v=L.free!==undefined&&i>=L.free?i+1:i;return L.cols>1?((v%L.cols)/(L.cols-1)*2-1)*.7:0;
+}
+function missCue(){
+  if(!ctx||!Access.get("cues"))return;const t=ctx.currentTime+.01;
+  tone(st(-5),t,.14,"triangle",.16,master);tone(st(-10),t+.1,.22,"triangle",.16,master);
+}
+// Arrow keys move between pads like a grid (one Tab stop for the whole board, then arrows).
+// Home/End jump to the first and last pad. Match up boards: up/down within a side, left/right across.
+function padKeys(e){
+  const p=e.target.closest&&e.target.closest(".pad");if(!p||e.altKey||e.ctrlKey||e.metaKey)return;
+  const i=+p.id.slice(3),n=cards.length;let j=null;
+  if(two){const r=i%NP,sd=sideOf(i);
+    j={ArrowUp:r>0?i-1:null,ArrowDown:r<NP-1?i+1:null,ArrowLeft:sd?r:null,ArrowRight:sd?null:NP+r,Home:0,End:n-1}[e.key];
+  }else{
+    const L=layout(),f=L.free,cells=L.cols*L.rows,toV=x=>f!==undefined&&x>=f?x+1:x,fromV=v=>f!==undefined&&v>f?v-1:v;
+    const step=d=>{let v=toV(i)+d;if(v===f)v+=d;return v>=0&&v<cells?fromV(v):null};
+    const c=toV(i)%L.cols;
+    j={ArrowUp:step(-L.cols),ArrowDown:step(L.cols),ArrowLeft:c>0?step(-1):null,ArrowRight:c<L.cols-1?step(1):null,Home:0,End:n-1}[e.key];
+  }
+  if(j===undefined)return;e.preventDefault();if(j===null||!$("pad"+j))return;focusPad(j);
+}
+function focusPad(j){
+  document.querySelectorAll("#grid .pad").forEach(x=>x.tabIndex=-1);
+  const b=$("pad"+j);if(b){b.tabIndex=0;b.focus()}
+}
 
 // Best scores: one per deck, with Difficult (sounds-only) boards kept separately.
 // Keys predate Difficult mode: "<deck>:easy" = names shown (the default), "<deck>" = sounds only.
@@ -1309,7 +1386,7 @@ function build(){
   clipLate={};
   const L=layout();
   clearInterval(timer);timer=null;open=[];lock=false;settle=null;moves=0;pairs=0;mlog=[];easyUsed=easy();NP=L.pairs;
-  over=false;turn=0;score=[0,0];showDuo();
+  over=false;turn=0;score=[0,0];showDuo();hush();timeWarn=0;
   hideDone(true);
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp"),dk=deck+"/"+(style==="triples");if(dh.dataset.deck!==dk){dh.dataset.deck=dk;
@@ -1346,20 +1423,29 @@ function build(){
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes). In Triples the
   // third pad is "half 2" and plays the first part again.
   const seen={};half=two?cards.map((_,i)=>sideOf(i)):cards.map(id=>seen[id]=(seen[id]===undefined?0:seen[id]+1));
-  const g=$("grid"),S=L;g.innerHTML="";g.dataset.size=two?"two":S.cols>4?"big":size;g.classList.toggle("two",two);
+  const g=$("grid"),S=L,hadFocus=g.contains(document.activeElement);g.innerHTML="";g.dataset.size=two?"two":S.cols>4?"big":size;g.classList.toggle("two",two);
   g.style.setProperty("--cols",S.cols);g.style.setProperty("--rows",two?NP:S.rows);
   if(two)MATCHUP[deck].forEach((h,c)=>{const e=document.createElement("div");e.className="sidehead s"+c;e.textContent=h;g.appendChild(e)});
   cards.forEach((id,i)=>{
     if(i===S.free&&!two){const f=document.createElement("div");f.className="freepad";f.setAttribute("aria-hidden","true");f.innerHTML='<img src="assets/mark.svg" alt="">';g.appendChild(f)}
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
-    b.setAttribute("aria-label","Pad "+(i+1)+", hidden sound");
+    b.tabIndex=i?-1:0; // one Tab stop for the board, then arrow keys (padKeys)
     b.innerHTML='<span class="dot"></span><span class="rings"><i></i><i></i></span><span class="lbl"></span><span class="np" aria-hidden="true"><b></b><small></small></span>';
-    if(two){b.classList.add("s"+sideOf(i));b.style.gridColumn=sideOf(i)?3:1;b.style.gridRow=i%NP+2;
-      b.setAttribute("aria-label",(sideOf(i)?"Right":"Left")+" pad "+(i%NP+1)+", hidden")}
-    b.onclick=()=>{if(dragged)return;if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";return}tap(i,b)};g.appendChild(b);
+    if(two){b.classList.add("s"+sideOf(i));b.style.gridColumn=sideOf(i)?3:1;b.style.gridRow=i%NP+2}
+    b.onclick=()=>{if(dragged)return;if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";announce($("status").textContent,{wait:false});return}tap(i,b)};g.appendChild(b);
+    padLabel(i);
   });
+  // For screen readers: what the board looks like, then the same tip the status line shows
+  const shape=two?NP+" "+MATCHUP[deck][0]+" pads on the left, "+NP+" "+MATCHUP[deck][1]+" pads on the right"
+    :S.rows+" rows of "+S.cols+" pads"+(S.free!==undefined?", with a free tile in the middle":"");
+  g.setAttribute("aria-label","Pads: "+shape);
+  if(builtOnce)announce(DECKNAME[deck]+", "+layoutName()+": "+shape+". "+msg,{wait:false,delay:350});
+  builtOnce=true;
   fitGrid();
+  if(hadFocus)focusPad(0);
 }
+let builtOnce=false,timeWarn=0;
+const layoutName=()=>SIZES[size].name+(style==="pairs"?"":" "+STYLES[style].name)+(duo()?", 2 Players":"");
 // On wide screens the board shrinks to fit the window's height, so the whole board and the
 // status line under it are on screen without scrolling. Phones scroll as before.
 function fitGrid(){
@@ -1406,17 +1492,23 @@ const DECKHELP={
 };
 function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
-  audio();stopSeq();newPadBus();entry[1](ctx.currentTime+.02,half[i]===1?1:0);
+  audio();stopSeq();newPadBus(padPan(i));soundUntil=Date.now()+900;const said=spokeAt;
+  entry[1](ctx.currentTime+.02,half[i]===1?1:0);
   const np=b.querySelector(".np");
   if(np){np.querySelector("b").textContent=two?sideText(entry,half[i]):entry[0];np.querySelector("small").textContent=two?MATCHUP[deck][half[i]]:DECKNAME[deck]}
   if(easy())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+(two?sideText(entry,half[i]):entry[0])+"."; // two sides: only this pad's half
   b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),Math.max(900,(seqEnd-ctx.currentTime)*1000));
+  // What a sighted player reads on the pad while it plays, for a screen reader (names shown only).
+  // A pad that reads itself aloud (quotes, jokes, words) needs nothing more.
+  return easy()&&spokeAt===said?(two?sideText(entry,half[i]):entry[0]):"";
 }
 // The clock: counts up, or down to zero on a Timed board (the demo ignores the limit)
 function tick(){
   const secs=Math.floor((Date.now()-start)/1000);
   if(style==="timed"&&!demo){
     const left=timeLimit()-secs;$("time").textContent=fmt(Math.max(0,left));$("timeBox").classList.toggle("low",left<=10);
+    // Screen readers hear the clock at 30 and 10 seconds left (after any sound playing)
+    for(const w of [30,10])if(left<=w&&left>0&&(!timeWarn||timeWarn>w)&&timeLimit()>w){timeWarn=w;announce(w+" seconds left.");break}
     if(left<=0)timeUp();
   }else $("time").textContent=fmt(secs);
 }
@@ -1428,6 +1520,8 @@ function timeUp(){
   $("status").textContent="Time's up! You found "+pairs+" of "+NP+(K()>2?" sets":" pairs")+". Tap New game to try again.";
   $("status").className="status err";
   if(duo()){const [a,b]=score;showDuo();$("status").textContent="Time's up! "+(a===b?"It's a tie, "+a+" to "+b+".":P(a>b?0:1)+" wins, "+Math.max(a,b)+" to "+Math.min(a,b)+".")+" Tap New game for a rematch."}
+  cards.forEach((_,i)=>padLabel(i));missCue();
+  announce($("status").textContent,{wait:false,delay:100});
 }
 const P=n=>names[n]||"Player "+(n+1);
 function tap(i,b){
@@ -1435,16 +1529,19 @@ function tap(i,b){
   // Tapping a new pad while a pair is still showing settles that pair at once, so the
   // new pad plays right away instead of the tap being ignored
   if(lock){if(!settle||open.includes(i))return;settle(true);if(b.classList.contains("matched")||over)return}
-  if(open.includes(i)){playPad(i,b);return}
+  hush(); // a new tap drops any announcement still waiting for the last sound
+  if(open.includes(i)){announce(playPad(i,b));return}
   // Match up boards: a second pad on the same side just changes which one you picked
-  if(two&&open.length===1&&sideOf(i)===sideOf(open[0])){$("pad"+open[0]).classList.remove("open");open=[]}
+  if(two&&open.length===1&&sideOf(i)===sideOf(open[0])){const o=open[0];$("pad"+o).classList.remove("open");open=[];padLabel(o)}
   if(!timer){start=Date.now();timer=setInterval(tick,250);
     if(!demo)track("play/"+deck+sizeTag()+styleTag()+(easy()?"":"/difficult"),"Game started: "+DECKNAME[deck]+sizeName()+styleName()+(easy()?"":" (Difficult)"))}
-  playPad(i,b);b.classList.add("open");open.push(i);
+  const heard=playPad(i,b);b.classList.add("open");open.push(i);padLabel(i);
   // A move ends after K pads (2, or 3 in Triples), or as soon as one doesn't match the first
   const k=K(),miss=cards[i]!==cards[open[0]];
+  const heardDot=heard?heard.replace(/[.!?]?$/,". "):"";
   if(!miss&&open.length<k){
     const who=duo()&&!demo?P(turn)+": ":demo?"Demo: ":"";
+    announce(heardDot+(k>2&&open.length===2?"Two alike! One more to find.":""));
     if(two)$("status").textContent=who+(demo?"now it looks on the other side.":"Now pick its match on the "+(sideOf(i)?"left.":"right."));
     // In Triples two alike isn't a match yet, so say so even when names are showing
     else if(k>2&&open.length===2)$("status").textContent=who+"Two alike! One more to go: find the third.";
@@ -1460,20 +1557,26 @@ function tap(i,b){
       const entry=DECKS[deck][cards[grp[0]]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3];
       pp.forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
-        const n=document.createElement("span");n.textContent=two?sideText(entry,half[+p.id.slice(3)]):name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
+        const n=document.createElement("span");n.textContent=two?sideText(entry,half[+p.id.slice(3)]):name;l.appendChild(n)});
       if(two)addLink(grp[0],grp[1],duo()?(turn?"var(--led)":"var(--ok-bright)"):LINKCOLORS[pairs%LINKCOLORS.length]);
       // Cut the sound right away so the match is obvious, then chime
-      cutPad();if(canSpeak)speechSynthesis.cancel();matchChime();
+      cutPad();if(canSpeak)speechSynthesis.cancel();matchChime();soundUntil=0;
       pp.forEach(p=>p.classList.remove("playing"));
       pairs++;$("pairs").textContent=pairs+"/"+NP;
       if(duo()){score[turn]++;pp.forEach(p=>p.dataset.by=turn);showDuo()}
+      grp.forEach(padLabel);
       $("status").textContent=(demo?"Demo: ":"")+(duo()?P(turn)+" scores, and goes again. ":"")+"Match: "+(entry[4]||name)+".";
+      // Screen readers hear the match after the chime. The last one is left to the Well done card.
+      const left=NP-pairs,unit=K()>2?(left===1?" set":" sets"):(left===1?" pair":" pairs");
+      if(pairs<NP&&!fast)announce($("status").textContent.replace(/\.\.$/,".")+" "+left+unit+" left"+(duo()?". Score "+score[0]+" to "+score[1]+".":"."),{delay:450});
       if(pairs===NP)finish();
     }else{
       pp.forEach(p=>p.classList.add("miss"));if(two)missLink(grp[0],grp[1],fast);
       $("status").textContent=demo?"Demo: different sounds. It remembers where they were.":"Different sounds. Remember where they were.";
       if(duo()){turn^=1;showDuo();$("status").textContent="Different sounds. "+P(turn)+"'s turn."}
-      const back=()=>pp.forEach(p=>p.classList.remove("miss","open"));
+      missCue();
+      if(!fast)announce(heardDot+(demo?"Demo: no match.":"No match."+(duo()?" "+P(turn)+"'s turn.":"")));
+      const back=()=>{pp.forEach(p=>p.classList.remove("miss","open"));grp.forEach(padLabel)};
       if(fast)back();else setTimeout(back,450);
     }
     open=[];lock=false;
@@ -1496,7 +1599,9 @@ function showDone(title,big,lbl,info,p1){
   doneTimer=setTimeout(()=>{if(thisBoard!==board||demo)return;c.hidden=false;c.querySelector(".btn.primary:not([hidden])").focus()},calm?250:900);
 }
 function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)$("grid").classList.remove("done","p1")}
-$("doneNew").onclick=()=>{track("done/new","Well done card: New game");build()};
+$("doneNew").onclick=()=>{track("done/new","Well done card: New game");build();focusPad(0)};
+// A screen reader lands on New game and then hears the result (title, time, moves)
+$("doneNew").setAttribute("aria-describedby","doneTitle doneLbl doneTime doneInfo");
 $("doneClose").onclick=()=>{track("done/close","Well done card: See game");hideDone();$("reset").focus({preventScroll:true})};
 // Best scores screen (assets/scores.js): from the Well done card, or by tapping the Best box
 const openScores=from=>window.PairodyScores&&PairodyScores.open(from);
@@ -1513,7 +1618,7 @@ function finish(){
   if(demo){
     // Demo boards never count toward best scores
     track("demo/done/"+deck,"Demo finished: "+DECKNAME[deck]);
-    st.textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New game to play.";
+    st.textContent="Demo done: "+moves+" moves, "+fmt(secs)+". Your turn! Tap New game to play.";announce(st.textContent,{delay:600});
     endDemo();showDone(null);return;
   }
   const label=DECKNAME[deck]+sizeName()+styleName()+(easyUsed?"":" (Difficult)");
@@ -1832,11 +1937,14 @@ function startDemo(){
   build();audio();
   demo={seen:{},slipped:false};setDemoUi(true);
   track("demo/start/"+deck,"Demo started: "+DECKNAME[deck]);
-  $("status").textContent="Demo: watch and listen. Tap Stop demo any time.";
+  $("status").textContent="Demo: watch and listen. Tap Stop demo any time.";announce($("status").textContent,{wait:false,delay:400});
   demoWait(700,demoStep);
 }
 $("demo").onclick=()=>demo?stopDemo():startDemo();
 initDrag();
+$("grid").addEventListener("keydown",padKeys);
+// Clicking or tapping a pad makes it the board's Tab stop, so Tab comes back to where you were
+$("grid").addEventListener("focusin",e=>{const p=e.target.closest(".pad");if(p&&p.tabIndex!==0){document.querySelectorAll("#grid .pad").forEach(x=>x.tabIndex=-1);p.tabIndex=0}});
 // "How to play" folds: closed until opened, and each remembers being open (localStorage data-key = "1")
 document.querySelectorAll("details.fold").forEach(d=>{
   try{d.open=localStorage.getItem(d.dataset.key)==="1"}catch(e){}
