@@ -294,12 +294,11 @@ dialog.scores .sc-done:empty{display:none}
 dialog.deckpick{max-width:min(780px,calc(100vw - 24px));padding:0;overflow:auto;overscroll-behavior:contain}
 .dp-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:14px 14px 10px 18px;background:var(--chassis);border-bottom:1px solid var(--line)}
 dialog.deckpick .dp-head h2{flex:1 1 auto;min-width:0;margin:0;padding:0;font-size:1.25rem}
-  color:var(--muted);font-family:var(--display);font-weight:600;font-size:.88rem;cursor:pointer}
 .dp-x{margin:0}
 .dp-x button{width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;padding:0}
 .dp-x button:hover{background:var(--line);color:var(--fg)}
 .dp-x svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-@media (max-width:420px){.decks{padding:4px 16px 18px}
+.decks{padding:4px 16px 18px}
 .dp-sec{padding-top:6px}
 .dp-band{margin:22px 0 2px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:baseline;flex-wrap:wrap;column-gap:10px}
 dialog.deckpick .dp-band h3{margin:0;font-family:var(--display);font-weight:600;font-size:1.05rem;color:var(--fg)}
