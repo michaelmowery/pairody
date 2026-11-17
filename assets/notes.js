@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Bigger on iPad', items: [
+      'On an iPad held upright, Pairody now fills the screen instead of sitting small in the middle.',
+    ]},
     { date: '2026-11-17', title: 'Animal recordings load more reliably', items: [
       'If an animal recording fails to load, Pairody now tries another way and retries it, so you hear the real animal instead of the stand-in sound.',
     ]},

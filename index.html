@@ -3,6 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>
+// Tablets (iPad) held upright: lay the page out 720px wide and let the browser scale it up, so
+// the game fills the big screen instead of sitting small in the middle. Sideways, the board is
+// limited by height, so the normal layout (fitGrid) works better there. Phones and desktop
+// browsers are untouched.
+(function(){
+  const m=document.querySelector('meta[name=viewport]');
+  function fit(){
+    const s=Math.min(screen.width,screen.height);
+    if(!(navigator.maxTouchPoints>1&&s>=744))return;
+    const wide=matchMedia('(orientation: landscape)').matches;
+    m.setAttribute('content',wide?'width=device-width,initial-scale=1,viewport-fit=cover'
+      :'width=720,initial-scale='+(s/720).toFixed(3)+',viewport-fit=cover');
+  }
+  fit();addEventListener('orientationchange',()=>setTimeout(fit,50));
+})();
+</script>
 <title>Pairody: memory match, played by ear</title>
 <meta name="description" content="A concentration game where every card is a sound. Find the pairs by ear: animal sounds, everyday sounds, instruments, weather, vehicles, ringtones, famous quotes, jokes, tongue twisters, homophones, hello in many languages, old tunes, Morse code, synonyms, elements, planets, presidents and more.">
 <meta name="theme-color" content="#FFF4E6" media="(prefers-color-scheme: light)">
