@@ -14,6 +14,7 @@
   const NOTES = [
     { date: '2026-11-17', title: 'See how your game ranks', items: [
       'The <b>Well done</b> card now says how this game ranks against your earlier ones on the same board and setup, like <i>2nd best of 10 games (Classic)</i>. Games are counted on this device from today.',
+      'Its headline changes with how you did, from <i>New best!</i> and <i>So close!</i> to <i>Solid game!</i>, with a short line on how far you were from your best.',
     ]},
     { date: '2026-11-17', title: 'Labels switch, and Timed is free', items: [
       'New <b>Labels</b> switch next to Timed. Labels on shows each pad\'s name while it plays; turn it off to play by sound only. Sounds-only games keep their own best scores, and a Daily Pairody cleared that way says <i>🎧 Sounds only</i> when you share it.',

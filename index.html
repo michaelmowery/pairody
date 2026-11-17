@@ -205,8 +205,8 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
       <div class="donecard" id="doneCard" hidden><div class="card" role="dialog" aria-labelledby="doneTitle" aria-describedby="doneInfo">
         <h2 id="doneTitle">Well done!</h2>
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
-        <p id="doneInfo"></p>
         <p class="rank" id="doneRank" hidden></p>
+        <p id="doneInfo"></p>
         <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
@@ -1665,16 +1665,37 @@ function finish(){
   if(isNew&&prev)msg="New best for "+DECKNAME[deck]+sizeName()+styleName()+"! "+moves+" moves, "+fmt(secs)+" (was "+Best.fmt(prev).replace(" · "," moves, ")+").";
   else if(isNew)msg=(style==="timed"?msg+" ":"")+"First "+sz+"game on "+DECKNAME[deck]+nl+(style==="timed"?". ":": "+moves+" moves, "+fmt(secs)+". ")+"That's your best to beat.";
   st.textContent=msg+perfect;
-  showDone(isNew&&prev?"New best!":moves===NP?"Perfect game!":"Well done!",fmt(secs),"Time",
-    moves+" moves"+(style==="timed"?", with "+fmt(Math.max(0,timeLimit()-secs))+" to spare":"")+nl+"."
-    +(isNew&&prev?" Your old best was "+Best.fmt(prev).replace(" · "," moves, ")+".":isNew?" That's your best to beat.":moves===NP?"":" Perfect is "+NP+"."));
+  const dc=doneCopy({rank,of,isNew,prev,moves,secs,spare:style==="timed"?Math.max(0,timeLimit()-secs):null});
+  showDone(dc.title,fmt(secs),"Time",dc.info);
   // How this game ranks among every game on this board, size, Timed and Labels setting (Michael, 2026-11-17)
-  if(of>1){const ord=n=>n+(n%100>10&&n%100<14?"th":["th","st","nd","rd"][n%10]||"th");
+  if(of>1){const ord=rankWord;
     const setup=[SIZES[size].name,style==="timed"?"Timed":"",labelsUsed?"":"labels off"].filter(Boolean).join(", ");
     $("doneRank").textContent=(rank===1?"Your best":ord(rank)+" best")+" of "+of+" games ("+setup+").";
     $("doneRank").hidden=false}
   showBest();if(isNew){const bx=$("bestBox");bx.classList.remove("new");void bx.offsetWidth;bx.classList.add("new")}
 }
+// What the Well done card says about a solo game, from how it ranks among earlier games on the
+// same board and setup (Michael, 2026-11-17): a headline for the tier and one short line, each
+// picked from a few wordings so it doesn't read the same every time. Kept short so the card is
+// quick to read and dismiss between games. Tiers: first game, new best, tied best, perfect,
+// near the top (top quarter), middle, further down.
+function doneCopy({rank,of,isNew,prev,moves,secs,spare}){
+  const pick=a=>a[Math.floor(Math.random()*a.length)],s=(n,w)=>n+" "+w+(n===1?"":"s");
+  const perfectGame=moves===NP,dm=prev?moves-prev.moves:0,ds=prev?prev.secs-secs:0;
+  const did=s(moves,"move")+(spare!=null?", "+fmt(spare)+" to spare":"")+". ";
+  let title,line;
+  if(of<=1){title=pick(["First one done!","And you're off!","Nice start!"]);line="That's your score to beat.";}
+  else if(isNew){title=perfectGame?pick(["Perfect, and a new best!","Flawless! New best!"]):pick(["New best!","Personal best!","That's a record!"]);
+    line=dm<0?s(-dm,"move")+" better than before.":s(ds,"second")+" faster than before.";}
+  else if(rank===1){title=perfectGame?"Perfect game!":pick(["Tied your best!","Right on your best!"]);line=pick(["Just a touch faster for a new record.","Matched your best on moves."]);}
+  else if(perfectGame){title=pick(["Perfect game!","Not a single miss!"]);line="Go a little faster for the top spot.";}
+  else if(rank<=Math.max(2,Math.ceil(of/4))){title=pick(["So close!","Right up there!","Great game!"]);line=dm>0?"Just "+s(dm,"move")+" off your best.":"Level with your best on moves.";}
+  else if(rank<=Math.ceil(of/2)){title=pick(["Solid game!","Nicely done!","Good one!"]);line=pick([s(dm,"move")+" off your best. You've got this.","Right in the middle of your games."]);}
+  else{title=pick(["Board cleared!","You got there!","Every pair found!"]);line=pick(["Off day? Your best is "+s(prev.moves,"move")+".","Shake it off and go again.","A fresh board might be just the thing."]);}
+  if(!perfectGame&&of<=1)line+=" Perfect is "+NP+".";
+  return {title,info:did+line};
+}
+function rankWord(n){return n+(n%100>10&&n%100<14?"th":["th","st","nd","rd"][n%10]||"th")}
 // ---- Deck picker: a chip shows the deck you're on; tapping it opens a panel of deck cards ----
 // Same pattern as Noodlit's scene menu: Featured on top, then either one A to Z list or a section
 // per kind (Sounds, Music, Words, Learning). Each card has a little picture of a matched pair, the
