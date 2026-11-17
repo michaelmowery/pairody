@@ -1546,7 +1546,10 @@ function tap(i,b){
     if(two)$("status").textContent=who+(demo?"now it looks on the other side.":"“"+sideText(DECKS[deck][cards[i]],half[i])+"” picked. Now find its match on the "+(sideOf(i)?"left.":"right."));
     // In Triples two alike isn't a match yet, so say so even when names are showing
     else if(k>2&&open.length===2)$("status").textContent=who+"Two alike! One more to go: find the third.";
-    else if(!easy())$("status").textContent=who+(open.length===1?(k>2?"Now find the other two.":demo?"now it looks for the twin.":"Now find its twin."):"One more to find.");
+    // Every board names the pad you picked (Michael, 2026-11-16), Difficult mode too. Only this
+    // pad's own half, so a Match up board in the grid never shows its answer.
+    else if(demo)$("status").textContent=who+(open.length===1?(k>2?"now it looks for the other two.":"now it looks for the twin."):"One more to find.");
+    else $("status").textContent=who+(open.length===1?"“"+sideText(DECKS[deck][cards[i]],half[i]===1?1:0)+"” picked. "+(k>2?"Now find the other two.":"Now find its twin."):"One more to find.");
     return}
   moves++;$("moves").textContent=moves;lock=true;mlog.push(miss?0:1);
   const grp=open.slice(),pp=grp.map(x=>$("pad"+x));
