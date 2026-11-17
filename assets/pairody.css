@@ -69,6 +69,10 @@ footer{color:var(--muted);font-size:.8rem;text-align:center}
 .toggle input:checked{background:var(--led)}
 .toggle input:checked::after{transform:translateX(16px)}
 .toggle input:checked + span{color:var(--fg)}
+/* Difficult mode caption says what is picked now (On: sounds only / Off: names shown) */
+.toggle .dm-on,.toggle .dm-off{font-weight:inherit}
+.toggle .dm-on,.toggle input:checked + span .dm-off{display:none}
+.toggle input:checked + span .dm-on{display:inline}
 .pad .np{position:absolute;left:0;right:0;bottom:0;z-index:3;display:none;padding:14px 7px 6px;text-align:left;pointer-events:none;
   background:linear-gradient(transparent,rgba(11,12,28,.92) 45%);color:#FFF4E6;font-family:var(--body);line-height:1.2}
 .pad .np b{display:block;font-family:var(--display);font-weight:600;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
