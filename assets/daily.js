@@ -34,6 +34,7 @@
     const fire = n ? ' · 🔥 ' + days(n) : '';
     ask.textContent = done ? '✓ Done today' + fire : 'Have you Pairody\'d today?' + (n ? ' 🔥 ' + n : '');
     ask.classList.toggle('done', done);
+    document.body.classList.toggle('daily-todo', !done && !dailyOn); // the arrow pointing at the pill
     const sh = $('dailyShare'); if (sh) sh.hidden = !done;
     $('dailyPill').title = done
       ? 'Daily Pairody: you cleared today\'s game. Next one in ' + untilTomorrow() + '. Tap to play it again, or tap again to go back to your own game.'

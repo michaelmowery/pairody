@@ -14,7 +14,8 @@
   const NOTES = [
     { date: '2026-11-17', title: 'A tidier Daily Pairody', items: [
       'The big Daily banner above the board is gone. The <b>Daily Pairody</b> button is still there, and the line under it shows your streak, then <i>✓ Done today</i> and a <b>Share</b> link once you\'ve played.',
-      'Clear the Daily and the Well done card leads with <b>Share</b>, shows your green and dark squares for the game, your streak, and when the next one comes.',
+      'Clear the Daily and the Well done card leads with <b>Share</b>, shows your green and dark squares for the game (one per move: green a match, dark a miss), your streak, and when the next one comes.',
+      'Haven\'t played today\'s Daily yet? A little arrow points the way.',
     ]},
     { date: '2026-11-17', title: 'See how your game ranks', items: [
       'The <b>Well done</b> card now says how this game ranks against your earlier ones on the same board and setup, like <i>2nd best of 10 games (Classic)</i>. Games are counted on this device from today.',
