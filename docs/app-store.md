@@ -9,7 +9,7 @@ before; nothing here changes pairody.app.
 | Path | What it is |
 | --- | --- |
 | `package.json` | Capacitor packages and the `app:*` scripts. Its `version` is the app version shown in the info panel. |
-| `capacitor.config.json` | App id `app.pairody`, name, web folder (`app-www`). |
+| `capacitor.config.json` | App id `com.mountmtech.pairody`, name, web folder (`app-www`). |
 | `scripts/build-app.sh` | Builds `app-www/`: the game files only, no `youtube.html` (Your music beta), no `sw.js`, version stamped from `package.json`. |
 | `ios/` | The Xcode project (Swift Package Manager, no CocoaPods). Icon, navy splash, silent-switch audio and the export-compliance flag are already set. |
 | `assets/native.js` | Detects the app and adds `class="native"` to `<html>`. `.web-only` / `.native-only` in the HTML pick what shows where. |
@@ -41,7 +41,7 @@ How the app differs from the website:
 ## Ship a build
 
 1. In [App Store Connect](https://appstoreconnect.apple.com): **Apps → + → New App**. Platform iOS,
-   name **Pairody**, language English (U.S.), bundle ID **app.pairody** (register it first under
+   name **Pairody**, language English (U.S.), bundle ID **com.mountmtech.pairody** (register it first under
    Certificates, Identifiers & Profiles if it isn't listed), SKU `pairody-ios`.
 2. In Xcode: set the run destination to **Any iOS Device (arm64)**, then **Product → Archive**.
 3. In the Organizer: **Distribute App → App Store Connect → Upload**.
