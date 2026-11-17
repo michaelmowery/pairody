@@ -77,6 +77,42 @@ body.daily-on .deck-chip .chev{display:none}
 .donecard .linkish:hover{color:var(--fg)}
 .donecard .linkish[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.grid.done,.donecard .card{animation:none}}
+/* Match up boards: two sides with a gutter between them for the lines (prototype) */
+.grid.two{grid-template-columns:1fr clamp(56px,16%,120px) 1fr;grid-auto-rows:var(--rowh,52px);row-gap:8px;column-gap:0;max-width:680px}
+.grid.two .sidehead{grid-row:1;align-self:end;height:auto;font-family:var(--display);font-weight:600;font-size:.72rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);padding:0 6px 2px}
+.grid.two{grid-template-rows:auto}
+.grid.two .sidehead.s0{grid-column:1;text-align:right}
+.grid.two .sidehead.s1{grid-column:3}
+.grid.two .pad{aspect-ratio:auto;height:var(--rowh,52px);border-radius:12px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.grid.two .pad .dot{top:50%;margin-top:-4px;width:9px;height:9px}
+.grid.two .pad.s0 .dot{right:9px} .grid.two .pad.s1 .dot{left:9px;right:auto}
+.grid.two .pad .np{inset:0;display:none;align-items:center;padding:0 26px 0 12px;background:none}
+.grid.two .pad.s1 .np{padding:0 12px 0 26px}
+.easy .grid.two .pad.open .np,.easy .grid.two .pad.playing .np{display:flex}
+.grid.two .pad .np b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:.8rem;line-height:1.2}
+.grid.two .pad .np small{display:none}
+.grid.two .pad .lbl{display:flex;align-items:center;gap:7px;width:100%;height:100%;padding:0 26px 0 10px;font-size:.8rem;text-align:left;justify-items:start}
+.grid.two .pad.s1 .lbl{padding:0 10px 0 26px}
+.grid.two .pad .lbl > span:last-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.grid.two .pad .art{display:none} /* the color and the line already tie a pair together, so the text gets the room */
+.grid.two .pad .art.txt{font-size:.95rem}
+.grid.two .pad.matched{--lc:var(--ok-bright);background:color-mix(in srgb,var(--lc) 15%,transparent);box-shadow:inset 0 0 0 2px var(--lc);color:var(--fg)}
+.grid.two .pad.matched .dot{background:var(--lc);box-shadow:0 0 6px var(--lc)}
+.grid.two .pad.matched[data-by="1"]{background:color-mix(in srgb,var(--lc) 15%,transparent);box-shadow:inset 0 0 0 2px var(--lc);color:var(--fg)}
+/* The lines: drawn in over .35s, a red one flashes on a miss, a dashed one follows a drag */
+#links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2}
+#links .link path{fill:none;stroke:var(--lc);stroke-width:3.5;stroke-linecap:round}
+#links .link circle{fill:var(--lc)}
+#links .link.draw path{stroke-dasharray:1;stroke-dashoffset:1;animation:linkdraw .38s ease-out forwards}
+#links .link.draw circle:last-of-type{opacity:0;animation:linkdot .1s .34s forwards}
+#links .link.miss{animation:linkmiss .45s ease-in forwards}
+#links .link.miss path{stroke-dasharray:.04 .03;stroke-width:3}
+#links .pending{fill:none;stroke:var(--led);stroke-width:3;stroke-dasharray:6 6;stroke-linecap:round}
+@keyframes linkdraw{to{stroke-dashoffset:0}}
+@keyframes linkdot{to{opacity:1}}
+@keyframes linkmiss{0%,40%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#links .link.draw path{animation:none;stroke-dashoffset:0}#links .link.draw circle:last-of-type{animation:none;opacity:1}#links .link.miss{animation:none}}
 </style>
 </head>
 <body>
@@ -403,7 +439,9 @@ function pickUnique(pool,key=x=>x,n=NP){
   return out;
 }
 // A pair that is two spoken lines: one pad says a, its twin says b
-const spoken=(name,a,b,art,txt,msg)=>[name,(t,half)=>say(half?b:a),art,txt,msg];
+// "sides" is the text each half shows on a Match up board (two sides, see twoSided)
+const spoken=(name,a,b,art,txt,msg)=>Object.assign([name,(t,half)=>say(half?b:a),art,txt,msg],{sides:[a,b]});
+const withSides=(e,a,b)=>Object.assign(e,{sides:[a,b]});
 const quoteEntry=([who,a,b])=>spoken(who,a,b,"❝",0,"“"+a+" "+b+"” ("+who+")");
 // One quote per pair, never two by the same person (their pads would look alike)
 function pickQuotes(){return pickUnique(QUOTES,q=>q[0]).map(quoteEntry)}
@@ -506,7 +544,7 @@ const MELODIES=[
 ];
 const pickMelodies=()=>pickUnique(MELODIES,m=>m[0]).map(([n,beat,a,b])=>{
   const A=mel(a,beat),B=mel(b,beat);
-  return[n,(t,half)=>playSeq(half?B:A,t),"🎵",0,n];
+  return withSides([n,(t,half)=>playSeq(half?B:A,t),"🎵",0,n],n+" (start)","…"+n);
 });
 
 // Rhymes (board id "wordplay", from when it was Word Play, so best scores carry over) and
@@ -526,7 +564,7 @@ const TIMES=[];for(let a=2;a<=10;a++)for(let b=a;b<=10;b++)TIMES.push([a,b]);
 // Capitals (deck id "brain", from when it was Brain Food, so best scores carry over)
 const pickBrain=()=>pickUnique(CAPITALS,c=>c[0]).map(([c,city])=>spoken(c+" · "+city,c,city,"🌍",0,"The capital of "+c+" is "+city));
 // Times Tables: every answer different on a board, so 3 × 4 and 2 × 6 never share one
-const pickTimes=()=>pickUnique(TIMES,([a,b])=>a*b).map(([a,b])=>spoken(a+" × "+b+" = "+a*b,a+" times "+b,String(a*b),"×",1,a+" times "+b+" is "+a*b));
+const pickTimes=()=>pickUnique(TIMES,([a,b])=>a*b).map(([a,b])=>withSides(spoken(a+" × "+b+" = "+a*b,a+" times "+b,String(a*b),"×",1,a+" times "+b+" is "+a*b),a+" × "+b,String(a*b)));
 
 // Synonyms: one pad says a word, its twin a word that means the same. No two pairs share a
 // meaning (so no huge/giant next to big/large, or talk/speak next to shout/yell).
@@ -539,13 +577,13 @@ const ELEMENTS=[["H","Hydrogen"],["He","Helium"],["Li","Lithium"],["C","Carbon"]
 // "F E" can come out as one word, so each letter is said on its own: "F. E."
 const spell=sym=>[...sym.toUpperCase()].join(". ")+".";
 const pickElements=()=>pickUnique(ELEMENTS,e=>e[0]).map(([sym,name,sayAs])=>
-  spoken(sym+" · "+name,"Symbol "+spell(sym),sayAs||name,"🧪",0,sym+" is the symbol for "+name.toLowerCase()));
+  withSides(spoken(sym+" · "+name,"Symbol "+spell(sym),sayAs||name,"🧪",0,sym+" is the symbol for "+name.toLowerCase()),sym,name));
 
 // Presidents: one pad says a number, its twin the US president who was that number.
 // One entry per person, so Grover Cleveland and Donald Trump each have both their numbers.
 const PRESIDENTS=[["1st","George Washington"],["2nd","John Adams"],["3rd","Thomas Jefferson"],["4th","James Madison"],["5th","James Monroe"],["6th","John Quincy Adams"],["7th","Andrew Jackson"],["8th","Martin Van Buren"],["9th","William Henry Harrison"],["10th","John Tyler"],["11th","James K. Polk"],["12th","Zachary Taylor"],["13th","Millard Fillmore"],["14th","Franklin Pierce"],["15th","James Buchanan"],["16th","Abraham Lincoln"],["17th","Andrew Johnson"],["18th","Ulysses S. Grant"],["19th","Rutherford B. Hayes"],["20th","James A. Garfield"],["21st","Chester A. Arthur"],["22nd and 24th","Grover Cleveland"],["23rd","Benjamin Harrison"],["25th","William McKinley"],["26th","Theodore Roosevelt"],["27th","William Howard Taft"],["28th","Woodrow Wilson"],["29th","Warren G. Harding"],["30th","Calvin Coolidge"],["31st","Herbert Hoover"],["32nd","Franklin D. Roosevelt"],["33rd","Harry S. Truman"],["34th","Dwight D. Eisenhower"],["35th","John F. Kennedy"],["36th","Lyndon B. Johnson"],["37th","Richard Nixon"],["38th","Gerald Ford"],["39th","Jimmy Carter"],["40th","Ronald Reagan"],["41st","George H. W. Bush"],["42nd","Bill Clinton"],["43rd","George W. Bush"],["44th","Barack Obama"],["45th and 47th","Donald Trump"],["46th","Joe Biden"]];
 const pickPresidents=()=>pickUnique(PRESIDENTS,p=>p[1]).map(([n,who])=>
-  spoken(n+" · "+who,"The "+n+" president",who,"🏛️",0,who+" was the "+n+" president"));
+  withSides(spoken(n+" · "+who,"The "+n+" president",who,"🏛️",0,who+" was the "+n+" president"),n,who));
 
 // Planets: one pad gives a clue, its twin names the planet, moon or star. Some have more than
 // one clue; a board never has two clues for the same answer. No clue names another answer.
@@ -583,7 +621,7 @@ const morseSeq=code=>[...code].flatMap(c=>[[700,c==="."?MU:3*MU],[null,MU]]);
 const morseArt=code=>code.replace(/\./g,"·").replace(/-/g,"−");
 const pickMorse=()=>pickUnique(MORSEKEYS).map(l=>{
   const seq=morseSeq(MORSE[l]),what=(/\d/.test(l)?"The number ":"The letter ")+l;
-  return[l+"  "+morseArt(MORSE[l]),(t,half)=>half?playSeq(seq,t,{beep:true,vol:.28}):say(what),"",1,what+" is "+morseArt(MORSE[l])];
+  return withSides([l+"  "+morseArt(MORSE[l]),(t,half)=>half?playSeq(seq,t,{beep:true,vol:.28}):say(what),"",1,what+" is "+morseArt(MORSE[l])],l,morseArt(MORSE[l]));
 });
 
 // Every animal has a recording and a synth stand-in. Each board picks as many as it has pairs.
@@ -617,7 +655,7 @@ const noteEntry=n=>[NOTENAME[n],t=>tone(st(n),t,.8,"triangle",.32),"♪"+NOTENAM
 const pickSome=a=>shuffle(a.slice()).slice(0,NP);
 const pickAnimals=()=>pickUnique(ANIMALS,a=>a[0]);
 // Animal Talk: one pad says the animal's name, its twin plays its call
-const pickTalk=()=>pickUnique(ANIMALS,a=>a[0]).map(([name,play])=>[name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"]);
+const pickTalk=()=>pickUnique(ANIMALS,a=>a[0]).map(([name,play])=>withSides([name,(t,half)=>half?play(t):say(name),ART[name],0,"“"+name+"” goes with its call"],name,(ART[name]||"🔊")+" call"));
 // Notes: the C major scale (Small picks 6 of its 8 notes); Big uses all 12 notes from C to B, sharps and flats too
 const pickNotes=()=>NP>8?[0,1,2,3,4,5,6,7,8,9,10,11].map(noteEntry):pickSome([0,2,4,5,7,9,11,12].map(noteEntry));
 // ---- Sound kit for the synth decks (Everyday Sounds, Instruments, Seasonal) ----
@@ -796,7 +834,7 @@ const HELLOS=[
   ["Hawaiian","Aloha","haw-US","Aloha"]
 ];
 const pickHello=()=>pickUnique(HELLOS,h=>h[4]||h[0]).map(([lang,word,code,said])=>
-  [lang+" · "+said,(t,half)=>half?say(lang):sayIn(word,code,said),"👋",0,"“"+said+"” is hello in "+lang]);
+  withSides([lang+" · "+said,(t,half)=>half?say(lang):sayIn(word,code,said),"👋",0,"“"+said+"” is hello in "+lang],said,lang));
 
 // Phone Keypad: one pad says a key, its twin plays its touch-tone (two tones at once,
 // one for the key's row and one for its column, the way phones dial).
@@ -804,7 +842,7 @@ const KEYPAD="123456789*0#",DTMF_ROW=[697,770,852,941],DTMF_COL=[1209,1336,1477]
 const KEYWORD={"*":"Star","#":"Pound",0:"Zero",1:"One",2:"Two",3:"Three",4:"Four",5:"Five",6:"Six",7:"Seven",8:"Eight",9:"Nine"};
 const pickKeypad=()=>pickUnique([...KEYPAD]).map(k=>{
   const i=KEYPAD.indexOf(k),row=DTMF_ROW[Math.floor(i/3)],col=DTMF_COL[i%3];
-  return["Key "+k,(t,half)=>{if(!half){say(KEYWORD[k]);return}beep(row,t,.45,{vol:.16});beep(col,t,.45,{vol:.16})},k,1,"The "+KEYWORD[k].toLowerCase()+" key"];
+  return withSides(["Key "+k,(t,half)=>{if(!half){say(KEYWORD[k]);return}beep(row,t,.45,{vol:.16});beep(col,t,.45,{vol:.16})},k,1,"The "+KEYWORD[k].toLowerCase()+" key"],"Key "+k,"☎ tone for "+k);
 });
 
 // Seasonal: the deck changes with the calendar. Each season mixes sounds, tunes split
@@ -1030,6 +1068,93 @@ const DECKGEN={animals:pickAnimals,talk:pickTalk,notes:pickNotes,quotes:pickQuot
   everyday:pickEveryday,instruments:pickInstruments,seasonal:pickSeasonal,twisters:pickTwisters,hello:pickHello,keypad:pickKeypad,
   weather:pickWeather,vehicles:pickVehicles,ringtones:pickRingtones,homophones:pickHomophones,
   synonyms:pickSynonyms,elements:pickElements,presidents:pickPresidents,planets:pickPlanets};
+// ---- Match up boards: two sides (prototype) ----
+// On a board where a prompt goes with its answer, prompts sit in a left column and answers in a
+// right column, and a line joins each matched pair. Tap one pad on each side, or drag from one to
+// the other. Text stays hidden until a pad is tapped, as on every board. Triples keep the classic
+// grid. Add ?twosided=0 to the address to compare with the classic grid.
+// id: [left heading, right heading]
+const MATCHUP={talk:["Animal","Call"],quotes:["Starts","Ends"],jokes:["Question","Answer"],wordplay:["Word","Rhyme"],opposites:["Word","Opposite"],
+  brain:["Country","Capital"],times:["Problem","Answer"],melodies:["Starts","Goes on"],morse:["Letter","Morse"],twisters:["Starts","Ends"],
+  hello:["Hello","Language"],keypad:["Key","Tone"],homophones:["Word","Sounds like"],
+  synonyms:["Word","Means the same"],elements:["Symbol","Element"],presidents:["Number","President"],planets:["Clue","Answer"]};
+const twoOff=/[?&]twosided=0/.test(location.search);
+const twoSided=()=>!twoOff&&!!MATCHUP[deck]&&style!=="triples";
+let two=false,links=[],dragged=false; // two: this board has two sides; links: [left pad, right pad, color]
+const sideOf=i=>i<NP?0:1; // pads 0..NP-1 are the left side
+const sideText=(e,h)=>e.sides?e.sides[h]:e[0];
+const LINKCOLORS=["#2EC4B6","#FF6B5B","#F2B33D","#8E7CFF","#3FA7F5","#E85FA8","#7BC86C","#FF9F43","#36B3C9","#C38D5E","#9DB13A","#B66DFF"];
+const SVGNS="http://www.w3.org/2000/svg";
+function linkLayer(){
+  let s=$("links");
+  if(!s){s=document.createElementNS(SVGNS,"svg");s.id="links";s.setAttribute("aria-hidden","true");$("grid").after(s)}
+  return s;
+}
+function clearLinks(){const s=$("links");if(s)s.textContent=""}
+// Where a line meets a pad: the middle of its inner edge (the side facing the gutter)
+function socket(i){
+  const b=$("grid").parentElement.getBoundingClientRect(),r=$("pad"+i).getBoundingClientRect();
+  return [(sideOf(i)?r.left:r.right)-b.left,r.top+r.height/2-b.top];
+}
+function curve([x1,y1],[x2,y2]){const d=(x2-x1)*.5;return "M"+x1+" "+y1+" C"+(x1+d)+" "+y1+" "+(x2-d)+" "+y2+" "+x2+" "+y2}
+function linkEl(i,j,color,cls){
+  const [l,r]=sideOf(i)?[j,i]:[i,j],a=socket(l),c=socket(r),g=document.createElementNS(SVGNS,"g");
+  g.setAttribute("class","link "+cls);g.style.setProperty("--lc",color);
+  const p=document.createElementNS(SVGNS,"path");p.setAttribute("d",curve(a,c));p.setAttribute("pathLength","1");g.appendChild(p);
+  [a,c].forEach(([x,y])=>{const e=document.createElementNS(SVGNS,"circle");e.setAttribute("cx",x);e.setAttribute("cy",y);e.setAttribute("r",4.5);g.appendChild(e)});
+  linkLayer().appendChild(g);return g;
+}
+function addLink(i,j,color){
+  links.push([i,j,color]);linkEl(i,j,color,"draw");
+  [i,j].forEach(x=>$("pad"+x).style.setProperty("--lc",color));
+}
+function missLink(i,j,fast){const g=linkEl(i,j,"var(--bad)","miss");setTimeout(()=>g.remove(),fast?0:450)}
+// Redraw every line where the pads are now (after a resize), without the drawing animation
+function drawLinks(){if(!two)return;clearLinks();links.forEach(([i,j,c])=>linkEl(i,j,c,"still"))}
+// Row height: phones use a fixed height per size; wide screens fit the board to the window
+function fitTwo(g){
+  const fixed={6:58,8:52,12:44}[NP]||48;
+  if(innerWidth>=700){
+    const top=g.getBoundingClientRect().top+scrollY,gap=8,head=26;
+    const h=Math.max(300,innerHeight-top-($("status").offsetHeight+60));
+    g.style.setProperty("--rowh",Math.round(Math.min(64,Math.max(36,(h-head-gap*NP)/NP)))+"px");
+  }else g.style.setProperty("--rowh",fixed+"px");
+  requestAnimationFrame(drawLinks);
+}
+// Drag from a pad to one on the other side. The pad you start on is picked as you start to
+// drag, a dashed line follows your finger, and letting go on the other side taps that pad.
+// Pads allow vertical scrolling (touch-action: pan-y), so a drag works sideways or at a slant.
+let drag=null;
+function pending(i,x,y){
+  let s=linkLayer(),p=s.querySelector(".pending");
+  if(!p){p=document.createElementNS(SVGNS,"path");p.setAttribute("class","pending");s.appendChild(p)}
+  const b=$("grid").parentElement.getBoundingClientRect();p.setAttribute("d",curve(socket(i),[x-b.left,y-b.top]));
+}
+const endPending=()=>{const p=$("links")?.querySelector(".pending");if(p)p.remove()};
+function initDrag(){
+$("grid").addEventListener("pointerdown",e=>{
+  if(!two||demo||over)return;const p=e.target.closest(".pad");if(!p||p.classList.contains("matched"))return;
+  drag={i:+p.id.slice(3),x:e.clientX,y:e.clientY,on:false};
+});
+addEventListener("pointermove",e=>{
+  if(!drag)return;
+  if(!drag.on){
+    if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<14)return;
+    drag.on=true;const i=drag.i;
+    if(!(open.length===1&&open[0]===i))tap(i,$("pad"+i));
+    if(!open.includes(i)){drag=null;return}
+  }
+  e.preventDefault();pending(drag.i,e.clientX,e.clientY);
+},{passive:false});
+addEventListener("pointerup",e=>{
+  if(!drag)return;const d=drag;drag=null;endPending();if(!d.on)return;
+  dragged=true;setTimeout(()=>dragged=false,0); // no click on the pad you started from
+  const t=document.elementFromPoint(e.clientX,e.clientY)?.closest(".grid.two .pad");
+  if(t&&!t.classList.contains("matched")){const j=+t.id.slice(3);
+    if(sideOf(j)!==sideOf(d.i)&&open.length===1&&open[0]===d.i){track("matchup/drag/"+deck,"Match up: drew a line");tap(j,t)}}
+});
+addEventListener("pointercancel",()=>{drag=null;endPending()});
+}
 const BOARDMODE={}; // id: [first kind, second kind], for a board whose games alternate
 // Board sizes. Big is 5x5 with a free tile in the center (pad position "free"), so it still has whole pairs.
 const SIZES={small:{name:"Small",cols:4,rows:3,pairs:6,key:"@small"},classic:{name:"Classic",cols:4,rows:4,pairs:8,key:""},big:{name:"Big",cols:5,rows:5,pairs:12,free:12,key:"@big"}};
@@ -1159,6 +1284,7 @@ const STYLESTART={
   pairs:"Tap any pad to hear it.",
   triples:"Every sound is on three pads. Find all three in one move.",
   timed:"Find every pair before the clock runs out. It starts on your first tap.",
+  two:"Tap a pad on the left, then its match on the right. Or drag a line from one to the other.",
   duo:"Player 1 goes first. Find a match and you go again; miss and it's Player 2's turn.",
 };
 function build(){
@@ -1178,8 +1304,10 @@ function build(){
   $("status").className="status";
   if(canSpeak)speechSynthesis.cancel();
   if(ctx){stopSeq();cutPad()}
+  two=twoSided();links=[];clearLinks();
   let msg=STYLESTART[style];
-  if(duo())msg=STYLESTART.duo+(style==="pairs"?"":" "+msg);
+  if(two)msg=STYLESTART.two+(style==="timed"?" "+STYLESTART.timed:"");
+  if(duo())msg=STYLESTART.duo+(style==="pairs"&&!two?"":" "+msg);
   if(dailyOn){
     const r=Daily.result();
     msg=r?"You cleared today's Daily Pairody in "+r.moves+" moves, "+fmt(r.secs)+". Play it again for fun. A new one tomorrow."
@@ -1191,6 +1319,7 @@ function build(){
     if(DECKGEN[deck])DECKS[deck]=DECKGEN[deck]();
     if(deck==="seasonal")msg+=" This season: "+SEASONS[season].name+".";
     const ids=[...Array(NP).keys()];
+    if(two)return shuffle(ids.slice()).concat(shuffle(ids.slice())); // left side, then right side
     return shuffle([].concat(...Array(K()).fill(ids)));
   };
   cards=dailyOn?Daily.seeded(deal):deal();
@@ -1199,29 +1328,33 @@ function build(){
   $("time").textContent=fmt(style==="timed"?timeLimit():0);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes). In Triples the
   // third pad is "half 2" and plays the first part again.
-  const seen={};half=cards.map(id=>seen[id]=(seen[id]===undefined?0:seen[id]+1));
-  const g=$("grid"),S=L;g.innerHTML="";g.dataset.size=S.cols>4?"big":size;
-  g.style.setProperty("--cols",S.cols);g.style.setProperty("--rows",S.rows);
+  const seen={};half=two?cards.map((_,i)=>sideOf(i)):cards.map(id=>seen[id]=(seen[id]===undefined?0:seen[id]+1));
+  const g=$("grid"),S=L;g.innerHTML="";g.dataset.size=two?"two":S.cols>4?"big":size;g.classList.toggle("two",two);
+  g.style.setProperty("--cols",S.cols);g.style.setProperty("--rows",two?NP:S.rows);
+  if(two)MATCHUP[deck].forEach((h,c)=>{const e=document.createElement("div");e.className="sidehead s"+c;e.textContent=h;g.appendChild(e)});
   cards.forEach((id,i)=>{
-    if(i===S.free){const f=document.createElement("div");f.className="freepad";f.setAttribute("aria-hidden","true");f.innerHTML='<img src="assets/mark.svg" alt="">';g.appendChild(f)}
+    if(i===S.free&&!two){const f=document.createElement("div");f.className="freepad";f.setAttribute("aria-hidden","true");f.innerHTML='<img src="assets/mark.svg" alt="">';g.appendChild(f)}
     const b=document.createElement("button");b.className="pad";b.id="pad"+i;
     b.setAttribute("aria-label","Pad "+(i+1)+", hidden sound");
     b.innerHTML='<span class="dot"></span><span class="rings"><i></i><i></i></span><span class="lbl"></span><span class="np" aria-hidden="true"><b></b><small></small></span>';
-    b.onclick=()=>{if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";return}tap(i,b)};g.appendChild(b);
+    if(two){b.classList.add("s"+sideOf(i));b.style.gridColumn=sideOf(i)?3:1;b.style.gridRow=i%NP+2;
+      b.setAttribute("aria-label",(sideOf(i)?"Right":"Left")+" pad "+(i%NP+1)+", hidden")}
+    b.onclick=()=>{if(dragged)return;if(demo){$("status").textContent="The demo is playing. Tap Stop demo to play yourself.";return}tap(i,b)};g.appendChild(b);
   });
   fitGrid();
 }
 // On wide screens the board shrinks to fit the window's height, so the whole board and the
 // status line under it are on screen without scrolling. Phones scroll as before.
 function fitGrid(){
-  const g=$("grid"),S=layout();g.style.maxWidth="";
+  const g=$("grid"),S=layout();g.style.maxWidth="";g.style.removeProperty("--rowh");
+  if(two){fitTwo(g);return}
   if(innerWidth<700)return;
   const top=g.getBoundingClientRect().top+scrollY,gap=10;
   const h=Math.max(300,innerHeight-top-($("status").offsetHeight+60));
   const w=(h-gap*(S.rows-1))/S.rows*S.cols+gap*(S.cols-1);
   if(w<g.parentElement.clientWidth)g.style.maxWidth=Math.floor(w)+"px";
 }
-addEventListener("resize",()=>fitGrid());
+addEventListener("resize",()=>{fitGrid();drawLinks()});
 const DECKNAME={animals:"Animals",talk:"Animal Talk",quotes:"Quotes",jokes:"Jokes",wordplay:"Rhymes",opposites:"Opposites",brain:"Capitals",times:"Times Tables",melodies:"Melodies",notes:"Notes",morse:"Morse Code",
   everyday:"Everyday Sounds",instruments:"Instruments",seasonal:"Seasonal",twisters:"Tongue Twisters",hello:"Say Hello",keypad:"Phone Keypad",
   weather:"Weather",vehicles:"Vehicles",ringtones:"Ringtones",homophones:"Homophones",
@@ -1258,8 +1391,8 @@ function playPad(i,b){
   const entry=DECKS[deck][cards[i]];
   audio();stopSeq();newPadBus();entry[1](ctx.currentTime+.02,half[i]===1?1:0);
   const np=b.querySelector(".np");
-  if(np){np.querySelector("b").textContent=entry[0];np.querySelector("small").textContent=DECKNAME[deck]}
-  if(easy())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+entry[0]+".";
+  if(np){np.querySelector("b").textContent=two?sideText(entry,half[i]):entry[0];np.querySelector("small").textContent=two?MATCHUP[deck][half[i]]:DECKNAME[deck]}
+  if(easy())$("status").textContent=(demo?"Demo: ":"")+"Now playing: "+(two?sideText(entry,half[i]):entry[0])+"."; // two sides: only this pad's half
   b.classList.add("playing");setTimeout(()=>b.classList.remove("playing"),Math.max(900,(seqEnd-ctx.currentTime)*1000));
 }
 // The clock: counts up, or down to zero on a Timed board (the demo ignores the limit)
@@ -1286,6 +1419,8 @@ function tap(i,b){
   // new pad plays right away instead of the tap being ignored
   if(lock){if(!settle||open.includes(i))return;settle(true);if(b.classList.contains("matched")||over)return}
   if(open.includes(i)){playPad(i,b);return}
+  // Match up boards: a second pad on the same side just changes which one you picked
+  if(two&&open.length===1&&sideOf(i)===sideOf(open[0])){$("pad"+open[0]).classList.remove("open");open=[]}
   if(!timer){start=Date.now();timer=setInterval(tick,250);
     if(!demo)track("play/"+deck+sizeTag()+styleTag()+(easy()?"":"/difficult"),"Game started: "+DECKNAME[deck]+sizeName()+styleName()+(easy()?"":" (Difficult)"))}
   playPad(i,b);b.classList.add("open");open.push(i);
@@ -1293,8 +1428,9 @@ function tap(i,b){
   const k=K(),miss=cards[i]!==cards[open[0]];
   if(!miss&&open.length<k){
     const who=duo()&&!demo?P(turn)+": ":demo?"Demo: ":"";
+    if(two)$("status").textContent=who+(demo?"now it looks on the other side.":"Now pick its match on the "+(sideOf(i)?"left.":"right."));
     // In Triples two alike isn't a match yet, so say so even when names are showing
-    if(k>2&&open.length===2)$("status").textContent=who+"Two alike! One more to go: find the third.";
+    else if(k>2&&open.length===2)$("status").textContent=who+"Two alike! One more to go: find the third.";
     else if(!easy())$("status").textContent=who+(open.length===1?(k>2?"Now find the other two.":demo?"now it looks for the twin.":"Now find its twin."):"One more to find.");
     return}
   moves++;$("moves").textContent=moves;lock=true;mlog.push(miss?0:1);
@@ -1307,7 +1443,8 @@ function tap(i,b){
       const entry=DECKS[deck][cards[grp[0]]],name=entry[0],art=entry[2]||ART[name]||"",isTxt=entry[3];
       pp.forEach(p=>{p.classList.remove("open");p.classList.add("matched");const l=p.querySelector(".lbl");l.innerHTML="";
         if(art){const s=document.createElement("span");s.className="art"+(isTxt?" txt":"");s.setAttribute("aria-hidden","true");s.textContent=art;l.appendChild(s)}
-        const n=document.createElement("span");n.textContent=name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
+        const n=document.createElement("span");n.textContent=two?sideText(entry,half[+p.id.slice(3)]):name;l.appendChild(n);p.setAttribute("aria-label",name+", matched")});
+      if(two)addLink(grp[0],grp[1],duo()?(turn?"var(--led)":"var(--ok-bright)"):LINKCOLORS[pairs%LINKCOLORS.length]);
       // Cut the sound right away so the match is obvious, then chime
       cutPad();if(canSpeak)speechSynthesis.cancel();matchChime();
       pp.forEach(p=>p.classList.remove("playing"));
@@ -1316,7 +1453,7 @@ function tap(i,b){
       $("status").textContent=(demo?"Demo: ":"")+(duo()?P(turn)+" scores, and goes again. ":"")+"Match: "+(entry[4]||name)+".";
       if(pairs===NP)finish();
     }else{
-      pp.forEach(p=>p.classList.add("miss"));
+      pp.forEach(p=>p.classList.add("miss"));if(two)missLink(grp[0],grp[1],fast);
       $("status").textContent=demo?"Demo: different sounds. It remembers where they were.":"Different sounds. Remember where they were.";
       if(duo()){turn^=1;showDuo();$("status").textContent="Different sounds. "+P(turn)+"'s turn."}
       const back=()=>pp.forEach(p=>p.classList.remove("miss","open"));
@@ -1626,7 +1763,7 @@ function demoStep(){
   const d=demo,k=K(),left=i=>!$("pad"+i).classList.contains("matched")&&!open.includes(i);
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const known=()=>Object.keys(d.seen).map(Number).filter(left);
-  const unseen=()=>cards.map((_,i)=>i).filter(i=>left(i)&&!(i in d.seen));
+  const unseen=(side)=>cards.map((_,i)=>i).filter(i=>left(i)&&!(i in d.seen)&&(side===undefined||sideOf(i)===side));
   const kn=known();
   let a=kn.find(x=>kn.filter(y=>d.seen[y]===d.seen[x]).length>=k);
   if(a===undefined){const u=unseen();a=u.length?pick(u):pick(kn)}
@@ -1637,8 +1774,8 @@ function demoStep(){
     const kn=known(),twins=kn.filter(x=>d.seen[x]===want);let c;
     if(twins.length){
       c=twins[0];
-      if(!d.slipped&&moves>=3&&Math.random()<.5){d.slipped=true;const wrong=kn.filter(x=>d.seen[x]!==want);if(wrong.length)c=pick(wrong)}
-    }else{const u=unseen();c=u.length?pick(u):pick(kn)}
+      if(!d.slipped&&moves>=3&&Math.random()<.5){d.slipped=true;const wrong=kn.filter(x=>d.seen[x]!==want&&(!two||sideOf(x)!==sideOf(a)));if(wrong.length)c=pick(wrong)}
+    }else{const other=two?1-sideOf(a):undefined,u=unseen(other);c=u.length?pick(u):pick(two?kn.filter(x=>sideOf(x)===other):kn)}
     demoFlip(c);
     demoWait(lock?DEMO_NEXT:DEMO_GAP,lock?demoStep:next);
   };
@@ -1661,6 +1798,7 @@ function startDemo(){
   demoWait(700,demoStep);
 }
 $("demo").onclick=()=>demo?stopDemo():startDemo();
+initDrag();
 build();
 </script>
 </body>

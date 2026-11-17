@@ -16,6 +16,11 @@
       'The iPhone and iPad app now sends the same anonymous usage counts as the website, like which boards get played, so we know what to build next. Nothing about you is sent.',
       'Switch it off any time: tap <b>i</b>, then turn off <b>Anonymous usage counts</b> under Privacy.',
     ]},
+    { date: '2026-11-16', title: 'Two sides for Match up boards', items: [
+      'On boards where a prompt goes with its answer, like <b>Capitals</b>, <b>Jokes</b> and <b>Quotes</b>, prompts now sit on the left and answers on the right.',
+      'Tap one pad on each side, or drag a line from one to the other. Each match is joined by its own colored line.',
+      'Boards where both pads make the same sound, like <b>Animals</b>, keep the classic grid, and so does <b>Triples</b>.',
+    ]},
     { date: '2026-11-16', title: 'A real 2 Players scoreboard', items: [
       'In <b>2 Players</b> a big scoreboard sits above the pads: each player\'s matches, and whose turn it is lit up in their color, teal or coral. The board\'s ring changes color with the turn too.',
       'Tap a name on the scoreboard to type your own. Names are saved on this device.',
