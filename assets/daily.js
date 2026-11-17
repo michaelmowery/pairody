@@ -1,7 +1,10 @@
-// Today's game: the Daily game card above the board, and the Share button.
+// Daily Pairody's bits around the board, and the Share button.
 // Daily itself (the seeded deal and the streak) lives in index.html; this file only shows it.
-//   - The card shows today's date, the streak and what to do next: play today's game, or, once
-//     one is cleared, a countdown to tomorrow's game and a Share button.
+//   - Under the Daily Pairody pill: "Have you Pairody'd today?" (with the streak), or once today's
+//     game is cleared "✓ Done today" and a Share link. (Until 2026-11-17 a Today's game banner sat
+//     above the board; Michael found it too much, so the pill and the Well done card carry it.)
+//   - On the Well done card after a Daily clear: Share up front, today's squares, the streak and
+//     a countdown to the next one.
 //   - Share builds a Wordle-style result (one square per move: green = match, dark = miss)
 //     and opens the share sheet, or copies it where there is none.
 // The page tells this file about new games ("pairody:board") and Daily clears
@@ -9,7 +12,7 @@
 // Words: in what players see, a "board" is a deck (Animals, Jokes...) and a "game" is one round.
 (function(){
   const $ = (id) => document.getElementById(id);
-  const card = $('today'); if (!card || typeof Daily === 'undefined') return;
+  const ask = $('dailyAsk'); if (!ask || typeof Daily === 'undefined') return;
   const track = (n, t) => window.PairodyAnalytics && window.PairodyAnalytics.track(n, t);
   const days = (n) => n + (n === 1 ? ' day' : ' days');
 
@@ -27,41 +30,22 @@
   }
 
   function render(){
-    const now = new Date();
-    $('tdMon').textContent = now.toLocaleDateString(undefined, { month: 'short' });
-    $('tdDay').textContent = now.getDate();
-    const n = Daily.streak(), done = !!Daily.result(), daily = dailyOn;
-    const flame = n ? '🔥 ' + days(n) + (n > 1 ? ' in a row' : '') + '. ' : '';
-    let title, sub;
-    if (done) {
-      title = '✓ Today\'s game done';
-      sub = flame + 'Next Daily Pairody in ' + untilTomorrow() + '.';
-    } else if (daily) {
-      title = 'Today\'s Daily Pairody';
-      const c = Daily.combo();
-      sub = comboLabel(c) + '. ' + (RULE[c.style] || RULE.pairs) + ' Same pads for everyone today. '
-        + (n ? 'Clear it to keep your 🔥 ' + n + '-day streak.' : 'Clear it to start a streak.');
-    } else {
-      title = 'Daily Pairody';
-      sub = 'One surprise game a day: the board, size and clock are picked for everyone. '
-        + (n ? '🔥 ' + days(n) + ': play to keep your streak.' : 'Clear one a day to build a streak.');
-    }
-    $('tdTitle').textContent = title;
-    $('tdSub').textContent = sub;
-    card.classList.toggle('done', done);
-    card.classList.toggle('on', daily && !done);
-    $('tdPlay').hidden = daily || done;
-    $('tdShare').hidden = !done;
-    card.hidden = false;
-    const ask = $('dailyAsk');
-    if (ask) { ask.textContent = done ? '✓ You Pairody\'d today' : 'Have you Pairody\'d today?'; ask.classList.toggle('done', done); }
+    const n = Daily.streak(), done = !!Daily.result();
+    const fire = n ? ' · 🔥 ' + days(n) : '';
+    ask.textContent = done ? '✓ Done today' + fire : 'Have you Pairody\'d today?' + (n ? ' 🔥 ' + n : '');
+    ask.classList.toggle('done', done);
+    const sh = $('dailyShare'); if (sh) sh.hidden = !done;
+    $('dailyPill').title = done
+      ? 'Daily Pairody: you cleared today\'s game. Next one in ' + untilTomorrow() + '. Tap to play it again, or tap again to go back to your own game.'
+      : 'Daily Pairody: one surprise game a day, the same board and size for everyone. Tap again to go back to your own game.';
+    const nx = $('doneNext'); if (nx && !$('doneDaily').hidden) nx.textContent = 'Next Daily Pairody in ' + untilTomorrow() + '.';
   }
+  const squares = (log) => { const sq = (log || '').split('').map((c) => c === '1' ? '🟩' : '⬛'); const rows = []; for (let i = 0; i < sq.length; i += 8) rows.push(sq.slice(i, i + 8).join('')); return rows; };
 
   // "Daily Pairody · Nov 16" / "Jokes · Big · Timed" / "14 moves, 1:02" / squares / streak / link
   function shareText(r){
     const when = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    const sq = (r.log || '').split('').map((c) => c === '1' ? '🟩' : '⬛');
-    const rows = []; for (let i = 0; i < sq.length; i += 8) rows.push(sq.slice(i, i + 8).join(''));
+    const rows = squares(r.log);
     const pairs = r.style === 'triples' ? OLD_TRIPLES[r.size] : SIZES[r.size] ? SIZES[r.size].pairs : 0;
     const extras = [r.moves === pairs ? '⭐ Perfect' : '', r.easy === false ? '🎧 Sounds only' : '', r.streak ? '🔥 ' + days(r.streak) : ''].filter(Boolean);
     return ['Daily Pairody · ' + when,
@@ -89,23 +73,28 @@
     copied(btn);
   }
 
-  $('tdPlay').onclick = () => {
-    track('daily/card/play', 'Today\'s game card: Play');
-    if (!dailyOn) enterDaily();
-  };
-  $('tdShare').onclick = () => share($('tdShare'), 'card');
+  const psh = $('dailyShare');
+  if (psh) psh.onclick = () => share(psh, 'pill');
   const ds = $('doneShare');
   if (ds) ds.onclick = () => share(ds, 'done');
 
   // A cleared Daily game's Well done card offers Share instead of a new game (a new Daily
   // game would deal the same pads again)
   const dn = $('doneNew');
-  addEventListener('pairody:daily-cleared', () => {
+  // and shows today's squares (this clear's moves: green = match, dark = miss) and when the next one comes
+  addEventListener('pairody:daily-cleared', (e) => {
     if (ds) { ds.hidden = false; ds.classList.add('primary'); dn.hidden = true; }
+    const dd = $('doneDaily');
+    if (dd) {
+      $('doneSquares').innerHTML = squares(typeof mlog !== 'undefined' ? mlog.join('') : (Daily.result() || {}).log).join('<br>');
+      $('doneSquares').setAttribute('aria-label', moves + ' moves: ' + mlog.filter((x) => x).length + ' matches and ' + mlog.filter((x) => !x).length + ' misses');
+      dd.hidden = false;
+    }
     render();
   });
   addEventListener('pairody:board', () => {
     if (ds) { ds.hidden = true; ds.classList.remove('primary'); dn.hidden = false; }
+    const dd = $('doneDaily'); if (dd) dd.hidden = true;
     render();
   });
   // Keep the countdown fresh, and roll over at midnight (a Daily game not started yet is redealt)

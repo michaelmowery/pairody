@@ -49,6 +49,14 @@ details.fold > summary:focus-visible{outline:2px solid var(--led-ink);outline-of
 .daily-wrap{display:grid;justify-items:center;gap:3px}
 .daily-ask{font-size:.72rem;color:var(--muted);font-family:var(--display);font-weight:500;white-space:nowrap}
 .daily-ask.done{color:var(--ok)}
+.daily-line{display:flex;gap:6px;align-items:baseline}
+.daily-share{background:none;border:0;padding:0;font:inherit;font-family:var(--display);font-weight:600;font-size:.72rem;color:var(--led-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.daily-share[hidden]{display:none}
+/* Daily Pairody on the Well done card: today's squares and the next game's countdown */
+.donecard .dd{margin-top:8px}
+.donecard .dd[hidden]{display:none}
+.donecard .dd-sq{font-size:1rem;line-height:1.15;letter-spacing:1px;color:var(--fg);margin:0}
+.donecard .dd-next{font-size:.82rem;margin-top:4px}
 /* While Daily Pairody is on, today's board, size and Timed setting are picked for everyone and
    played as dealt: the pickers and the Timed switch are hidden, and the board chip is locked */
 body.daily-on .styles,body.daily-on .opts{display:none}
@@ -150,13 +158,6 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
     </a>
   </header>
 
-  <!-- Today's Daily game: filled in by assets/daily.js -->
-  <section class="today" id="today" aria-labelledby="tdTitle" hidden>
-    <div class="td-cal" aria-hidden="true"><span id="tdMon"></span><b id="tdDay"></b></div>
-    <div class="td-text"><h2 class="td-title" id="tdTitle">Daily Pairody</h2><p class="td-sub" id="tdSub" aria-live="polite"></p></div>
-    <div class="td-btns"><button class="btn primary" id="tdPlay">Play today's game</button><button class="btn" id="tdShare" hidden>Share</button></div>
-  </section>
-
   <div class="chassis">
     <div class="strip">
       <button type="button" class="deck-chip" id="deckChip" aria-haspopup="dialog" aria-controls="deckPick">
@@ -164,7 +165,7 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
         <span class="dc-text"><span class="dc-cat" id="dcCat">Sounds</span><span class="dc-name" id="dcName">Animals</span></span>
         <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
       </button>
-      <div class="daily-wrap"><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board and size for everyone. Tap again to go back to your own game.">Daily Pairody</button><small class="daily-ask" id="dailyAsk">Have you Pairody'd today?</small></div>
+      <div class="daily-wrap"><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board and size for everyone. Tap again to go back to your own game.">Daily Pairody</button><small class="daily-line"><span class="daily-ask" id="dailyAsk" aria-live="polite">Have you Pairody'd today?</span><button type="button" class="daily-share" id="dailyShare" hidden>Share</button></small></div>
     </div>
     <details class="fold boardhelp" id="boardHelp" data-key="pairody-help"><summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span id="boardHelpSum">How to play</span></summary>
       <p class="deckhelp" id="deckHelp"></p></details>
@@ -207,6 +208,7 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p class="rank" id="doneRank" hidden></p>
         <p id="doneInfo"></p>
+        <div class="dd" id="doneDaily" hidden><p class="dd-sq" id="doneSquares" role="img"></p><p class="dd-next" id="doneNext"></p></div>
         <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
@@ -1428,7 +1430,7 @@ function build(){
   };
   cards=dailyOn?Daily.seeded(deal):deal();
   $("status").textContent=msg;
-  dispatchEvent(new Event("pairody:board")); // assets/daily.js refreshes Today's game
+  dispatchEvent(new Event("pairody:board")); // assets/daily.js refreshes the line under the Daily pill
   $("time").textContent=fmt(style==="timed"?timeLimit():0);
   // The first pad of each pair is "half 0", its twin "half 1" (used by Quotes).
   const seen={};half=two?cards.map((_,i)=>sideOf(i)):cards.map(id=>seen[id]=(seen[id]===undefined?0:seen[id]+1));
@@ -1655,7 +1657,7 @@ function finish(){
     st.textContent=(first?"Today's Daily Pairody cleared in "+moves+" moves, "+fmt(secs)+"."+perfect:"Cleared again in "+moves+" moves. Only your first clear today counts.")
       +" Streak: "+streak+(streak===1?" day.":" days in a row!")+(grew?"":" Come back tomorrow to keep it going.");
     showDone(moves===NP?"Perfect game!":"Well done!",fmt(secs),"Time",moves+" moves"+nl+". "+(first?"":"Only your first clear today counts. ")
-      +"Streak: "+streak+(streak===1?" day.":" days in a row!")+" New games tomorrow.");
+      +"Streak: "+streak+(streak===1?" day.":" days in a row!"));
     showBest();return;
   }
   const {rank,of}=Best.play(bestKey(deck),moves,secs),{isNew,prev}=Best.record(bestKey(deck),moves,secs);

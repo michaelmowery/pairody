@@ -57,9 +57,9 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `done/away` | the Well done card closed by tapping outside it (added 2026-11-17) |
 | `daily/streak/<n>` | a Daily streak grew to n days (n capped at 30) |
 | `daily/on`, `daily/off` | Daily Pairody turned on or off with its pill (added 2026-11-16). Since then Daily is not a style: `style/daily` stops, and Daily games add `/daily` after the style suffix in play/win/perfect (for example `win/jokes/big/triples/daily`; Pairs shows just `/daily`). Before, `/daily` was the style suffix of a per-board Daily game. |
-| `daily/card/play` | Play today's game tapped on the Daily game card above the board (added 2026-11-16) |
-| `daily/share/card`, `daily/share/done` | a Daily result shared through the share sheet, from the Daily game card or the Well done card |
-| `daily/copy/card`, `daily/copy/done` | a Daily result copied instead (no share sheet, or sharing failed) |
+| `daily/card/play` | (stopped 2026-11-17, when the Daily banner above the board was removed) Play today's game tapped on that banner (added 2026-11-16) |
+| `daily/share/pill`, `daily/share/done` | a Daily result shared through the share sheet, from the Share link under the Daily Pairody pill or the Well done card (`daily/share/card` until 2026-11-17, from the old banner) |
+| `daily/copy/pill`, `daily/copy/done` | a Daily result copied instead (no share sheet, or sharing failed) |
 | `size/<size>` | board size picked (small, classic, big). Sizes added 2026-11-15; earlier play/win counts are all Classic. |
 | `difficult/on`, `difficult/off` | (stopped 2026-11-17, when Difficult mode was removed) Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
