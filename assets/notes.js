@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Game buttons in one row', items: [
+      '<b>New game</b>, <b>Demo</b> and the <b>Difficult</b> switch now sit together in one row just above the pads, with New game first.',
+    ]},
     { date: '2026-11-17', title: 'Know what you picked', items: [
       'On Match up boards the line under the pads now names the pad you just tapped, like <i>“France” picked. Now find its match on the right.</i> It does this in Difficult mode too.',
       'Same sound boards do it too: <i>“Cat” picked. Now find its twin.</i>',
