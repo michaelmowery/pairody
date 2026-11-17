@@ -16,7 +16,7 @@ VERSION=$(node -p "require('./package.json').version")
 
 rm -rf "$OUT"
 mkdir -p "$OUT"
-cp index.html privacy.html manifest.webmanifest favicon.ico apple-touch-icon.png "$OUT"/
+cp index.html privacy.html support.html manifest.webmanifest favicon.ico apple-touch-icon.png "$OUT"/
 cp -R assets sounds "$OUT"/
 rm -f "$OUT"/sounds/*.md "$OUT"/assets/og-image.png
 
