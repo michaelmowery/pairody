@@ -26,7 +26,6 @@ Each clip was trimmed to one call, mixed to mono, peak-normalized and encoded as
 | Peacock | `animals/peacock.mp3` | [Pavo cristatus (call).ogg](https://commons.wikimedia.org/wiki/File:Pavo_cristatus_(call).ogg) | Ke4roh | Public domain | one call, 1 s from 7.3 s |
 | Rattlesnake | `animals/rattlesnake.mp3` | [Rattlesnake.ogg](https://commons.wikimedia.org/wiki/File:Rattlesnake.ogg) | uploaded by Borisblue | Public domain | first 1.2 s of rattling |
 | Dove | `animals/dove.mp3` | [Dove cooing.ogg](https://commons.wikimedia.org/wiki/File:Dove_cooing.ogg) | mary905 | Public domain | one coo, 1.8 s from 3.2 s |
-| Eagle | `animals/eagle.mp3` | [Yellowstone sound library - Bald Eagle - 003.mp3](https://commons.wikimedia.org/wiki/File:Yellowstone_sound_library_-_Bald_Eagle_-_003.mp3) | NPS & MSU Acoustic Atlas / Jennifer Jerrett | Public domain | calls, 1.3 s from 6.4 s, boosted |
 | Bison | `animals/bison.mp3` | [Bison.ogg](https://commons.wikimedia.org/wiki/File:Bison.ogg) | National Park Service | Public domain | bellow, 1.6 s from 0.5 s |
 | Cicada | `animals/cicada.mp3` | [Chorus Cicada singing.ogg](https://commons.wikimedia.org/wiki/File:Chorus_Cicada_singing.ogg) | Siobhan Leachman | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | song, 1.5 s from 8.6 s |
 
