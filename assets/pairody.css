@@ -360,23 +360,6 @@ dialog.deckpick .dp-sec-head p{margin:0;font-size:.85rem;color:var(--muted)}
 body.daily-on .decks .deck-tile small::before{content:""}
 .decks .deck-tile small:empty{display:none}
 @media (prefers-reduced-motion:no-preference){dialog.deckpick[open]{animation:infoin .18s ease-out}}
-/* Today's game: the Daily card above the board (assets/daily.js) */
-.today{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0;padding:10px 12px;border-radius:16px;
-  background:linear-gradient(90deg,var(--led-soft),transparent 75%),var(--chassis);border:1px solid var(--line);border-left:4px solid var(--led)}
-.today[hidden]{display:none}
-.today.done{background:linear-gradient(90deg,var(--ok-soft),transparent 75%),var(--chassis);border-left-color:var(--ok-bright)}
-.today.on{border-color:var(--led);border-left-width:4px}
-.td-cal{flex:none;width:46px;border-radius:9px;overflow:hidden;text-align:center;background:var(--field);box-shadow:0 1px 3px rgba(0,0,0,.18);font-family:var(--display);font-weight:600}
-.td-cal span{display:block;background:var(--led);color:#14162B;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 0}
-.today.done .td-cal span{background:var(--ok-bright)}
-.td-cal b{display:block;font-size:1.35rem;line-height:1.5;color:var(--fg)}
-.td-text{flex:1 1 200px;min-width:0}
-.td-title{margin:0;font-family:var(--display);font-weight:600;font-size:1.05rem;line-height:1.2;color:var(--fg)}
-.today.done .td-title{color:var(--ok)}
-.td-sub{margin:2px 0 0;color:var(--muted);font-size:.86rem;line-height:1.35}
-.td-btns{display:flex;gap:6px;margin-left:auto}
-.td-btns .btn[hidden]{display:none}
-@media (max-width:480px){.td-btns{flex-basis:100%;margin-left:0;padding-left:58px}}
 /* 2 Players scoreboard above the pads */
 .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
 .vs[hidden]{display:none}
