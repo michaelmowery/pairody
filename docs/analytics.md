@@ -71,6 +71,7 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `info/open` | info panel opened |
 | `notes/open/info`, `notes/open/welcome` | release notes opened from the info panel's What's new, or from All release notes on the New version note (added 2026-11-15) |
 | `feedback` | Send feedback tapped |
+| `access/cues/on`, `access/cues/off`, `access/extraTime/on`, `access/extraTime/off` | Audio cues or Extra time switched in the info panel's Accessibility section (added 2026-11-17) |
 | `analytics/off` | usage counts switched off (the last count sent) |
 
 Each count also carries what GoatCounter collects for every hit: referrer, screen size, browser
