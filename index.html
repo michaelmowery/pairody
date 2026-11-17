@@ -49,6 +49,19 @@ details.fold > summary:focus-visible{outline:2px solid var(--led-ink);outline-of
 .daily-wrap{display:grid;justify-items:center;gap:3px}
 .daily-ask{font-size:.72rem;color:var(--muted);font-family:var(--display);font-weight:500;white-space:nowrap}
 .daily-ask.done{color:var(--ok)}
+/* Not played today's Daily yet: a hand-drawn arrow points at the pill (Michael, 2026-11-17).
+   body.daily-todo is set by assets/daily.js; it goes once today's game is cleared or Daily is on. */
+.dp-anchor{position:relative;display:inline-flex}
+.daily-arrow{display:none;position:absolute;right:calc(100% + 4px);top:-2px;width:46px;height:36px;overflow:visible;pointer-events:none;
+  fill:none;stroke:var(--led);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+body.daily-todo .daily-arrow{display:block}
+@media (max-width:520px){.daily-arrow{width:28px;height:22px;top:6px;right:calc(100% + 1px)}}
+@media (prefers-reduced-motion:no-preference){
+  body.daily-todo .daily-arrow .da-line{stroke-dasharray:60;stroke-dashoffset:60;animation:daDraw .7s ease-out .4s forwards}
+  body.daily-todo .daily-arrow .da-head{stroke-dasharray:30;stroke-dashoffset:30;animation:daDraw .3s ease-out 1.05s forwards}
+  body.daily-todo .daily-arrow{animation:daNudge 2.4s ease-in-out 1.6s infinite}}
+@keyframes daDraw{to{stroke-dashoffset:0}}
+@keyframes daNudge{0%,60%,100%{transform:translate(0,0)}75%{transform:translate(4px,-1px)}}
 .daily-line{display:flex;gap:6px;align-items:baseline}
 .daily-share{background:none;border:0;padding:0;font:inherit;font-family:var(--display);font-weight:600;font-size:.72rem;color:var(--led-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .daily-share[hidden]{display:none}
@@ -56,6 +69,7 @@ details.fold > summary:focus-visible{outline:2px solid var(--led-ink);outline-of
 .donecard .dd{margin-top:8px}
 .donecard .dd[hidden]{display:none}
 .donecard .dd-sq{font-size:1rem;line-height:1.15;letter-spacing:1px;color:var(--fg);margin:0}
+.donecard .dd-key{font-size:.75rem;margin-top:3px}
 .donecard .dd-next{font-size:.82rem;margin-top:4px}
 /* While Daily Pairody is on, today's board, size and Timed setting are picked for everyone and
    played as dealt: the pickers and the Timed switch are hidden, and the board chip is locked */
@@ -165,7 +179,7 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
         <span class="dc-text"><span class="dc-cat" id="dcCat">Sounds</span><span class="dc-name" id="dcName">Animals</span></span>
         <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
       </button>
-      <div class="daily-wrap"><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board and size for everyone. Tap again to go back to your own game.">Daily Pairody</button><small class="daily-line"><span class="daily-ask" id="dailyAsk" aria-live="polite">Have you Pairody'd today?</span><button type="button" class="daily-share" id="dailyShare" hidden>Share</button></small></div>
+      <div class="daily-wrap"><span class="dp-anchor"><svg class="daily-arrow" viewBox="0 0 52 40" aria-hidden="true"><path class="da-line" d="M5 34c3-9 9-16 17-19 7-3 14-3 22-1"/><path class="da-head" d="M37 6.5l8.5 7.2-9.6 5.3"/></svg><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board and size for everyone. Tap again to go back to your own game.">Daily Pairody</button></span><small class="daily-line"><span class="daily-ask" id="dailyAsk" aria-live="polite">Have you Pairody'd today?</span><button type="button" class="daily-share" id="dailyShare" hidden>Share</button></small></div>
     </div>
     <details class="fold boardhelp" id="boardHelp" data-key="pairody-help"><summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span id="boardHelpSum">How to play</span></summary>
       <p class="deckhelp" id="deckHelp"></p></details>
@@ -208,7 +222,7 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
         <div class="big"><small id="doneLbl">Time</small><span id="doneTime">0:00</span></div>
         <p class="rank" id="doneRank" hidden></p>
         <p id="doneInfo"></p>
-        <div class="dd" id="doneDaily" hidden><p class="dd-sq" id="doneSquares" role="img"></p><p class="dd-next" id="doneNext"></p></div>
+        <div class="dd" id="doneDaily" hidden><p class="dd-sq" id="doneSquares" role="img"></p><p class="dd-key" aria-hidden="true">🟩 match · ⬛ miss · one square per move</p><p class="dd-next" id="doneNext"></p></div>
         <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
@@ -1354,6 +1368,14 @@ const Daily={
     if(first)v.today.done[Daily.id()]=Object.assign({moves,secs,streak:v.streak},extra);
     v.top=Math.max(v.top||0,v.streak);Daily.save(v);return {first,streak:v.streak,grew};
   },
+  // For testing: undo today's clear on this device, as if today's Daily hadn't been played.
+  // The streak steps back a day. Open the site with ?resetdaily=1 (the address is tidied after).
+  resetToday(){
+    const v=Daily.load(),today=Daily.day();
+    if(v.today&&v.today.date===today)v.today={date:today,done:{}};
+    if(v.last===today){if((v.streak||0)>1){v.streak--;v.last=Daily.yesterday()}else{delete v.last;v.streak=0}}
+    Daily.save(v);
+  },
   seed(){let h=2166136261;for(const c of "pairody|"+Daily.day()+"|"+Daily.id()){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0},
   // Runs fn with Math.random swapped for a generator seeded by today's date, deck and size,
   // and with the decks' "don't repeat the last board" memory set aside, so every player's
@@ -1367,6 +1389,8 @@ const Daily={
     finally{Math.random=rand;bags.clear();bg.forEach((v,k)=>bags.set(k,v));lastDealt.clear();ld.forEach((v,k)=>lastDealt.set(k,v));
       Object.assign(boardMode,bm)}}
 };
+if(/[?&]resetdaily=1/.test(location.search)){Daily.resetToday();try{history.replaceState(null,"",location.pathname+location.search.replace(/[?&]resetdaily=1/,"").replace(/^&/,"?")+location.hash)}catch(e){}}
+
 // 2 Players: the readout's small score plus the big scoreboard above the pads. The player whose
 // turn it is lights up in their color (teal for Player 1, coral for Player 2, the same colors
 // their matched pads take), and the board gets a thin ring in that color too.
