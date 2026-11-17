@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Game size on the Well done card', items: [
+      'The <b>Well done</b> card now shows the board and game size you just played, like <i>Animals · Classic 4×4</i>.',
+    ]},
     { date: '2026-11-17', title: 'A simpler board list', items: [
       'The board list is one list now: Same sound boards, then Match up boards, each by topic with the free boards first. The Featured row and the All / Grouped switch are gone.',
     ]},
