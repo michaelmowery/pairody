@@ -346,9 +346,10 @@ const ART={Cat:"🐱",Dog:"🐶",Sheep:"🐑",Songbird:"🐦",Owl:"🦉",Duck:"�
 // recording takes over from the next board.
 const CLIPS={Cat:"cat",Dog:"dog",Sheep:"sheep",Songbird:"songbird",Owl:"owl",Duck:"duck",Frog:"frog",Rooster:"rooster",Horse:"horse",Elephant:"elephant",Wolf:"wolf",Goat:"goat",Hen:"hen",Goose:"goose",Donkey:"donkey",Raven:"raven",Whale:"whale",Peacock:"peacock",Rattlesnake:"rattlesnake",Dove:"dove",Bison:"bison",Cicada:"cicada"};
 const clipData={},clipBuf={},clipTry={};
-// fetch first; if that fails (some app web views), try XMLHttpRequest before giving up
+// fetch first (the iOS app's web view answers local files with status 0, not 200);
+// if that fails, try XMLHttpRequest before giving up
 function clipBytes(url){
-  return fetch(url).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>{if(!b||!b.byteLength)throw 0;return b})
+  return fetch(url).then(r=>{if(!r.ok&&r.status!==0)throw 0;return r.arrayBuffer()}).then(b=>{if(!b||!b.byteLength)throw 0;return b})
     .catch(()=>new Promise(ok=>{
       try{const x=new XMLHttpRequest();x.open("GET",url);x.responseType="arraybuffer";
         x.onload=()=>ok((x.status===200||x.status===0)&&x.response&&x.response.byteLength?x.response:null);
