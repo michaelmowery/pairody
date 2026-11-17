@@ -12,6 +12,13 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-16', title: 'Tidier help, and no Triples on Match up boards', items: [
+      '<b>How to play</b> under the board name now folds away. Tap it to read how the board you picked plays. The longer help under the game folds away too, and each stays open once you open it.',
+      'Match up boards, where a prompt goes with its answer, no longer offer <b>Triples</b>. If Triples was your pick, those boards play Pairs and Triples comes back on Same sound boards.',
+    ]},
+    { date: '2026-11-16', title: 'Same sound or Match up', items: [
+      'Every card in the board picker now says how that board plays: <b>Same sound</b> (find two pads that sound alike) or <b>Match up</b> (match a prompt on the left to its answer on the right).',
+    ]},
     { date: '2026-11-16', title: 'Usage counts in the iPhone app', items: [
       'The iPhone and iPad app now sends the same anonymous usage counts as the website, like which boards get played, so we know what to build next. Nothing about you is sent.',
       'Switch it off any time: tap <b>i</b>, then turn off <b>Anonymous usage counts</b> under Privacy.',
