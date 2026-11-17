@@ -88,7 +88,7 @@ Xcode (App target → General), `npm run app:sync`, then Archive and upload agai
   > • Morse Code: letters and their beeps
   >
   > Pick Small, Classic or Big boards. Names show on each pad while it plays, so kids can jump
-  > right in; turn on Difficult mode for sounds only. Your best score for every deck and size is
+  > right in; turn on Timed for a clock to beat. Your best score for every deck and size is
   > saved on your device, and Demo shows you how it's done.
   >
   > Free, with no ads and no accounts.

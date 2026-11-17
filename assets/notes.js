@@ -12,6 +12,13 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Simpler choices', items: [
+      'Fewer switches: <b>Triples</b> and <b>Difficult mode</b> are gone. Pads always show their sound\'s name while it plays.',
+      'Want a clock to beat? Turn on the new <b>Timed</b> switch, next to New game and Demo.',
+      'The line that says what you picked, like <i>“Cat” picked. Now find its twin.</i>, now sits right above the pads.',
+      '<b>2 Players</b> is free for everyone.',
+      'Daily Pairody picks the board, the size and whether it\'s Timed.',
+    ]},
     { date: '2026-11-17', title: 'Game buttons in one row', items: [
       '<b>New game</b>, <b>Demo</b> and the <b>Difficult</b> switch now sit together in one row just above the pads, with New game first.',
     ]},

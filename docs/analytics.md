@@ -44,10 +44,11 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `decks/open` | deck picker opened (the deck chip at the top of the board; added 2026-11-16) |
 | `decks/view/all`, `decks/view/grouped` | deck picker switched between one A to Z list and Grouped by kind (Grouped is the default) |
 | `decks/featured/<id>` | a deck picked from the picker's Featured row (also counted as `deck/<id>`) |
-| `play/<id>[/small\|/big][/triples\|/timed\|/2p\|/daily][/difficult]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; the style suffix is left out for Pairs, the original game; `/difficult` = sounds only, no names) |
-| `win/<id>[/small\|/big][/<style>][/difficult]` | board cleared (style suffix as for `play`) |
-| `perfect/<id>[/small\|/big][/<style>]` | board cleared in one move per pair, or per set in Triples (not counted for 2 Players) |
-| `style/<style>` | board style picked (pairs, triples, timed, duo, daily). Styles added 2026-11-16; earlier counts are all Pairs. Note the picker id for 2 Players is `duo` but its play/win suffix is `/2p`. |
+| `play/<id>[/small\|/big][/timed][/2p][/daily]` | first pad tapped on a new board (`/small` or `/big` = board size, none = Classic 4x4; `/timed` = the Timed switch is on). Before 2026-11-17 there were also `/triples` and `/difficult` (sounds only) suffixes; both modes were removed that day. |
+| `win/<id>[/small\|/big][/timed][/2p][/daily]` | board cleared (suffixes as for `play`) |
+| `perfect/<id>[/small\|/big][/timed][/daily]` | board cleared in one move per pair (not counted for 2 Players) |
+| `timed/on`, `timed/off` | the Timed switch (next to New game and Demo) turned on or off (added 2026-11-17, replacing the Pairs/Triples/Timed style buttons) |
+| `style/<style>` | (stopped 2026-11-17, see `timed/on`) board style picked (pairs, triples, timed, duo, daily). Styles added 2026-11-16; earlier counts are all Pairs. Note the picker id for 2 Players is `duo` but its play/win suffix is `/2p`. |
 | `players/1`, `players/2` | 1 Player / 2 Players picked (added 2026-11-16). Since then 2 Players is not a style: `style/duo` stops, and 2-player games add `/2p` after the style suffix in play/win/perfect (for example `win/animals/triples/2p`; Pairs shows just `/2p`, as before). |
 | `matchup/drag/<id>` | on a two-sided Match up board, a match made by dragging a line from one side to the other instead of tapping both pads (added 2026-11-16) |
 | `timed/out/<id>[/small\|/big]` | a Timed board ran out of time |
@@ -58,7 +59,7 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `daily/share/card`, `daily/share/done` | a Daily result shared through the share sheet, from the Daily game card or the Well done card |
 | `daily/copy/card`, `daily/copy/done` | a Daily result copied instead (no share sheet, or sharing failed) |
 | `size/<size>` | board size picked (small, classic, big). Sizes added 2026-11-15; earlier play/win counts are all Classic. |
-| `difficult/on`, `difficult/off` | Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
+| `difficult/on`, `difficult/off` | (stopped 2026-11-17, when Difficult mode was removed) Difficult mode (sounds only) switched. Names show by default. Before 2026-11-12 this was `easy/on`/`easy/off`, and `play`/`win` used an `/easy` suffix instead. |
 | `demo/start/<id>` | Demo button tapped (auto-plays a board of the current deck) |
 | `demo/done/<id>` | Demo finished the board |
 | `demo/stop/<id>` | Demo stopped early (Stop demo, New board or picking a deck) |
