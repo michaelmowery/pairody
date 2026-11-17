@@ -1577,6 +1577,8 @@ const FEATURED=["animals","jokes","brain","melodies"];
 // The deck chip's little icon
 const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",weather:"⛈️",vehicles:"🚂",ringtones:"📱",homophones:"👂",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
   talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🎶",opposites:"⇄",brain:"🌍",times:"✖️",synonyms:"≈",elements:"🧪",planets:"🪐",presidents:"🏛️"};
+const PLAYKIND={same:"Same sound",match:"Match up"};
+const playKind=id=>MATCHUP[id]?"match":"same";
 const deckName=id=>id==="youtube"?"Your music":DECKNAME[id];
 const deckView=()=>{try{return localStorage.getItem("pairody-deckview")==="all"?"all":"grouped"}catch(e){return "grouped"}};
 function deckTile(id,showKind,from){
@@ -1588,11 +1590,15 @@ function deckTile(id,showKind,from){
   const thumb=document.createElement("span");thumb.className="dt-thumb";thumb.setAttribute("aria-hidden","true");
   pair.forEach(x=>{const p=document.createElement("i");p.textContent=x;if(!/\p{Extended_Pictographic}/u.test(x)&&x.length>3)p.className="w";thumb.appendChild(p)});
   t.appendChild(thumb);
+  // Which kind of game: "Same sound" (both pads alike, classic grid) or "Match up" (a prompt
+  // and its answer, played on two sides). Same list as the two-sided layout (MATCHUP).
+  if(!yt){const m=document.createElement("span");m.className="dt-play "+playKind(id);m.textContent=PLAYKIND[playKind(id)];t.appendChild(m)}
   if(showKind){const k=document.createElement("span");k.className="dt-kind";k.textContent=DECKKINDS[kind].name;t.appendChild(k)}
   const n=document.createElement("span");n.className="dt-name";n.textContent=deckName(id);
   if(yt){const b=document.createElement("span");b.className="beta";b.textContent="Beta";n.append(" ",b)}
   t.appendChild(n);
   const l=document.createElement("span");l.className="dt-line";l.textContent=line;t.appendChild(l);
+  if(!yt)t.setAttribute("aria-description",PLAYKIND[playKind(id)]);
   if(!yt)t.title=DECKHELP[id].replace(/<[^>]+>/g,"");
   return t;
 }
