@@ -32,6 +32,16 @@
 .pad .lbl{font-size:.72rem;padding:4px;text-align:center;line-height:1.2;display:grid;gap:4px;justify-items:center}
 .pad .art{font-size:clamp(1.5rem,7vw,2.4rem);line-height:1;font-weight:600;color:var(--fg)}
 .pad .art.txt{font-size:clamp(1rem,4.5vw,1.5rem);color:var(--ok)}
+/* Collapsible "How to play" (board note under the chip, and the longer help under the game) */
+details.fold > summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-weight:600;
+  font-size:.9rem;color:var(--fg);padding:2px 0;user-select:none;-webkit-user-select:none}
+details.fold > summary::-webkit-details-marker{display:none}
+details.fold > summary .chev{width:16px;height:16px;fill:none;stroke:var(--led);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s;flex:none}
+details.fold[open] > summary .chev{transform:rotate(90deg)}
+details.fold > summary h2{margin:0}
+details.fold[open] > summary{margin-bottom:6px}
+details.fold > summary:focus-visible{outline:2px solid var(--led);outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){details.fold > summary .chev{transition:none}}
 .deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
 .deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
 .row-btns{display:flex;gap:6px}
@@ -41,6 +51,7 @@
 .daily-ask.done{color:var(--ok)}
 /* While Daily Pairody is on, today's board, size and style are picked for everyone and played
    as dealt (names shown): the pickers and Difficult mode are hidden, and the board chip is locked */
+body.matchup .styles [data-style="triples"]{display:none}
 body.daily-on .styles,body.daily-on .opts{display:none}
 body.daily-on .deck-chip{cursor:default}
 body.daily-on .deck-chip .chev{display:none}
@@ -140,7 +151,8 @@ body.daily-on .deck-chip .chev{display:none}
       </button>
       <div class="daily-wrap"><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board, size and style for everyone. Tap again to go back to your own game.">Daily Pairody</button><small class="daily-ask" id="dailyAsk">Have you Pairody'd today?</small></div>
     </div>
-    <p class="deckhelp" id="deckHelp" aria-live="polite"></p>
+    <details class="fold boardhelp" id="boardHelp" data-key="pairody-help"><summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span id="boardHelpSum">How to play</span></summary>
+      <p class="deckhelp" id="deckHelp" aria-live="polite"></p></details>
     <div class="styles" role="group" aria-label="Game style">
       <button data-style="pairs" aria-pressed="true" title="Find the pairs at your own pace">Pairs</button>
       <button data-style="triples" aria-pressed="false" title="Every sound is on three pads: find all three in one move">Triples</button>
@@ -187,16 +199,16 @@ body.daily-on .deck-chip .chev{display:none}
     <p class="status" id="status">Tap any pad to hear it.</p>
   </div>
 
-  <div class="notes">
-    <h2>How to play</h2>
+  <details class="notes fold" id="moreHelp" data-key="pairody-morehelp">
+    <summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><h2>More help: sizes, styles, best scores</h2></summary>
     <p>Pick a size: Small has 12 pads (6 pairs), Classic has 16 (8 pairs), and Big has 25 (12 pairs, plus a free tile in the middle). Flip one pad, then another. A match turns green and shows what it was; a miss goes dark again. A perfect game takes one move per pair.</p>
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn on Difficult mode and you get the sounds only, no names.</p>
     <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own bests, and so does Difficult mode, so a game played sounds-only is never compared with one where you could see the names.</p>
     <p>Pick a style too. <b>Pairs</b> is the usual game. <b>Daily Pairody</b>, at the top next to the board name, is one surprise game a day: the date picks the board, game size and style, and everyone gets the same pads. You play it as dealt, with names shown, and your own choices come back when you tap it again. Clear one every day to build a streak. <b>Triples</b> puts every sound on three pads, and you find all three in one move (on boards with two parts, like Quotes, two pads say the first part and one says the ending). <b>Timed</b> gives you a clock to beat. Next to the styles, pick <b>1 Player</b> or <b>2 Players</b>. Two players works with every style and takes turns on one device: find a match and you go again, miss and it's the other player's turn. In Timed you share the clock, and whoever has more when it runs out wins. Triples and Timed keep their own best scores; 2 Players and Daily don't touch them.</p>
-    <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; the note under the board name explains the one you picked.</p>
+    <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
-  </div>
+  </details>
   <dialog class="info deckpick" id="deckPick" aria-labelledby="deckPickTitle">
     <div class="dp-head">
       <h2 id="deckPickTitle">Choose a board</h2>
@@ -1229,8 +1241,9 @@ const Daily={
   combo(){
     let h=2166136261;for(const c of "pairody-combo|"+Daily.day()){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}
     const r=n=>{h=Math.imul(h^h>>>15,2246822507);h=Math.imul(h^h>>>13,3266489909);h^=h>>>16;return (h>>>0)%n};
-    const decks=Object.keys(DECKNAME),sizes=Object.keys(SIZES),styles=["pairs","triples","timed"];
-    return {deck:decks[r(decks.length)],size:sizes[r(sizes.length)],style:styles[r(styles.length)]};
+    const decks=Object.keys(DECKNAME),sizes=Object.keys(SIZES),d=decks[r(decks.length)],sz=sizes[r(sizes.length)];
+    const styles=MATCHUP[d]?["pairs","timed"]:["pairs","triples","timed"]; // Match up boards have no Triples
+    return {deck:d,size:sz,style:styles[r(styles.length)]};
   },
   // A streak still counts today if the last clear was yesterday
   streak(){const v=Daily.load();return v.last===Daily.day()||v.last===Daily.yesterday()?v.streak||0:0},
@@ -1289,6 +1302,9 @@ const STYLESTART={
 };
 function build(){
   if(demo)stopDemo(true);
+  // Match up boards have no Triples (Michael, 2026-11-16): play Pairs instead. The saved choice
+  // stays Triples, so it comes back on a Same sound board (see pickDeck).
+  if(style==="triples"&&MATCHUP[deck]){style="pairs";showStyle()}
   board++; // a move still resolving from the old board is dropped (see tap)
   clipLate={};
   const L=layout();
@@ -1297,6 +1313,7 @@ function build(){
   hideDone(true);
   $("bestBox").classList.remove("new");showBest();
   const dh=$("deckHelp"),dk=deck+"/"+(style==="triples");if(dh.dataset.deck!==dk){dh.dataset.deck=dk;
+    $("boardHelpSum").textContent="How to play "+DECKNAME[deck];
     dh.innerHTML="<b>"+DECKNAME[deck]+".</b> "+DECKHELP[deck]+(style==="triples"?" <b>Triples:</b> every sound is on three pads, so find all three.":"")}
   $("moves").textContent=0;$("pairs").textContent="0/"+NP;
   $("pairsLbl").textContent=style==="triples"?"Sets of 3":"Pairs";
@@ -1651,6 +1668,7 @@ function showDeckChip(){
   $("dcArt").textContent=DECKICON[deck]||"♪";
   $("dcCat").textContent=dailyOn?"Today's board":DECKKINDS[kind].name;$("dcName").textContent=DECKNAME[deck];
   $("deckChip").dataset.kind=kind;
+  document.body.classList.toggle("matchup",!!MATCHUP[deck]); // hides the Triples button
   $("deckChip").setAttribute("aria-label","Board: "+DECKNAME[deck]+", "+DECKKINDS[kind].name+". Choose a board.");
   document.querySelectorAll(".decks button[data-deck]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.deck===deck));
 }
@@ -1658,6 +1676,7 @@ function pickDeck(id,from){
   $("deckPick").close();
   if(dailyOn)leaveDaily(true);
   deck=id;track("deck/"+deck,"Board picked: "+DECKNAME[deck]);
+  try{if(style==="pairs"&&!MATCHUP[deck]&&localStorage.getItem("pairody-style")==="triples"){style="triples";showStyle()}}catch(e){}
   if(from==="featured")track("decks/featured/"+deck,"Featured board picked: "+DECKNAME[deck]);
   showDeckChip();build();$("deckChip").focus();
 }
@@ -1706,8 +1725,9 @@ function showStyle(){
 document.querySelectorAll("[data-style]").forEach(btn=>btn.onclick=()=>{
   const was=dailyOn;if(dailyOn)leaveDaily(true);
   const to=btn.dataset.style;
+  try{localStorage.setItem("pairody-style",to)}catch(e){} // saved even when already showing (a Match up board shows Pairs for a saved Triples)
   if(to===style&&!demo){if(was)build();return}
-  style=to;try{localStorage.setItem("pairody-style",style)}catch(e){}
+  style=to;
   track("style/"+style,"Game style picked: "+STYLES[style].name);
   showStyle();build();
 });
@@ -1805,6 +1825,12 @@ function startDemo(){
 }
 $("demo").onclick=()=>demo?stopDemo():startDemo();
 initDrag();
+// "How to play" folds: closed until opened, and each remembers being open (localStorage data-key = "1")
+document.querySelectorAll("details.fold").forEach(d=>{
+  try{d.open=localStorage.getItem(d.dataset.key)==="1"}catch(e){}
+  d.addEventListener("toggle",()=>{try{localStorage.setItem(d.dataset.key,d.open?"1":"0")}catch(e){}
+    track("help/"+(d.id==="boardHelp"?"board":"more")+"/"+(d.open?"open":"close"),"How to play "+(d.open?"opened":"closed"))});
+});
 build();
 </script>
 </body>
