@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Settings in one place', items: [
+      '<b>New game</b> and <b>Demo</b> now sit at the top, then all the settings together (game size, players, Timed, Labels), then your moves and time right above the pads.',
+    ]},
     { date: '2026-11-17', title: 'One best score per game size', items: [
       'Timed games now count toward the same best score as untimed ones, since the clock doesn\'t change how fast you play. The Timed column is gone from <b>Your best scores</b>, and any Timed bests you already had were kept if they were better.',
     ]},
