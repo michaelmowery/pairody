@@ -56,7 +56,14 @@ body.daily-on .styles,body.daily-on .opts{display:none}
 body.daily-on .deck-chip{cursor:default}
 body.daily-on .deck-chip .chev{display:none}
 .boardbar{gap:10px 14px}
-.boardbar .bb-btns{margin-left:auto}
+/* New game, Demo and the Difficult switch share a row under the readout (Michael, 2026-11-16).
+   On narrow phones the switch caption shortens to "Difficult · On/Off". */
+.boardbar .bb-btns{flex:1 0 100%;align-items:center;flex-wrap:wrap;gap:8px}
+.boardbar .bb-btns .toggle{margin-left:auto}
+.toggle .dm-more{font-style:normal}
+@media (max-width:520px){.toggle .dm-more{display:none}}
+body.daily-on .bb-btns .toggle{display:none}
+@media (max-width:400px){.boardbar .bb-btns{gap:6px}.boardbar .bb-btns .btn{padding-left:12px;padding-right:12px}.boardbar .bb-btns .toggle{gap:6px}}
 .pad.matched .lbl{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
@@ -163,7 +170,6 @@ body.daily-on .deck-chip .chev{display:none}
       </div>
     </div>
     <div class="opts">
-      <label class="toggle"><input type="checkbox" id="difficult"><span>Difficult mode · <b class="dm-on">On: sounds only, no names</b><b class="dm-off">Off: names shown</b></span></label>
       <div class="sizes" role="group" aria-label="Game size">
         <button data-size="small" aria-pressed="false" title="12 pads, 6 pairs">Small <small>3×4</small></button>
         <button data-size="classic" aria-pressed="true" title="16 pads, 8 pairs">Classic <small>4×4</small></button>
@@ -178,7 +184,8 @@ body.daily-on .deck-chip .chev{display:none}
       <div class="duo" id="duoBox" hidden><span>Score</span><b><i id="s0"><small>P1</small>0</i> <i id="s1"><small>P2</small>0</i></b></div>
       <div class="best tap" id="bestBox" role="button" tabindex="0" title="Your best on this board and game size: fewest moves, then fastest time. Saved on this device."><span id="bestLbl">Best</span><b id="best">—</b></div>
     </div>
-    <div class="row-btns bb-btns"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button><button class="btn" id="reset">New game</button></div>
+    <div class="row-btns bb-btns"><button class="btn" id="reset">New game</button><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button>
+      <label class="toggle"><input type="checkbox" id="difficult"><span>Difficult<i class="dm-more"> mode</i> · <b class="dm-on">On<i class="dm-more">: sounds only, no names</i></b><b class="dm-off">Off<i class="dm-more">: names shown</i></b></span></label></div>
     </div>
     <!-- 2 Players scoreboard: whose turn it is and each player's matches. Names are editable and saved on this device. -->
     <div class="vs" id="vs" role="group" aria-label="Scoreboard" hidden>
