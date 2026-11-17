@@ -19,8 +19,12 @@
   const PREFS_KEY = 'pairody.prefs';
 
   // Only the live site and the iOS app count; local copies and preview hosts just log to the console.
-  // App counts are tagged: page views start with /app, and the launch event is launch/ios-app.
+  // App counts are tagged so they never mix with the website's: page views start with /app, and
+  // every event starts with ios/ (ios/deck/animals, ios/win/jokes/big, ios/launch). GoatCounter's
+  // filter box matches part of a name, so "win/jokes" shows web and app together, "ios/" the app only.
+  // native.js runs first (not deferred) and sets PairodyNative when Capacitor says it's the app.
   const NATIVE = !!window.PairodyNative;
+  const TAG = NATIVE ? 'ios/' : '';
   const LIVE = NATIVE || /(^|\.)pairody\.app$/.test(location.hostname);
 
   function loadPrefs(){ try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') || {}; } catch(e){ return {}; } }
@@ -45,8 +49,11 @@
         s: [screen.width, screen.height, window.devicePixelRatio || 1].join(','),
         rnd: Math.random().toString(36).slice(2, 8),
       }));
+      // Always the full https address: the app's pages come from capacitor://localhost.
       const url = 'https://' + GOATCOUNTER_CODE + '.goatcounter.com/count?' + q;
-      if (navigator.sendBeacon && navigator.sendBeacon(url)) return;
+      // In the app, a plain image request: WKWebView can accept a beacon from the app's own
+      // scheme and then drop it without saying so, which would lose the count.
+      if (!NATIVE && navigator.sendBeacon && navigator.sendBeacon(url)) return;
       const img = new Image();
       img.onerror = () => {}; // offline or blocked: drop it quietly
       img.src = url;
@@ -54,14 +61,15 @@
   }
 
   // An action: `name` is a short path-like id ("deck/animals"), `title` a readable label.
-  function track(name, title){ send({ p: name, t: title || name, e: 'true' }); }
+  // In the app both get the iOS tag (see TAG above).
+  function track(name, title){ send({ p: TAG + name, t: (NATIVE ? 'iOS: ' : '') + (title || name), e: 'true' }); }
 
   window.PairodyAnalytics = { track, enabled, setEnabled };
 
   // One page view per load, tagged with how Pairody was opened (installed app or browser tab).
   const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   send({ p: (NATIVE ? '/app' : '') + (location.pathname || '/'), t: document.title, r: NATIVE ? '' : document.referrer });
-  if (NATIVE) track('launch/ios-app', 'Opened the iOS app');
+  if (NATIVE) track('launch', 'Opened the app'); // sent as ios/launch
   else track(standalone ? 'launch/installed-app' : 'launch/browser', standalone ? 'Opened as installed app' : 'Opened in a browser');
 
   // Installed to the home screen (Chrome, Edge and Android; iOS doesn't say, so the launch

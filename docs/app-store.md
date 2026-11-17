@@ -23,7 +23,9 @@ How the app differs from the website:
 - No service worker and no "Check for updates": updates come through the App Store.
 - No "early preview" wording (Apple rejects apps that call themselves a beta or preview).
 - Pads play with the ring/silent switch on (`AppDelegate.swift` sets the audio session to playback).
-- Usage counts still go to GoatCounter, tagged `launch/ios-app` and `/app/...` page views.
+- Usage counts still go to GoatCounter (boards, sizes, styles, players, wins, Daily, and so on),
+  tagged so they don't mix with the website's: events start with `ios/` and page views with
+  `/app`. The Anonymous usage counts switch in the info panel turns them off. See `docs/analytics.md`.
 
 ## One-time setup on the Mac (Wison)
 
@@ -91,9 +93,12 @@ Xcode (App target → General), `npm run app:sync`, then Archive and upload agai
   >
   > Free, with no ads and no accounts.
 
-- **App Privacy (nutrition label):** Data collected → *Usage Data → Product Interaction*. Not
-  linked to the user, not used for tracking, purpose *Analytics*. Nothing else. (GoatCounter
-  sets no identifiers, so no App Tracking Transparency prompt is needed.)
+- **App Privacy (nutrition label):** answer *Yes, we collect data*, then tick only
+  *Usage Data → Product Interaction*. For it: **not linked to the user's identity**, **not used
+  for tracking**, purpose **Analytics** only. Nothing else is collected (no contact info, no
+  identifiers, no diagnostics). GoatCounter sets no cookies or device IDs and keeps no profile,
+  so no App Tracking Transparency prompt is needed and `NSUserTrackingUsageDescription` stays out
+  of `Info.plist`. Players can switch counts off in the info panel (Privacy).
 - **Export compliance:** already answered in `Info.plist` (`ITSAppUsesNonExemptEncryption = NO`).
 - **Review notes:** "Pairody is a memory game where every card is a sound. Turn the volume up,
   pick a deck and tap two pads to find matching sounds. No login is needed."
