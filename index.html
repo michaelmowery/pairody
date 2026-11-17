@@ -1617,6 +1617,13 @@ $("bestBox").onclick=()=>openScores(dailyOn||duo()?"streak":"best");
 $("bestBox").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("bestBox").click()}};
 addEventListener("pairody:bests-cleared",()=>showBest());
 addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("doneCard").hidden&&!document.querySelector("dialog[open]"))$("doneClose").click()});
+// A tap anywhere outside the card closes it too, like See game (Michael, 2026-11-17). A tap on
+// another control (New game, a size, the board chip) still does its own job as well.
+document.addEventListener("click",e=>{
+  const c=$("doneCard");if(c.hidden||c.querySelector(".card").contains(e.target)||e.target.closest("dialog"))return;
+  track("done/away","Well done card: closed by tapping outside");hideDone();
+  if(e.target===c)$("reset").focus({preventScroll:true});
+},true);
 // Board cleared
 function finish(){
   clearInterval(timer);

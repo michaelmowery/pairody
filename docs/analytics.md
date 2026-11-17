@@ -53,6 +53,7 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `matchup/drag/<id>` | on a two-sided Match up board, a match made by dragging a line from one side to the other instead of tapping both pads (added 2026-11-16) |
 | `timed/out/<id>[/small\|/big]` | a Timed board ran out of time |
 | `done/new`, `done/close` | on the Well done card shown after a board is cleared: New board, or See board (closes the card). Added 2026-11-16. |
+| `done/away` | the Well done card closed by tapping outside it (added 2026-11-17) |
 | `daily/streak/<n>` | a Daily streak grew to n days (n capped at 30) |
 | `daily/on`, `daily/off` | Daily Pairody turned on or off with its pill (added 2026-11-16). Since then Daily is not a style: `style/daily` stops, and Daily games add `/daily` after the style suffix in play/win/perfect (for example `win/jokes/big/triples/daily`; Pairs shows just `/daily`). Before, `/daily` was the style suffix of a per-board Daily game. |
 | `daily/card/play` | Play today's game tapped on the Daily game card above the board (added 2026-11-16) |
