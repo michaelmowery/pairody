@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'A simpler board list', items: [
+      'The board list is one list now: Same sound boards, then Match up boards, each by topic with the free boards first. The Featured row and the All / Grouped switch are gone.',
+    ]},
     { date: '2026-11-17', title: 'A tidier Daily Pairody', items: [
       'The big Daily banner above the board is gone. The <b>Daily Pairody</b> button is still there, and the line under it shows your streak, then <i>✓ Done today</i> and a <b>Share</b> link once you\'ve played.',
       'Clear the Daily and the Well done card leads with <b>Share</b>, shows your green and dark squares for the game (one per move: green a match, dark a miss), your streak, and when the next one comes.',

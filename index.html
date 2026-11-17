@@ -237,7 +237,7 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
     <p>Each pad shows the name of its sound while it plays, like the now-playing card in a music app. Want a real test of your ears? Turn <b>Labels</b> off and you get the sounds only. Those games keep their own best scores.</p>
     <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own bests, and so do Timed games.</p>
     <p>Want a challenge? Turn on <b>Timed</b>, next to New game and Demo, and you get a clock to beat. <b>Daily Pairody</b>, at the top next to the board name, is one surprise game a day: the date picks the board, game size and whether it's Timed, and everyone gets the same pads. You play it as dealt, and your own choices come back when you tap it again. Clear one every day to build a streak. Pick <b>1 Player</b> or <b>2 Players</b> next to the sizes. Two players take turns on one device: find a match and you go again, miss and it's the other player's turn. In a Timed game you share the clock, and whoever has more when it runs out wins. 2 Players and Daily games don't touch your best scores.</p>
-    <p>Tap the board name at the top to see every board as a card, grouped into Sounds, Music, Words and Learning or in one A to Z list. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
+    <p>Tap the board name at the top to see every board as a card, grouped first by how they play (Same sound or Match up), then into Sounds, Music, Words and Learning, with the free boards first. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
     <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
     <p>Playing with a screen reader or a keyboard? Each pad says where it sits (row and column, or which side on Match up boards) and whether it's face down, face up or matched, and matches, turns and the clock are read out once the sound has finished. On a keyboard, Tab to the pads and move around with the arrow keys. Tap <b>i</b> for <b>Audio cues</b>, which place each pad's sound left to right where it sits, and <b>Extra time</b> for Timed games.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
@@ -245,10 +245,6 @@ body.daily-on .bb-btns [data-style="timed"]{display:none}
   <dialog class="info deckpick" id="deckPick" aria-labelledby="deckPickTitle">
     <div class="dp-head">
       <h2 id="deckPickTitle">Choose a board</h2>
-      <div class="dp-view" role="radiogroup" aria-label="Show boards">
-        <button type="button" role="radio" data-view="all" aria-label="All boards, A to Z" title="All boards, A to Z"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14M5 12h14M5 17.5h14"/></svg><span>All</span></button>
-        <button type="button" role="radio" data-view="grouped" aria-label="Grouped by how they play, then topic" title="Grouped by how they play, then topic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Grouped</span></button>
-      </div>
       <form method="dialog" class="dp-x"><button aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
     </div>
     <div class="decks" id="deckBody" role="group" aria-label="Boards"></div>
@@ -1763,14 +1759,12 @@ const DECKCARD={
   planets:["learning",["Red planet","Mars"],"Planets, moons and stars from clues"],
   presidents:["learning",["16th","Lincoln"],"Match each president to their number"]
 };
-const FEATURED=["animals","jokes","brain","melodies"];
 // The deck chip's little icon
 const DECKICON={animals:"🦁",everyday:"🔔",keypad:"☎️",morse:"📡",weather:"⛈️",vehicles:"🚂",ringtones:"📱",homophones:"👂",notes:"🎹",melodies:"🎵",instruments:"🎻",seasonal:SEASONS[season].art,
   talk:"🐱",quotes:"💬",jokes:"😂",twisters:"👅",hello:"👋",wordplay:"🎶",opposites:"⇄",brain:"🌍",times:"✖️",synonyms:"≈",elements:"🧪",planets:"🪐",presidents:"🏛️"};
 const PLAYKIND={same:"Same sound",match:"Match up"};
 const playKind=id=>MATCHUP[id]?"match":"same";
 const deckName=id=>id==="youtube"?"Your music":DECKNAME[id];
-const deckView=()=>{try{return localStorage.getItem("pairody-deckview")==="all"?"all":"grouped"}catch(e){return "grouped"}};
 function deckTile(id,showKind,from){
   const [kind,pair,line]=DECKCARD[id],yt=id==="youtube";
   const t=document.createElement(yt?"a":"button");
@@ -1808,9 +1802,8 @@ function buildDeckPicker(){
   const body=$("deckBody");body.textContent="";
   const ids=Object.keys(DECKCARD);
   const grouped=document.createElement("div");grouped.className="dp-grouped";
-  grouped.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));
-  // Free boards come first (Michael, 2026-11-16): first in each group, and in their own section
-  // in All. Your music counts as free. The iOS app shows no Free/Plus yet, so it keeps one list.
+  // One list (Michael, 2026-11-17: the Featured row and the All / Grouped switch were removed).
+  // Free boards come first in each group (Michael, 2026-11-16). Your music counts as free. The iOS app shows no Free/Plus yet, so it keeps one list.
   const tiers=!document.documentElement.classList.contains("native")&&window.PairodyPlus;
   const isFree=id=>id==="youtube"||!tiers||PairodyPlus.deckTier(id)==="free";
   const freeFirst=list=>tiers?list.filter(isFree).concat(list.filter(id=>!isFree(id))):list;
@@ -1828,31 +1821,8 @@ function buildDeckPicker(){
   });
   grouped.appendChild(deckSection("dp-kind",DECKKINDS.yours.name,DECKKINDS.yours.hint,["youtube"],false,"grouped","yours"));
   grouped.querySelector('.dp-kind[data-kind="yours"]')?.classList.add("web-only"); // the iOS app has no Your music
-  const all=document.createElement("div");all.className="dp-all";
-  all.appendChild(deckSection("dp-featured","Featured","A good place to start",FEATURED,true,"featured"));
-  const az=ids.slice().sort((a,b)=>deckName(a).localeCompare(deckName(b)));
-  if(tiers){
-    all.appendChild(deckSection("dp-az dp-free","Free","Always included, A to Z",az.filter(isFree),true,"all"));
-    all.appendChild(deckSection("dp-az dp-plus","Plus","Part of Pairody Plus later. Free for everyone for now",az.filter(id=>!isFree(id)),true,"all"));
-  }else all.appendChild(deckSection("dp-az","All boards","A to Z",az,true,"all"));
-  body.append(grouped,all);applyDeckView();
+  body.append(grouped);
 }
-function applyDeckView(){
-  const v=deckView();
-  document.querySelectorAll(".dp-view [data-view]").forEach(b=>{const on=b.dataset.view===v;b.setAttribute("aria-checked",on);b.tabIndex=on?0:-1});
-  $("deckBody").querySelector(".dp-grouped").hidden=v!=="grouped";
-  $("deckBody").querySelector(".dp-all").hidden=v!=="all";
-}
-document.querySelectorAll(".dp-view [data-view]").forEach(b=>b.onclick=()=>{
-  if(b.dataset.view===deckView())return;
-  try{localStorage.setItem("pairody-deckview",b.dataset.view)}catch(e){}
-  track("decks/view/"+b.dataset.view,"Board picker view: "+b.dataset.view);
-  applyDeckView();$("deckBody").scrollTop=0;$("deckPick").scrollTop=0;
-});
-document.querySelector(".dp-view").addEventListener("keydown",e=>{
-  if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key))return;
-  e.preventDefault();const nx=document.querySelector('.dp-view [data-view]:not([data-view="'+deckView()+'"])');nx.click();nx.focus();
-});
 function showDeckChip(){
   const kind=DECKCARD[deck][0];
   $("dcArt").textContent=DECKICON[deck]||"♪";
@@ -1866,15 +1836,14 @@ function pickDeck(id,from){
   $("deckPick").close();
   if(dailyOn)leaveDaily(true);
   deck=id;track("deck/"+deck,"Board picked: "+DECKNAME[deck]);
-  if(from==="featured")track("decks/featured/"+deck,"Featured board picked: "+DECKNAME[deck]);
   showDeckChip();build();$("deckChip").focus();
 }
 $("deckChip").onclick=()=>{
   document.querySelectorAll("dialog.info[open]").forEach(d=>d.close());
   const dp=$("deckPick");dp.showModal();
   track("decks/open","Board picker opened");
-  const cur=dp.querySelector((deckView()==="all"?".dp-all .dp-az":".dp-grouped .dp-kind")+' [data-deck="'+deck+'"]');
-  if(cur){cur.focus({preventScroll:true});if(!FEATURED.includes(deck))cur.scrollIntoView({block:"center"});else dp.scrollTop=0}
+  const cur=dp.querySelector('.dp-grouped [data-deck="'+deck+'"]');
+  if(cur){cur.focus({preventScroll:true});cur.scrollIntoView({block:"center"})}
 };
 // Tap outside the panel to close it
 $("deckPick").addEventListener("click",e=>{
