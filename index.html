@@ -44,6 +44,7 @@ details.fold > summary:focus-visible{outline:2px solid var(--led-ink);outline-of
 @media (prefers-reduced-motion:reduce){details.fold > summary .chev{transition:none}}
 .deckhelp{margin:0;color:var(--muted);font-size:.9rem;line-height:1.4}
 .deckhelp b{color:var(--fg);font-family:var(--display);font-weight:600}
+.demo-row{margin:10px 0 2px}
 .row-btns{display:flex;gap:6px}
 .daily-pill[aria-pressed="true"]{border-color:var(--led);box-shadow:inset 0 0 0 1px var(--led)}
 .daily-wrap{display:grid;justify-items:center;gap:3px}
@@ -79,7 +80,7 @@ body.daily-on .styles,body.daily-on .opts{display:none}
 body.daily-on .deck-chip{cursor:default}
 body.daily-on .deck-chip .chev{display:none}
 .boardbar{gap:10px 14px}
-/* New game and Demo lead the controls, then the settings: sizes and players, then the Timed and
+/* New game leads the controls (Demo is in How to play), then the settings: sizes and players, then the Timed and
    Labels switches on their own line, then the readout (Michael, 2026-11-17). On phones the switch
    captions shorten to "Timed · On" / "Labels · On". */
 .boardbar .bb-btns{align-items:center;flex-wrap:wrap;gap:8px}
@@ -182,10 +183,12 @@ body.daily-on .setsw [data-style="timed"]{display:none}
       <div class="daily-wrap"><span class="dp-anchor"><svg class="daily-arrow" viewBox="0 0 52 40" aria-hidden="true"><path class="da-line" d="M5 34c3-9 9-16 17-19 7-3 14-3 22-1"/><path class="da-head" d="M37 6.5l8.5 7.2-9.6 5.3"/></svg><button class="btn daily-pill" id="dailyPill" aria-pressed="false" title="Daily Pairody: one surprise game a day, the same board and size for everyone. Tap again to go back to your own game.">Daily Pairody</button></span><small class="daily-line"><span class="daily-ask" id="dailyAsk" aria-live="polite">Have you Pairody'd today?</span><button type="button" class="daily-share" id="dailyShare" hidden>Share</button></small></div>
     </div>
     <details class="fold boardhelp" id="boardHelp" data-key="pairody-help"><summary><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span id="boardHelpSum">How to play</span></summary>
-      <p class="deckhelp" id="deckHelp"></p></details>
-    <!-- Top to bottom (Michael, 2026-11-17): New game and Demo, then every setting together (sizes,
+      <p class="deckhelp" id="deckHelp"></p>
+      <!-- Demo lives here, with the instructions (Michael, 2026-11-17). It opens this fold while it runs, so Stop demo stays in reach -->
+      <p class="demo-row"><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Watch a demo</button></p></details>
+    <!-- Top to bottom (Michael, 2026-11-17): New game (Demo is in How to play above), then every setting together (sizes,
          players, Timed, Labels), then this game's readout right above the status line and pads -->
-    <div class="row boardbar"><div class="row-btns bb-btns"><button class="btn" id="reset">New game</button><button class="btn" id="demo" aria-pressed="false" title="Watch Pairody play a game of this board by itself">Demo</button></div></div>
+    <div class="row boardbar"><div class="row-btns bb-btns"><button class="btn" id="reset">New game</button></div></div>
     <div class="opts">
       <div class="sizes" role="group" aria-label="Game size">
         <button data-size="small" aria-pressed="false" title="12 pads, 6 pairs">Small <small>3×4</small></button>
@@ -241,7 +244,7 @@ body.daily-on .setsw [data-style="timed"]{display:none}
     <p>Your best score for each board (fewest moves, then fastest time) is saved on this device and shows next to the board name. Tap <b>Best</b> above the pads to see all of them on one score card, where you can also clear them. Each game size keeps its own best, and Timed games count toward it too.</p>
     <p>Want a challenge? Turn on <b>Timed</b>, under the game sizes, and you get a clock to beat. <b>Daily Pairody</b>, at the top next to the board name, is one surprise game a day: the date picks the board, game size and whether it's Timed, and everyone gets the same pads. You play it as dealt, and your own choices come back when you tap it again. Clear one every day to build a streak. Pick <b>1 Player</b> or <b>2 Players</b> next to the sizes. Two players take turns on one device: find a match and you go again, miss and it's the other player's turn. In a Timed game you share the clock, and whoever has more when it runs out wins. 2 Players and Daily games don't touch your best scores.</p>
     <p>Tap the board name at the top to see every board as a card, grouped first by how they play (Same sound or Match up), then into Sounds, Music, Words and Learning, with the free boards first. Each board plays a little differently; tap <b>How to play</b> under the board name to read about the one you picked.</p>
-    <p>Not sure how it works? Tap <b>Demo</b> and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
+    <p>Not sure how it works? Open <b>How to play</b> and tap <b>Watch a demo</b>, and Pairody plays a game of whichever board you picked by itself: it listens, remembers where each sound was, and pairs them up. Demo games don't count toward your best scores.</p>
     <p>Playing with a screen reader or a keyboard? Each pad says where it sits (row and column, or which side on Match up boards) and whether it's face down, face up or matched, and matches, turns and the clock are read out once the sound has finished. On a keyboard, Tab to the pads and move around with the arrow keys. Tap <b>i</b> for <b>Audio cues</b>, which place each pad's sound left to right where it sits, and <b>Extra time</b> for Timed games.</p>
     <p class="web-only">Want your own songs? Try <a href="youtube.html">Your music</a> (beta) with a YouTube playlist.</p>
   </details>
@@ -1968,8 +1971,11 @@ function demoStep(){
   };
   demoWait(DEMO_GAP,next);
 }
+var demoOpened=false,demoToggle=false; // demoToggle: the next toggle event is ours, not the player's
 function setDemoUi(on){
-  const btn=$("demo");btn.textContent=on?"Stop demo":"Demo";btn.classList.toggle("primary",on);btn.setAttribute("aria-pressed",on);
+  const btn=$("demo");btn.textContent=on?"Stop demo":"Watch a demo";
+  // Demo sits in the How to play fold: open it while a demo runs (without remembering that), close it again after
+  const f=$("boardHelp");if(on&&!f.open){demoOpened=demoToggle=true;f.open=true}else if(!on&&demoOpened){demoOpened=false;if(f.open){demoToggle=true;f.open=false}}btn.classList.toggle("primary",on);btn.setAttribute("aria-pressed",on);
   document.body.classList.toggle("demo",on);
 }
 function endDemo(){demo=null;setDemoUi(false)}
@@ -1992,7 +1998,7 @@ $("grid").addEventListener("focusin",e=>{const p=e.target.closest(".pad");if(p&&
 // "How to play" folds: closed until opened, and each remembers being open (localStorage data-key = "1")
 document.querySelectorAll("details.fold").forEach(d=>{
   try{d.open=localStorage.getItem(d.dataset.key)==="1"}catch(e){}
-  d.addEventListener("toggle",()=>{try{localStorage.setItem(d.dataset.key,d.open?"1":"0")}catch(e){}
+  d.addEventListener("toggle",()=>{if(d.id==="boardHelp"){if(demoToggle){demoToggle=false;return}demoOpened=false}try{localStorage.setItem(d.dataset.key,d.open?"1":"0")}catch(e){}
     track("help/"+(d.id==="boardHelp"?"board":"more")+"/"+(d.open?"open":"close"),"How to play "+(d.open?"opened":"closed"))});
 });
 build();

@@ -12,6 +12,9 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-17', title: 'Demo moved to How to play', items: [
+      'The Demo button now lives in <b>How to play</b> as <b>Watch a demo</b>, so New game has the top row to itself.',
+    ]},
     { date: '2026-11-17', title: 'Settings in one place', items: [
       '<b>New game</b> and <b>Demo</b> now sit at the top, then all the settings together (game size, players, Timed, Labels), then your moves and time right above the pads.',
     ]},
