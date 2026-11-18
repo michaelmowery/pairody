@@ -56,7 +56,7 @@ Xcode (App target → General), `npm run app:sync`, then Archive and upload agai
 - **Name:** Pairody
 - **Subtitle (30):** Memory match, played by ear
 - **Category:** Games, secondary Puzzle (or Family)
-- **Price:** Free. No in-app purchases.
+- **Price:** Free, with one in-app purchase: Pairody Plus (see Pairody Plus below).
 - **Age rating:** 4+ (answer "None" to every content question)
 - **Privacy policy URL:** https://pairody.app/privacy.html
 - **Support URL:** https://pairody.app/support.html
@@ -91,6 +91,47 @@ Xcode (App target → General), `npm run app:sync`, then Archive and upload agai
 - **Export compliance:** already answered in `Info.plist` (`ITSAppUsesNonExemptEncryption = NO`).
 - **Review notes:** "Pairody is a memory game where every card is a sound. Turn the volume up,
   pick a deck and tap two pads to find matching sounds. No login is needed."
+  From 1.1.0 add: "Pairody Plus is a one-time non-consumable purchase that unlocks every board.
+  Animals, Melodies, Jokes, Capitals and Daily Pairody are free; every other board has 10 free
+  games, then shows the Plus sheet. Get Plus and Restore purchases are on that sheet and in the
+  i (About Pairody) panel."
+
+## Pairody Plus (in-app purchase, from 1.1.0)
+
+One non-consumable in-app purchase, **$3.99** (Michael, 2026-11-18), bought with StoreKit 2 straight
+from the app (no RevenueCat or other SDK, no server). Code: `ios/App/App/PlusStore.swift` (native)
+and `assets/plus.js` (rules, Plus sheet). The website stays free for everyone.
+
+| | |
+| --- | --- |
+| Product ID | `com.mountmtech.pairody.plus` |
+| Type | Non-Consumable |
+| Reference name | Pairody Plus |
+| Display name (30) | Pairody Plus |
+| Description (45) | Unlock every board, and every new one |
+| Price | $3.99 (Tier for USD 3.99; Apple sets the other countries) |
+| Review screenshot | the Plus sheet (open a Plus board after its 10 free games, or Get Plus in the i panel) |
+
+One-time setup in App Store Connect (Michael):
+
+1. **Business → Agreements:** sign the **Paid Apps** agreement, then add bank account and tax forms.
+   Purchases can't be sold (or even tested in the sandbox reliably) until it is active.
+2. **Small Business Program:** enroll at <https://developer.apple.com/app-store/small-business-program/>
+   so Apple keeps 15% instead of 30%.
+3. **Pairody → Monetization → In-App Purchases → +:** create the product above, add the review
+   screenshot, and set availability to the same 174 countries.
+4. **Family Sharing** (on the product page): optional and can't be turned off once on. Recommended for
+   a family game.
+5. On the new **1.1.0** version page, under *In-App Purchases and Subscriptions*, add Pairody Plus so
+   it goes to review with the build (the first in-app purchase must ship with a new version).
+
+Test without paying:
+
+- **Simulator:** `ios/App/App/Pairody.storekit` is a local StoreKit file with the same product. In
+  Xcode, **Product → Scheme → Edit Scheme → Run → Options → StoreKit Configuration:
+  Pairody.storekit**. Purchases are fake, and **Debug → StoreKit → Manage Transactions** deletes
+  them to test again. Free-game counts live in the web view's storage (`pairody.plusTries`).
+- **TestFlight / device:** purchases go through the sandbox and are free.
 
 ### Screenshots
 

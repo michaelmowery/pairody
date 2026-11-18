@@ -5,7 +5,7 @@
 <form method="dialog" class="info-x"><button aria-label="Close">×</button></form>
 <p class="info-tag">About</p>
 <h2 id="infoTitle">About Pairody</h2>
-<p>Memory match, played by ear. Pairody is free to play, with no ads and no accounts, and new boards arrive <span class="web-only">often</span><span class="native-only">with app updates</span>.</p>
+<p>Memory match, played by ear. Pairody is free to <span class="web-only">play</span><span class="native-only">download</span>, with no ads and no accounts, and new boards arrive <span class="web-only">often</span><span class="native-only">with app updates</span>.</p>
 <div class="info-news" hidden>
   <p class="info-news-latest"></p>
   <button type="button" class="btn info-news-btn">What's new</button>
@@ -17,6 +17,7 @@
   <li><b>Best scores</b> for each board, saved on this device. No account or sign-up.</li>
   <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Your Music in the board picker.</li>
   <li class="web-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), Your music, every game size, Timed, Labels, 2 Players and Daily are free. Boards tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
+  <li class="native-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), every game size, Timed, Labels, 2 Players and Daily are free. Every board tagged <span class="tier-tag">Plus</span> has 10 free games to try it, and Pairody Plus, a one-time purchase, unlocks them all for good.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>
@@ -29,6 +30,13 @@
 <h3>Best scores</h3>
 <p>Every best score saved on this device, by board, game size and style. You can clear them there too.</p>
 <div class="info-scores"><button type="button" class="btn info-scores-btn">See best scores</button></div>
+</div>
+<div class="info-plus" hidden>
+<h3>Pairody Plus</h3>
+<p class="info-plus-state"></p>
+<div class="info-plus-actions"><button type="button" class="btn primary info-plus-buy">Get Plus</button>
+<button type="button" class="btn info-plus-restore">Restore purchases</button></div>
+<p class="info-plus-status" role="status"></p>
 </div>
 <h3>Privacy</h3>
 <p>To learn which boards and features people use, Pairody sends anonymous counts (like "Animals game cleared") to <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. No cookies, no ads, and nothing that follows you around the web. <span class="web-only">Your playlists and song links are never sent. </span><a href="privacy.html">Privacy policy</a></p>
@@ -74,7 +82,26 @@
     // Tap outside the panel to close it
     dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
     setupUpdates(dlg);btn.addEventListener("click",()=>{resetUpdateUi(dlg);setFeedbackLink(dlg)});
-    setFeedbackLink(dlg);setupNews(dlg);setupScores(dlg);setupAccess(dlg);
+    setFeedbackLink(dlg);setupNews(dlg);setupScores(dlg);setupAccess(dlg);setupPlus(dlg);
+  }
+  // Pairody Plus (the iOS app only, assets/plus.js): what you have, Get Plus and Restore purchases.
+  // Apple asks for Restore purchases somewhere easy to find; it lives here and on the Plus sheet.
+  function setupPlus(dlg){
+    const P=window.PairodyPlus,box=dlg.querySelector(".info-plus");
+    if(!P||!P.LOCKED)return;
+    const show=()=>{box.querySelector(".info-plus-state").textContent=P.has()
+      ?"You have Pairody Plus: every board, and every new one as it arrives. Thank you!"
+      :"One purchase unlocks every board, and every new one as it arrives. No subscription.";
+      const b=box.querySelector(".info-plus-buy");b.textContent="Get Plus"+(P.price()?" · "+P.price():"")};
+    box.querySelector(".info-plus-buy").addEventListener("click",()=>{dlg.close();P.offer({from:"info"})});
+    box.querySelector(".info-plus-restore").addEventListener("click",async()=>{
+      const st=box.querySelector(".info-plus-status");st.textContent="Checking with the App Store…";
+      const ok=await P.restore();
+      st.textContent=P.has()?"Plus restored. Every board is unlocked.":ok===false?"Couldn’t reach the App Store. Check your connection and try again.":"No Plus purchase found for this Apple ID.";
+      show()});
+    addEventListener("pairody:plus",show);
+    document.querySelector(".info-btn")?.addEventListener("click",()=>{box.querySelector(".info-plus-status").textContent="";show()});
+    show();box.hidden=false;
   }
   // Accessibility switches, on pages that have them (index.html sets window.PairodyAccess)
   function setupAccess(dlg){
