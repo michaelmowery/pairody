@@ -159,7 +159,7 @@
 <ul class="plus-list">
   <li><b class="plus-count">Every Plus board</b>: Quotes, Notes, Morse Code, Times Tables, Weather and the rest.</li>
   <li><b>Every new board</b> as it arrives, at no extra cost.</li>
-  <li><b>Pay once.</b> No subscription, no ads, no account.</li>
+  <li><b>Pay once.</b> No subscription, no ads, no account. Family Sharing included.</li>
 </ul>
 <p class="plus-free">Animals, Melodies, Jokes, Capitals and Daily Pairody stay free, with every game size, Timed, Labels and 2 Players.</p>
 <div class="plus-actions">

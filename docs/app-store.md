@@ -120,8 +120,8 @@ One-time setup in App Store Connect (Michael):
    so Apple keeps 15% instead of 30%.
 3. **Pairody → Monetization → In-App Purchases → +:** create the product above, add the review
    screenshot, and set availability to the same 174 countries.
-4. **Family Sharing** (on the product page): optional and can't be turned off once on. Recommended for
-   a family game.
+4. **Family Sharing:** turn it **on** on the product page (Michael, 2026-11-18). It can't be turned off
+   later; the Plus sheet says "Family Sharing included".
 5. On the new **1.1.0** version page, under *In-App Purchases and Subscriptions*, add Pairody Plus so
    it goes to review with the build (the first in-app purchase must ship with a new version).
 
