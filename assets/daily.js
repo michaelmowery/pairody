@@ -85,6 +85,7 @@
   // and shows today's squares (this clear's moves: green = match, dark = miss) and when the next one comes
   addEventListener('pairody:daily-cleared', (e) => {
     if (ds) { ds.hidden = false; ds.classList.add('primary'); dn.hidden = true; }
+    const pk = $('donePick'); if (pk) pk.hidden = false; // a way on to another board
     const dd = $('doneDaily');
     if (dd) {
       $('doneSquares').innerHTML = squares(typeof mlog !== 'undefined' ? mlog.join('') : (Daily.result() || {}).log).join('<br>');
@@ -95,6 +96,7 @@
   });
   addEventListener('pairody:board', () => {
     if (ds) { ds.hidden = true; ds.classList.remove('primary'); dn.hidden = false; }
+    const pk = $('donePick'); if (pk) pk.hidden = true;
     const dd = $('doneDaily'); if (dd) dd.hidden = true;
     render();
   });

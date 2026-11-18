@@ -90,12 +90,11 @@ body.daily-todo .daily-arrow{display:block}
 .donecard .dd-key{font-size:.75rem;margin-top:3px}
 .donecard .dd-next{font-size:.82rem;margin-top:4px}
 /* While Daily Pairody is on, today's board, size and Timed setting are picked for everyone and
-   played as dealt: the pickers and the Timed switch are hidden, and the board chip is locked */
+   played as dealt: the pickers and the Timed switch are hidden. The board chip stays live: picking
+   a board leaves Daily and plays that board (2026-11-18; locking it left players stuck on Daily). */
 body.daily-on .styles,body.daily-on .opts{display:none}
 /* 1 / 2 Players share the sizes row now that the style buttons are gone (2026-11-17) */
 .opts .styles .players{border-left:0;padding-left:0}
-body.daily-on .deck-chip{cursor:default}
-body.daily-on .deck-chip .chev{display:none}
 .boardbar{gap:10px 14px}
 /* New game leads the controls (Demo is in How to play), then the settings: sizes and players, then the Timed and
    Labels switches on their own line, then the readout (Michael, 2026-11-17). On phones the switch
@@ -246,7 +245,7 @@ body.daily-on .setsw [data-style="timed"]{display:none}
         <p class="rank" id="doneRank" hidden></p>
         <p id="doneInfo"></p>
         <div class="dd" id="doneDaily" hidden><p class="dd-sq" id="doneSquares" role="img"></p><p class="dd-key" aria-hidden="true">🟩 match · ⬛ miss · one square per move</p><p class="dd-next" id="doneNext"></p></div>
-        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="doneClose">See game</button></div>
+        <div class="btns"><button class="btn" id="doneShare" hidden>Share</button><button class="btn primary" id="doneNew">New game</button><button class="btn" id="donePick" hidden>Pick a board</button><button class="btn" id="doneClose">See game</button></div>
         <button type="button" class="linkish" id="doneScores">All best scores</button>
       </div></div>
     </div>
@@ -1680,6 +1679,8 @@ function hideDone(all){clearTimeout(doneTimer);$("doneCard").hidden=true;if(all)
 $("doneNew").onclick=()=>{track("done/new","Well done card: New game");build();focusPad(0)};
 // A screen reader lands on New game and then hears the result (title, time, moves)
 $("doneNew").setAttribute("aria-describedby","doneTitle doneSize doneLbl doneTime doneInfo doneRank");
+// After a Daily clear: open the board picker, which leaves Daily when a board is picked
+$("donePick").onclick=()=>{track("done/pick","Well done card: Pick a board");hideDone();$("deckChip").click()};
 $("doneClose").onclick=()=>{track("done/close","Well done card: See game");hideDone();$("reset").focus({preventScroll:true})};
 // Best scores screen (assets/scores.js): from the Well done card, or by tapping the Best box
 const openScores=from=>window.PairodyScores&&PairodyScores.open(from);
@@ -1875,7 +1876,7 @@ function showDeckChip(){
   $("dcCat").textContent=dailyOn?"Today's board":DECKKINDS[kind].name;$("dcName").textContent=DECKNAME[deck];
   $("deckChip").dataset.kind=kind;
   document.body.classList.toggle("matchup",!!MATCHUP[deck]);
-  $("deckChip").setAttribute("aria-label","Board: "+DECKNAME[deck]+", "+DECKKINDS[kind].name+". Choose a board.");
+  $("deckChip").setAttribute("aria-label","Board: "+DECKNAME[deck]+", "+(dailyOn?"today's Daily Pairody board. Choose a board to leave Daily.":DECKKINDS[kind].name+". Choose a board."));
   document.querySelectorAll(".decks button[data-deck]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.deck===deck));
 }
 function pickDeck(id,from){
@@ -1949,7 +1950,6 @@ function enterDaily(){
   if(dailyOn)return;
   home={deck,size,style};dailyOn=true;
   const c=Daily.combo();deck=c.deck;size=c.size;style=c.style;
-  $("deckChip").disabled=true;
   document.body.classList.add("daily-on");$("dailyPill").setAttribute("aria-pressed","true");
   track("daily/on","Daily Pairody on");
   showDeckChip();showSize();showStyle();build();
@@ -1958,7 +1958,6 @@ function leaveDaily(quiet){
   if(!dailyOn)return;
   dailyOn=false;({deck,size,style}=home);
   home=null;
-  $("deckChip").disabled=false;
   document.body.classList.remove("daily-on");$("dailyPill").setAttribute("aria-pressed","false");
   showDeckChip();showSize();showStyle();
   if(!quiet){track("daily/off","Daily Pairody off");build()}
