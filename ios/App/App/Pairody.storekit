@@ -1,0 +1,38 @@
+{
+  "identifier" : "5A1B7C42",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "3.99",
+      "familyShareable" : true,
+      "internalID" : "6A2C9E11",
+      "localizations" : [
+        {
+          "description" : "Unlock every board, and every new one",
+          "displayName" : "Pairody Plus",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.mountmtech.pairody.plus",
+      "referenceName" : "Pairody Plus",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

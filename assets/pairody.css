@@ -235,7 +235,23 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
 .tier-tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid var(--led);border-radius:999px;
   color:var(--led-ink);font-family:var(--display);font-weight:600;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;vertical-align:1px;line-height:1.5}
 .tier-tag.tier-free{border-color:var(--ok);color:var(--ok)}
-.native .tier-tag{display:none} /* app: no tags until it can sell Plus */
+.plus-owned .tier-tag{display:none} /* app, Plus bought: every board is the same, so no tags */
+/* The Plus sheet (assets/plus.js, iOS app) */
+dialog.plus-sheet .plus-why{color:var(--fg)}
+dialog.plus-sheet .plus-list{margin:8px 0}
+dialog.plus-sheet .plus-free{font-size:.85rem}
+.plus-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 0}
+.plus-actions .plus-buy{flex:1 1 200px}
+dialog.plus-sheet .plus-status{margin:8px 0 0;font-size:.85rem}
+dialog.plus-sheet .plus-status:empty{display:none}
+dialog.plus-sheet .plus-owned-note{display:none;color:var(--fg)}
+dialog.plus-sheet.owned .plus-owned-note{display:block}
+dialog.plus-sheet.owned :is(.plus-why,.plus-free,.plus-actions,.plus-list){display:none}
+.plus-more{margin:8px 0 0}
+.plus-more:not(:has(button:not([hidden]))){display:none}
+/* Pairody Plus in the info panel (assets/info.js, iOS app) */
+.info-plus-actions{display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 0}
+.plus-owned .info-plus-buy{display:none}
 /* Best scores screen (assets/scores.js) */
 dialog.scores .sc-summary{margin:10px 0 2px;color:var(--fg)}
 dialog.scores .sc-summary b{color:var(--ok);font-family:var(--display)}

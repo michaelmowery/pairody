@@ -75,6 +75,13 @@ nothing identifies the player. `/youtube.html` and the `yt/` events never come f
 | `notes/open/info`, `notes/open/welcome` | release notes opened from the info panel's What's new, or from All release notes on the New version note (added 2026-11-15) |
 | `feedback` | Send feedback tapped |
 | `access/cues/on`, `access/cues/off`, `access/extraTime/on`, `access/extraTime/off` | Audio cues or Extra time switched in the info panel's Accessibility section (added 2026-11-17) |
+| `plus/open/<from>` | the Pairody Plus sheet opened (iOS app only; added 2026-11-18). `<from>`: `picker` (a Plus board with no free games left picked in the board picker), `board` (first tap on such a board), `info` (Get Plus in the info panel) |
+| `plus/out/<id>` | a Plus board picked or tapped with its 10 free games used up (then `plus/open/picker` or `plus/open/board` follows) |
+| `plus/try/<id>` | a free game used on a Plus board (first pad tapped; not counted for Demo or Daily). Titles say how many are left |
+| `plus/buy` | Get Plus tapped (Apple's purchase sheet opens) |
+| `plus/bought`, `plus/cancel`, `plus/pending`, `plus/fail/<why>` | how the purchase ended: bought, cancelled on Apple's sheet, waiting for Ask to Buy, or failed (`unavailable`, `unverified`, `error`) |
+| `plus/restore`, `plus/restored`, `plus/restore/none` | Restore purchases tapped, and whether Plus was found |
+| `plus/pickfree` | Pick a free board tapped on the Plus sheet |
 | `analytics/off` | usage counts switched off (the last count sent) |
 
 Each count also carries what GoatCounter collects for every hit: referrer, screen size, browser

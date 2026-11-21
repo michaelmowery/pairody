@@ -1,6 +1,6 @@
 {
   "name": "pairody",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Pairody: memory match, played by ear. The website needs no build; this file only drives the iOS app (Capacitor).",
   "scripts": {

@@ -12,6 +12,11 @@
 // localStorage: pairody.notesSeen = id (date + title) of the newest entry this device has seen.
 (function(){
   const NOTES = [
+    { date: '2026-11-18', title: 'Pairody Plus in the iPhone and iPad app', items: [
+      'In the App Store app, Animals, Melodies, Jokes, Capitals and Daily Pairody stay free, and every other board gives you <b>10 free games</b> to try it.',
+      '<b>Pairody Plus</b> is a one-time purchase that unlocks every board, plus every new one as it arrives. No subscription. <b>Restore purchases</b> is in the <b class="welcome-i">i</b> panel.',
+      'On the website, every board is still free for everyone.',
+    ]},
     { date: '2026-11-18', title: 'Easier to leave Daily Pairody', items: [
       'After a Daily Pairody you are no longer stuck on it. Tap the board name to pick any board, or use the new <b>Pick a board</b> button on the Well done card.',
     ]},

@@ -1492,6 +1492,7 @@ function build(){
     return shuffle(ids.concat(ids));
   };
   cards=dailyOn?Daily.seeded(deal):deal();
+  msg+=plusLine();
   $("status").textContent=msg;
   dispatchEvent(new Event("pairody:board")); // assets/daily.js refreshes the line under the Daily pill
   $("time").textContent=fmt(style==="timed"?timeLimit():0);
@@ -1597,17 +1598,32 @@ function timeUp(){
   cards.forEach((_,i)=>padLabel(i));missCue();
   announce($("status").textContent,{wait:false,delay:100});
 }
+// iOS app, a Plus board played on free games: "Free game 4 of 10 on this Plus board." (none on the website, with Plus, or on Daily)
+function plusLine(){
+  const left=!dailyOn&&window.PairodyPlus?PairodyPlus.deckTries(deck):null;
+  if(left===null)return "";
+  return left?" Free game "+(PairodyPlus.TRIAL_PLAYS-left+1)+" of "+PairodyPlus.TRIAL_PLAYS+" on this Plus board.":" Your free games on this Plus board are used up.";
+}
+// After buying Plus mid-board, drop the free-game note from the status line
+function showPlusLine(){if(!timer)$("status").textContent=$("status").textContent.replace(/ (Free game \d+ of \d+ on this Plus board|Your free games on this Plus board are used up)\./,"")}
+addEventListener("pairody:plus",showPlusLine);
 const P=n=>names[n]||"Player "+(n+1);
 function tap(i,b){
   if(b.classList.contains("matched")||over)return;
   // Tapping a new pad while a pair is still showing settles that pair at once, so the
   // new pad plays right away instead of the tap being ignored
   if(lock){if(!settle||open.includes(i))return;settle(true);if(b.classList.contains("matched")||over)return}
+  // iOS app: the first tap on a Plus board whose free games are used up opens the Plus sheet.
+  // Demo and Daily Pairody always play (assets/plus.js has the rules).
+  if(!timer&&!demo&&!dailyOn&&window.PairodyPlus&&!PairodyPlus.canPlay(deck)){
+    track("plus/out/"+deck,"Plus board tapped with no free games left: "+DECKNAME[deck]);
+    PairodyPlus.offer({deck,deckName:DECKNAME[deck],out:true,from:"board"}).then(ok=>{if(ok)showPlusLine()});return}
   hush(); // a new tap drops any announcement still waiting for the last sound
   if(open.includes(i)){announce(playPad(i,b));return}
   // Match up boards: a second pad on the same side just changes which one you picked
   if(two&&open.length===1&&sideOf(i)===sideOf(open[0])){const o=open[0];$("pad"+o).classList.remove("open");open=[];padLabel(o)}
   if(!timer){start=Date.now();timer=setInterval(tick,250);
+    if(!demo&&!dailyOn&&window.PairodyPlus)PairodyPlus.useTry("deck",deck); // a free game on a Plus board (iOS app)
     if(!demo)track("play/"+deck+sizeTag()+styleTag()+(labelsOn()?"":"/nolabels"),"Game started: "+DECKNAME[deck]+sizeName()+styleName()+(labelsOn()?"":" (no labels)"))}
   const heard=playPad(i,b);b.classList.add("open");open.push(i);padLabel(i);
   // A move ends after two pads
@@ -1850,8 +1866,8 @@ function buildDeckPicker(){
   const ids=Object.keys(DECKCARD);
   const grouped=document.createElement("div");grouped.className="dp-grouped";
   // One list (Michael, 2026-11-17: the Featured row and the All / Grouped switch were removed).
-  // Free boards come first in each group (Michael, 2026-11-16). Your music counts as free. The iOS app shows no Free/Plus yet, so it keeps one list.
-  const tiers=!document.documentElement.classList.contains("native")&&window.PairodyPlus;
+  // Free boards come first in each group (Michael, 2026-11-16). Your music counts as free. The iOS app does the same since it sells Plus (2026-11-18).
+  const tiers=window.PairodyPlus;
   const isFree=id=>id==="youtube"||!tiers||PairodyPlus.deckTier(id)==="free";
   const freeFirst=list=>tiers?list.filter(isFree).concat(list.filter(id=>!isFree(id))):list;
   // Grouped (Michael, 2026-11-16): first by how a board plays (Same sound, then Match up), then by
@@ -1880,6 +1896,10 @@ function showDeckChip(){
   document.querySelectorAll(".decks button[data-deck]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.deck===deck));
 }
 function pickDeck(id,from){
+  // iOS app: a Plus board whose free games are used up opens the Plus sheet instead (assets/plus.js)
+  if(window.PairodyPlus&&!PairodyPlus.canPlay(id)){
+    track("plus/out/"+id,"Plus board picked with no free games left: "+DECKNAME[id]);
+    PairodyPlus.offer({deck:id,deckName:DECKNAME[id],out:true,from:"picker"}).then(ok=>{if(ok)pickDeck(id,from)});return}
   $("deckPick").close();
   if(dailyOn)leaveDaily(true);
   deck=id;track("deck/"+deck,"Board picked: "+DECKNAME[deck]);
