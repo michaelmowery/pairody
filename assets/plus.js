@@ -34,11 +34,14 @@
   const NATIVE = !!window.PairodyNative; // assets/native.js runs first
   const TIERS = {
     free: { label: 'Free', hint: 'Always included' },
-    plus: { label: 'Plus', hint: NATIVE ? 'Part of Pairody Plus' : 'Part of Pairody Plus. Free for everyone on the website' },
+    plus: { label: 'Plus', hint: NATIVE && window.PairodyPlatform !== 'android' ? 'Part of Pairody Plus' : 'Part of Pairody Plus. Free for everyone on the website' },
   };
   const FREE_DECKS = new Set(['animals', 'melodies', 'jokes', 'brain']); // one per group: Sounds, Music, Words, Learning (brain = Capitals)
   const PLUS_STYLES = new Set([]);
-  const LOCKED = NATIVE;     // the iOS app sells Plus; the website stays open
+  // The iOS app sells Plus; the website and, for now, the Android app stay open (Michael,
+  // 2026-11-25: Android launches free, Google Play Billing comes later).
+  const IOS = NATIVE && window.PairodyPlatform !== 'android';
+  const LOCKED = IOS;
   const TRIAL_PLAYS = 10;    // free tries per Plus deck and per Plus style
   const TRIES_KEY = 'pairody.plusTries';
   const OWNED_KEY = 'pairody.plus'; // "1" = this Apple ID owns Plus (last answer from the App Store)
@@ -91,6 +94,7 @@
     return left ? 'Plus · ' + left + ' left' : 'Get Plus';
   }
   function tierTag(tier, showFree, key){
+    if (NATIVE && !LOCKED) return null; // the Android app: every board is open, so no Free/Plus tags
     if (tier === 'free' && !showFree) return null;
     const tag = document.createElement('span');
     tag.className = 'tier-tag tier-' + tier;

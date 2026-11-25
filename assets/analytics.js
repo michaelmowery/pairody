@@ -23,8 +23,9 @@
   // every event starts with ios/ (ios/deck/animals, ios/win/jokes/big, ios/launch). GoatCounter's
   // filter box matches part of a name, so "win/jokes" shows web and app together, "ios/" the app only.
   // native.js runs first (not deferred) and sets PairodyNative when Capacitor says it's the app.
+  // The Android app's events start with android/ the same way.
   const NATIVE = !!window.PairodyNative;
-  const TAG = NATIVE ? 'ios/' : '';
+  const TAG = NATIVE ? (window.PairodyPlatform === 'android' ? 'android/' : 'ios/') : '';
   const LIVE = NATIVE || /(^|\.)pairody\.app$/.test(location.hostname);
 
   function loadPrefs(){ try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') || {}; } catch(e){ return {}; } }

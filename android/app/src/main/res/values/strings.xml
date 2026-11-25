@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pairody</string>
+    <string name="title_activity_main">Pairody</string>
+    <string name="package_name">com.mountmtech.pairody</string>
+    <string name="custom_url_scheme">com.mountmtech.pairody</string>
+</resources>

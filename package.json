@@ -2,13 +2,17 @@
   "name": "pairody",
   "version": "1.1.0",
   "private": true,
-  "description": "Pairody: memory match, played by ear. The website needs no build; this file only drives the iOS app (Capacitor).",
+  "description": "Pairody: memory match, played by ear. The website needs no build; this file only drives the iOS and Android apps (Capacitor).",
   "scripts": {
     "app:web": "sh scripts/build-app.sh",
     "app:sync": "sh scripts/build-app.sh && cap sync ios",
-    "app:ios": "sh scripts/build-app.sh && cap sync ios && cap open ios"
+    "app:ios": "sh scripts/build-app.sh && cap sync ios && cap open ios",
+    "android:sync": "sh scripts/build-app.sh && cap sync android",
+    "android:open": "sh scripts/build-app.sh && cap sync android && cap open android",
+    "android:assets": "npx @capacitor/assets@3 generate --android --assetPath resources"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0"
   },

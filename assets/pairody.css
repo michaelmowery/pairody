@@ -231,6 +231,10 @@ dialog.info .info-analytics{align-items:flex-start;font-size:.85rem;line-height:
 .native-only{display:none}
 .native .native-only{display:revert}
 .native .web-only{display:none!important}
+/* Which app: native.js also adds .ios or .android */
+:root:not(.ios) .ios-only,:root:not(.android) .android-only{display:none!important}
+/* Plus is sold in the iOS app only for now; the Android app has every board open, so no tags */
+.android .tier-tag{display:none!important}
 /* Free / Plus labels (assets/plus.js): a small outlined pill on Plus decks and styles */
 .tier-tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid var(--led);border-radius:999px;
   color:var(--led-ink);font-family:var(--display);font-weight:600;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;vertical-align:1px;line-height:1.5}

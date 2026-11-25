@@ -17,12 +17,14 @@
   <li><b>Best scores</b> for each board, saved on this device. No account or sign-up.</li>
   <li class="web-only"><b>Your music</b> <span class="beta">Beta</span> builds a game from a YouTube playlist. It's open to beta testers for now. Find it under Your Music in the board picker.</li>
   <li class="web-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), Your music, every game size, Timed, Labels, 2 Players and Daily are free. Boards tagged <span class="tier-tag">Plus</span> will be part of Pairody Plus, a one-time unlock, later on. For now everything is free for everyone.</li>
-  <li class="native-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), every game size, Timed, Labels, 2 Players and Daily are free. Every board tagged <span class="tier-tag">Plus</span> has 10 free games to try it, and Pairody Plus, a one-time purchase, unlocks them all for good.</li>
+  <li class="native-only ios-only"><b>Free and Plus.</b> One board in each group (Animals, Melodies, Jokes and Capitals), every game size, Timed, Labels, 2 Players and Daily are free. Every board tagged <span class="tier-tag">Plus</span> has 10 free games to try it, and Pairody Plus, a one-time purchase, unlocks them all for good.</li>
+  <li class="android-only"><b>Every board is free</b> in the Android app, with every game size, Timed, Labels, 2 Players and Daily.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>
   <li class="web-only">Headphones help. On iPhone, flip off silent mode or you won't hear the pads.</li>
-  <li class="native-only">Headphones help. Pads play even with your iPhone on silent, so turn the volume down if you're somewhere quiet.</li>
+  <li class="native-only ios-only">Headphones help. Pads play even with your iPhone on silent, so turn the volume down if you're somewhere quiet.</li>
+  <li class="android-only">Headphones help. Turn the media volume up to hear the pads.</li>
   <li>No ads and no accounts. Your scores stay on this device.<span class="web-only"> Your music plays through YouTube's own player.</span></li>
   <li>Animal sounds are public domain or CC0 recordings (<a href="https://github.com/michaelmowery/pairody/blob/main/sounds/CREDITS.md" target="_blank" rel="noopener">credits</a>).</li>
 </ul>
@@ -64,7 +66,8 @@
   <span class="info-version"></span>
 </div>
 <p class="info-update-status" role="status"></p>
-<p class="native-only">New versions arrive through the App Store.</p>
+<p class="native-only ios-only">New versions arrive through the App Store.</p>
+<p class="android-only">New versions arrive through Google Play.</p>
 <p class="info-foot">Pairody · © 2026 Mount M Technologies, LLC</p>`;
   function init(){
     const top=document.querySelector(".top");if(!top)return;
